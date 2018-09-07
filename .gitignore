@@ -1,0 +1,14 @@
+target/
+## IntelliJ
+.idea
+*.iml
+
+## Temp
+dependency-reduced-pom.xml
+*~
+
+## VS Code
+.classpath
+.factorypath
+.project
+.settings/
