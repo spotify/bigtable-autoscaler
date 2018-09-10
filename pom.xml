@@ -257,36 +257,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <!--
-                    If you have customized the name of your Docker image in your
-                    pom.xml to not refer to ${gcpProjectId}, then you can safely
-                    remove this check and the entire execution element
-                    -->
-                    <execution>
-                        <id>verify-gcp-project-id-set</id>
-                        <!-- this check is only bound to install in order to run it just before 'deploy' phase -->
-                        <phase>install</phase>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireProperty>
-                                    <property>gcpProjectId</property>
-                                    <message>The gcpProjectId must be set in order to build and push
-                                        a Docker image to Google Container Registry
-                                    </message>
-                                    <regex>\w+.*</regex>
-                                    <regexMessage>The gcpProjectId must be set and non-empty in
-                                        order to build and push a Docker image to Google Container
-                                        Registry
-                                    </regexMessage>
-                                </requireProperty>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
