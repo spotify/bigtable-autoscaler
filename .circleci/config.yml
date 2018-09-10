@@ -3,6 +3,7 @@
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
 version: 2
+executorType: machine
 jobs:
   build:
     docker:
@@ -36,9 +37,6 @@ jobs:
           paths:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      - setup_remote_docker:
-          version: 18.03.1-ce
 
       # run tests!
       - run: mvn verify
