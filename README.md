@@ -11,8 +11,14 @@ Many Bigtable clusters have uneven load over time. To avoid wasting capacity (an
 ### Prerequisites
 
 * A production Bigtable cluster (or several) to autoscale.
-* A json key to a Service Account with the right credentials.
-    * If the autoscaler is running is the same GCP project as all the Bigtable clusters, the Compute Engine Default Service Account is sufficient.
+* Service account JSON key that has relevant access to the Bigtable clusters to autoscale. See [Google's documentation](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) on how to create a key.
+    * If the autoscaler is running in the same GCP project as all the Bigtable clusters, the Compute Engine Default Service Account is sufficient.
+    * The minimum permissions are:
+        * Role **Bigtable Administrator**, in particular
+            * bigtable.clusters.get
+            * bigtable.clusters.update
+        * Role **Monitoring Viewer**, in particular
+            * monitoring.timeSeries.list
 * Docker.
 * PostgreSQL database (for production use; if only trying out ???).
 
