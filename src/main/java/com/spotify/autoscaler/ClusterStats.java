@@ -52,7 +52,7 @@ public class ClusterStats {
   public ClusterStats(final SemanticMetricRegistry registry, final Database db) {
     this.registry = registry;
     this.db = db;
-    cleanupExecutor.scheduleWithFixedDelay(() -> {
+    cleanupExecutor.scheduleAtFixedRate(() -> {
           unregisterInactiveClustersMetrics(registry, db);
 
         }, CLEANUP_INTERVAL.toMillis(),
