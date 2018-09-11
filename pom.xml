@@ -231,25 +231,6 @@
         <finalName>${project.artifactId}</finalName>
         <plugins>
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.0</version>
-                <configuration>
-                    <showWarnings>true</showWarnings>
-                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
-                    <compilerArgs>
-                        <compilerArg>-Xlint:cast</compilerArg>
-                        <compilerArg>-Xlint:divzero</compilerArg>
-                        <compilerArg>-Xlint:empty</compilerArg>
-                        <compilerArg>-Xlint:fallthrough</compilerArg>
-                        <compilerArg>-Xlint:finally</compilerArg>
-                        <compilerArg>-Xlint:overrides</compilerArg>
-                        <compilerArg>-Xlint:path</compilerArg>
-                        <compilerArg>-Xlint:unchecked</compilerArg>
-                        <compilerArg>-Xlint:-options</compilerArg>
-                    </compilerArgs>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>2.10</version>
                 <executions>

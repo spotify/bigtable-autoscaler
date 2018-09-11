@@ -21,6 +21,7 @@ Many Bigtable clusters have uneven load over time. To avoid wasting capacity (an
             * monitoring.timeSeries.list
 * Docker.
 * PostgreSQL database (for production use; if only trying out ???).
+* Java 8 (java 9+ can't run it).
 
 ### Building
 
