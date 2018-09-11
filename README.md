@@ -11,7 +11,7 @@ Many Bigtable clusters have uneven load over time. To avoid wasting capacity (an
 ### Prerequisites
 
 * A production Bigtable cluster (or several) to autoscale.
-* Service account, with the right permissions.
+* A json key to a Service Account with the right credentials.
     * If the autoscaler is running is the same GCP project as all the Bigtable clusters, the Compute Engine Default Service Account is sufficient.
 * Docker.
 * PostgreSQL database (for production use; if only trying out ???).
@@ -27,7 +27,7 @@ Run these commands to build the project and create a docker image:
 
 Start the service using a dockerized PostgreSQL instance:
 
-    docker-compose -f quickstart.yml up
+    GOOGLE_APPLICATION_CREDENTIALS=<credentials json file> docker-compose -f quickstart.yml up
 
 Register the Bigtable cluster that should be autoscaled in the service:
 
