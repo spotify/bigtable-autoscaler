@@ -16,16 +16,29 @@ Many Bigtable clusters have uneven load over time. To avoid wasting capacity (an
 * Docker.
 * PostgreSQL database (for production use; if only trying out ???).
 
+### Building
+
+Run these commands to build the project and create a docker image:
+
+    mvn package
+    docker build .
+
 ### Running
 
-To run the bigtable-autoscaler service locally:
+Start the service using a dockerized PostgreSQL instance:
 
-mvn clean install???
-???
+    docker-compose -f quickstart.yml up
 
-## Examples
+Register the Bigtable cluster that should be autoscaled in the service:
 
-???
+    curl -X POST "http://localhost:8080/clusters?projectId=<gcp-project-id>&instanceId=<bigtable-instance-id>&<bigtable-cluster-id>&minNodes=4&maxNodes=6&cpuTarget=0.8"
+
+If the cluster was at 3 nodes, this will immediately rescale the cluster to 4 nodes as that's the
+ minimum threshold. By generating some load to the cluster:
+
+    TODO
+
+It will soon autoscale up to 6 nodes.
 
 ## How does it work?
 
