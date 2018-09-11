@@ -1,8 +1,31 @@
 # bigtable-autoscaler
 
-You have a Bigtable cluster and you would like to optimize its cost by having the
-right size at any given time. Then you should consider using the Bigtable
+You have a Bigtable cluster and you would like to optimize its cost by using the
+right number of nodes at any given time. Then you should consider using the Bigtable
 autoscaler service!
+
+Many Bigtable clusters have uneven load over time. To avoid wasting capacity (and money), it's desirable to scale down the cluster during off-hours. The Bigtable autoscaler lets you do that without being hands-on.
+
+## Getting started
+
+### Prerequisites
+
+* A production Bigtable cluster (or several) to autoscale.
+* Service account, with the right permissions.
+    * If the autoscaler is running is the same GCP project as all the Bigtable clusters, the Compute Engine Default Service Account is sufficient.
+* Docker.
+* PostgreSQL database (for production use; if only trying out ???).
+
+### Running
+
+To run the bigtable-autoscaler service locally:
+
+mvn clean install???
+???
+
+## Examples
+
+???
 
 ## How does it work?
 
@@ -24,22 +47,11 @@ and then it sends a resize request.
 The autoscaler also provides an HTTP API to insert, update and delete Bigtable 
 clusters from being autoscaled.
 
-## How to run the service?
+## Does it enforce storage constraints?
 
-### Prerequisites
+Yes.
 
-(at least) A BT cluster to autoscale???
-Service account, with right permissions???
-Java, maven???
-Docker???
-Postgres (optional)???
-
-### Running
-
-To run the bigtable-autoscaler service locally:
-
-mvn clean install
-???
+Since July 1st 2018 Google enforces storage limits on Bigtable nodes. In particular each Bigtable node will be able to handle at most 8Tb on HDD clusters and 2.5Tb on SSD clusters (for more info take a look here) Writes will fail until these conditions are not satisfied. The autoscaler will make sure that these constraints are respected and prefer those to the CPU target in that situation.
 
 ## REST API
 
@@ -90,14 +102,9 @@ mvn clean install
     * Returns *Nothing*
     * Responds with a 5xx HTTP code if the Bigtable autoscaler is not able to autoscale. For example if it can't communicate with the database.
 
-## Examples
-
-???
-
 ## Development setup
 
-This service needs to be run with a service account that has rights to
-get and update cluster size.
+???
 
 The database schema is defined in schema.sql in this project.
 
