@@ -21,6 +21,8 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <maven.install.skip>true</maven.install.skip>
         <checkstyle.violationSeverity>warning</checkstyle.violationSeverity>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
@@ -227,6 +229,63 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <showWarnings>true</showWarnings>
+                    <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                    <compilerArgs>
+                        <compilerArg>-Xlint:cast</compilerArg>
+                        <compilerArg>-Xlint:divzero</compilerArg>
+                        <compilerArg>-Xlint:empty</compilerArg>
+                        <compilerArg>-Xlint:fallthrough</compilerArg>
+                        <compilerArg>-Xlint:finally</compilerArg>
+                        <compilerArg>-Xlint:overrides</compilerArg>
+                        <compilerArg>-Xlint:path</compilerArg>
+                        <compilerArg>-Xlint:unchecked</compilerArg>
+                        <compilerArg>-Xlint:-options</compilerArg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                <execution>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>copy-dependencies</goal>
+                    </goals>
+                </execution>
+                </executions>
+                <configuration>
+                    <useBaseVersion>false</useBaseVersion>
+                    <overWriteReleases>false</overWriteReleases>
+                    <overWriteSnapshots>true</overWriteSnapshots>
+                    <includeScope>runtime</includeScope>
+                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>1.4.4</version>
+                <executions>
+                    <execution>
+                    <id>default</id>
+                    <goals>
+                        <goal>build</goal>
+                    </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <tag>${project.version}</tag>
+                    <buildArgs>
+                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
