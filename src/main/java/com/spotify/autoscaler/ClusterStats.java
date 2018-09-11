@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,17 +44,28 @@ public class ClusterStats {
 
   private static final Logger logger = LoggerFactory.getLogger(ClusterStats.class);
 
+  private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
   private SemanticMetricRegistry registry;
   private Database db;
   private Map<String, ClusterData> nodes = new ConcurrentHashMap<String, ClusterData>();
-  private final ScheduledExecutorService cleanupExecutor = new ScheduledThreadPoolExecutor(1);
-  private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
+
+  private final ScheduledExecutorService cleanupExecutor = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
+    @Override
+    public Thread newThread(final Runnable r) {
+      return new Thread(r, "Cluster-Metrics-Cleaner");
+    }
+  });
 
   public ClusterStats(final SemanticMetricRegistry registry, final Database db) {
     this.registry = registry;
     this.db = db;
     cleanupExecutor.scheduleAtFixedRate(() -> {
-          unregisterInactiveClustersMetrics(registry, db);
+          try {
+            logger.info("Cleanup running");
+            unregisterInactiveClustersMetrics(registry, db);
+          } catch (Throwable t){
+            logger.error("Cleanup task failed", t);
+          }
 
         }, CLEANUP_INTERVAL.toMillis(),
         CLEANUP_INTERVAL.toMillis(),
