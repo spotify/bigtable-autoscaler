@@ -1,0 +1,24 @@
+version: '3.1'
+
+services:
+
+  postgres:
+    image: postgres:9.6
+    restart: always
+    volumes:
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-create-schema.sql
+    environment:
+      POSTGRES_DB: autoscaler
+
+  bigtable-autoscaler:
+    depends_on:
+      - postgres
+    restart: always
+    volumes:
+      - ./${GOOGLE_APPLICATION_CREDENTIALS}:/secret/credentials.json
+    build: .
+    ports:
+      - 8080:8080
+    environment:
+      JDBC_URL: jdbc:postgresql://postgres:5432/autoscaler
+      GOOGLE_APPLICATION_CREDENTIALS: /secret/credentials.json

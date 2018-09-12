@@ -74,7 +74,7 @@ public class PostgresDatabaseIT {
 
     Connection connection = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
     // create the table
-    String table = Resources.toString(Resources.getResource("autoscale.sql"), Charsets.UTF_8);
+    String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
     PreparedStatement createTable = connection.prepareStatement(table);
     createTable.executeUpdate();
 
