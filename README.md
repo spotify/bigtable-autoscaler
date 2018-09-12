@@ -44,16 +44,14 @@ Register the Bigtable cluster that should be autoscaled in the service:
     curl -X POST "http://localhost:8080/clusters?projectId=<gcp-project-id>&instanceId=<bigtable-instance-id>&<bigtable-cluster-id>&minNodes=4&maxNodes=6&cpuTarget=0.8"
 
 If the cluster was at 3 nodes, this will immediately rescale the cluster to 4 nodes as that's the
- minimum threshold. If you generate some significant load to the cluster, it may scale up to 6 
- nodes.
- 
+minimum threshold. If you generate some significant load to the cluster, it may scale up to 6 nodes.
+
 ### Registering Jersey Resources and Providers Dynamically
-  You can register any additional JAX-RS resource, JAX-RS or Jersey contract provider or JAX-RS feature by editing the 
- [config file](/src/main/resources/bigtable-autoscaler.conf).
-  You can either
-   * add a package to `additionalPackages` for any resource to be discovered. For this to work, resources to be 
-     discovered should be annotated.
-   * add a fully qualified class name to `additionalClasses` (semicolon separated).
+You can register any additional JAX-RS resource, JAX-RS or Jersey contract provider or JAX-RS feature by editing the
+[config file](/src/main/resources/bigtable-autoscaler.conf).
+You can either
+* add a package to `additionalPackages` for any resource to be discovered. For this to work, resources to be discovered should be annotated.
+* add a fully qualified class name to `additionalClasses` (semicolon separated).
 
 ### Using a Cloud SQL Postgres database as persistent storage
 
@@ -92,7 +90,7 @@ this.
 
 Yes.
 
-Since July 1st 2018 Google enforces storage limits on Bigtable nodes. In particular each Bigtable node will be able to handle at most 8Tb on HDD clusters and 2.5Tb on SSD clusters (for more info take a look here) Writes will fail until these conditions are not satisfied. The autoscaler will make sure that these constraints are respected and prefer those to the CPU target in that situation.
+Since July 1st 2018 Google enforces storage limits on Bigtable nodes. In particular each Bigtable node will be able to handle at most 8Tb on HDD clusters and 2.5Tb on SSD clusters (for more info take a look [here](https://cloud.google.com/bigtable/quotas#storage-per-node)). Writes will fail until these conditions are not satisfied. The autoscaler will make sure that these constraints are respected and prefer those to the CPU target in that situation.
 
 ### Does it take project quotas into account?
 
