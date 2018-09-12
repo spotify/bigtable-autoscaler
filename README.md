@@ -4,24 +4,27 @@ You have a Bigtable cluster and you would like to optimize its cost by using the
 right number of nodes at any given time. Then you should consider using the Bigtable
 autoscaler service!
 
-Many Bigtable clusters have uneven load over time. To avoid wasting capacity (and money), it's desirable to scale down the cluster during off-hours. The Bigtable autoscaler lets you do that without being hands-on.
+Many Bigtable clusters have uneven load over time. To avoid wasting capacity (and money), it's 
+desirable to scale down the cluster during off-hours. The Bigtable autoscaler lets you do that 
+with no manual intervention.
 
 ## Getting started
 
 ### Prerequisites
 
-* A production Bigtable cluster (or several) to autoscale.
+* A production Bigtable cluster (or several) to autoscale (development clusters can't be scaled)
 * Service account JSON key that has relevant access to the Bigtable clusters to autoscale. See [Google's documentation](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) on how to create a key.
     * If the autoscaler is running in the same GCP project as all the Bigtable clusters, the Compute Engine Default Service Account is sufficient.
     * The minimum permissions are:
-        * Role **Bigtable Administrator**, in particular
+        * Role **Bigtable Administrator**, in particular the permissions
             * bigtable.clusters.get
             * bigtable.clusters.update
-        * Role **Monitoring Viewer**, in particular
+        * Role **Monitoring Viewer**, in particular the permissions
             * monitoring.timeSeries.list
-* Docker.
-* PostgreSQL database (for production use; if only trying out ???).
-* Java 8 (java 9+ can't run it).
+* Docker
+* PostgreSQL database (for production use; in this quickstart session we're using a postgres docker 
+image)
+* Java 8 (the service is not compatible with Java 9 or later at the moment)
 
 ### Building
 
@@ -41,12 +44,15 @@ Register the Bigtable cluster that should be autoscaled in the service:
     curl -X POST "http://localhost:8080/clusters?projectId=<gcp-project-id>&instanceId=<bigtable-instance-id>&<bigtable-cluster-id>&minNodes=4&maxNodes=6&cpuTarget=0.8"
 
 If the cluster was at 3 nodes, this will immediately rescale the cluster to 4 nodes as that's the
- minimum threshold. By generating some load to the cluster:
+ minimum threshold. If you generate some significant load to the cluster, it may scale up to 6 
+ nodes.
 
-    TODO
+### Using a Cloud SQL Postgres database as persistent storage
 
-It will soon autoscale up to 6 nodes.
-
+If you want to run this in production, consider using a Cloud SQL postgres database to store the 
+state. We recommend connecting using the [JDBC socket factory](https://cloud.google.com/sql/docs/postgres/connect-external-app#java). You can specify the jdbcUrl either in a 
+custom config file or as an environment variable. 
+ 
 ## How does it work?
 
 The Bigtable autoscaler is a backend service that periodically sends
@@ -67,66 +73,29 @@ and then it sends a resize request.
 The autoscaler also provides an HTTP API to insert, update and delete Bigtable 
 clusters from being autoscaled.
 
-## Does it enforce storage constraints?
+## FAQ
+
+### Does it handle sudden load spikes, for instance Dataflow jobs reading/writing batch data?
+
+Not well enough. Online requests may be slowed when the job starts. We are working on improving 
+this.
+
+### Does it enforce storage constraints?
 
 Yes.
 
 Since July 1st 2018 Google enforces storage limits on Bigtable nodes. In particular each Bigtable node will be able to handle at most 8Tb on HDD clusters and 2.5Tb on SSD clusters (for more info take a look here) Writes will fail until these conditions are not satisfied. The autoscaler will make sure that these constraints are respected and prefer those to the CPU target in that situation.
 
-## REST API
+### Does it take project quotas into account?
 
-### Clusters Resource
+No!
 
-* **GET /clusters**
-    * Expected query parameters: *None*
-    * Returns a list of all clusters' autoscaling settings and latest events.
-* **GET /clusters/logs**
-    * Expected query parameters:
-        * *projectId*: The cluster's Project ID.
-        * *instanceId*: The cluster's Instance ID.
-        * *clusterId*: The cluster's Cluster ID.
-    * Returns a list of the cluster's latest resize events.
-* **POST /clusters**
-    * Expected query parameters:
-        * *projectId*: The cluster's Project ID.
-        * *instanceId*: The cluster's Instance ID.
-        * *clusterId*: The cluster's Cluster ID.
-        * *minNodes*: Minimum number of nodes. The autoscaler will not try to set the number of nodes below this number.
-        * *maxNodes*: Maximum number of nodes. The autoscaler will not try to set the number of nodes above this number.
-        * *cpuTarget*: Target CPU utilization. The autoscaler will try to set the number of nodes in order to have this CPU utilization.
-        * *overloadStep* (optional): In case the cluster is hitting 90% CPU utilization we don't really know how big the resize should be. With this parameter you can set how aggressive the resize step should be in that case. This is an additive factor, not a multiplier to the number of nodes.
-        * *enabled* (default=true): Whether to have autoscaling enabled or disabled for the cluster.
-    * Adds a Bigtable cluster to be managed by the autoscaler.
-* **PUT /clusters**
-    * Expected query parameters:
-        * *projectId*: The cluster's Project ID.
-        * *instanceId*: The cluster's Instance ID.
-        * *clusterId*: The cluster's Cluster ID.
-        * *minNodes*: Minimum number of nodes. The autoscaler will not try to set the number of nodes below this number.
-        * *maxNodes*: Maximum number of nodes. The autoscaler will not try to set the number of nodes above this number.
-        * *cpuTarget*: Target CPU utilization. The autoscaler will try to set the number of nodes in order to have this CPU utilization.
-        * *overloadStep* (optional): In case the cluster is hitting 90% CPU utilization we don't really know how big the resize should be. With this parameter you can set how aggressive the resize step should be in that case. This is an additive factor, not a multiplier to the number of nodes.
-        * *enabled* (default=true): Whether to have autoscaling enabled or disabled for the cluster.
-    * Updates all of the autoscaler settings for a Bigtable cluster.
-* **DELETE /clusters**
-    * Expected query parameters:
-        * *projectId*: The cluster's Project ID.
-        * *instanceId*: The cluster's Instance ID.
-        * *clusterId*: The cluster's Cluster ID.
-    * Deletes a Bigtable cluster from being managed by the autoscaler.
+A resize command may fail if you don't have enough quota in the GCP project. This will be logged 
+as an error.
 
-### Health Resource
+## API
 
-* **GET /health**
-    * Expected query parameters: *None*
-    * Returns *Nothing*
-    * Responds with a 5xx HTTP code if the Bigtable autoscaler is not able to autoscale. For example if it can't communicate with the database.
-
-## Development setup
-
-???
-
-The database schema is defined in schema.sql in this project.
+See the [API doc](api.md)
 
 ## Code of conduct
 
