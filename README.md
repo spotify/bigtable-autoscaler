@@ -49,8 +49,7 @@ minimum threshold. If you generate some significant load to the cluster, it may 
 ### Using a Cloud SQL Postgres database as persistent storage
 
 If you want to run this in production, consider using a Cloud SQL postgres database to store the
-state. We recommend connecting using the [JDBC socket factory](https://cloud.google.com/sql/docs/postgres/connect-external-app#java). You can specify the jdbcUrl either in a
-custom config file or as an environment variable.
+state. We recommend connecting using the [JDBC socket factory](https://cloud.google.com/sql/docs/postgres/connect-external-app#java). You can either specify the jdbcUrl in a custom [config file](/src/main/resources/bigtable-autoscaler.conf) or use the *JDBC_URL* environment variable when running the docker image [that we built](#building).
 
 ## Registering Jersey Resources and Providers Dynamically
 You can register any additional JAX-RS resource, JAX-RS or Jersey contract provider or JAX-RS feature by editing the
