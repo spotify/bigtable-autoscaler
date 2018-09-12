@@ -46,3 +46,7 @@
     * Expected query parameters: *None*
     * Returns *Nothing*
     * Responds with a 5xx HTTP code if the Bigtable autoscaler is not able to autoscale. For example if it can't communicate with the database.
+
+### Security
+Vanilla bigtable-autoscaler does not provide any security mechanism. However, you can implement your custom [filter](https://javaee.github.io/javaee-spec/javadocs/javax/ws/rs/container/ContainerRequestFilter.html) to perform the 
+desired security checks and [plug it in](README.md#registering-jersey-resources-and-providers-dynamically).

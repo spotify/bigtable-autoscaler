@@ -46,6 +46,14 @@ Register the Bigtable cluster that should be autoscaled in the service:
 If the cluster was at 3 nodes, this will immediately rescale the cluster to 4 nodes as that's the
  minimum threshold. If you generate some significant load to the cluster, it may scale up to 6 
  nodes.
+ 
+### Registering Jersey Resources and Providers Dynamically
+  You can register any additional JAX-RS resource, JAX-RS or Jersey contract provider or JAX-RS feature by editing the 
+ [config file](/src/main/resources/bigtable-autoscaler.conf).
+  You can either
+   * add a package to `additionalPackages` for any resource to be discovered. For this to work, resources to be 
+     discovered should be annotated.
+   * add a fully qualified class name to `additionalClasses` (semicolon separated).
 
 ### Using a Cloud SQL Postgres database as persistent storage
 
