@@ -53,6 +53,8 @@ public interface BigtableCluster {
 
   int consecutiveFailureCount(); // 0 means last autoscale attempt succeeded
 
+  int loadDelta(); //0 means no extra load to consider, gt 0 means minNodes is effectively minNodes+loadDelta
+
   default String clusterName() {
     return "projects/" + projectId() + "/instances/" + instanceId() + "/clusters/" + clusterId();
   }
@@ -60,4 +62,9 @@ public interface BigtableCluster {
   default String description() {
     return String.format("%s/%s/%s", projectId(), instanceId(), clusterId());
   }
+
+  default int effectiveMinNodes(){
+    return Math.min(minNodes() + loadDelta() , maxNodes());
+  }
+
 }
