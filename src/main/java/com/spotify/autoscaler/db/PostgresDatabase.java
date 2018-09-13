@@ -83,6 +83,7 @@ public class PostgresDatabase implements Database {
     ds.setUsername(config.getString("username"));
     ds.setPassword(config.getString("password"));
     ds.setMaximumPoolSize(MAX_POOL_SIZE);
+    ds.setInitializationFailTimeout(-1);
     return ds;
   }
 
