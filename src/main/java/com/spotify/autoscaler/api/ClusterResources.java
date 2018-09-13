@@ -180,7 +180,7 @@ public class ClusterResources {
   @PUT
   @Path("load")
   @Produces(MediaType.APPLICATION_JSON)
-  public Response getLogs(@QueryParam("projectId") String projectId,
+  public Response setExtraLoad(@QueryParam("projectId") String projectId,
                           @QueryParam("instanceId") String instanceId,
                           @QueryParam("clusterId") String clusterId,
                           @QueryParam("loadDelta") Integer loadDelta) {
