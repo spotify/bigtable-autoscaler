@@ -108,7 +108,8 @@ public class AutoscaleJob implements Closeable {
         .maxNodes(cluster.maxNodes())
         .cpuTarget(cluster.cpuTarget())
         .overloadStep(cluster.overloadStep())
-        .currentNodes(currentNodes);
+        .currentNodes(currentNodes)
+        .loadDelta(cluster.loadDelta());
 
   }
 
@@ -197,8 +198,8 @@ public class AutoscaleJob implements Closeable {
     }
 
     logger.info(
-        "Running autoscale job. Nodes: {} (min={}, max={}), CPU: {} (target={})",
-        nodes, cluster.minNodes(), cluster.maxNodes(),
+        "Running autoscale job. Nodes: {} (min={}, max={}, loadDelta={}), CPU: {} (target={})",
+        nodes, cluster.minNodes(), cluster.maxNodes(), cluster.loadDelta(),
         currentCpu, cluster.cpuTarget());
 
     double initialDesiredNodes = currentCpu * nodes / cluster.cpuTarget();
@@ -268,10 +269,14 @@ public class AutoscaleJob implements Closeable {
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
+  boolean autoscalerBoundariesHonored(){
+    return currentNodes == sizeConstraints(currentNodes);
+  }
+
   int sizeConstraints(int desiredNodes) {
 
     // the desired size should be inside the autoscale boundaries
-    int finalNodes = Math.max(cluster.minNodes(), Math.min(cluster.maxNodes(), desiredNodes));
+    int finalNodes = Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
     if (desiredNodes != finalNodes) {
       addResizeReason(String.format("Size strategy: Target count overriden(%d -> %d)", desiredNodes, finalNodes));
     }
@@ -315,7 +320,7 @@ public class AutoscaleJob implements Closeable {
     hasRun = true;
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
-    if (isTooEarlyToScale()) {
+    if (autoscalerBoundariesHonored() && isTooEarlyToScale()) {
       logger.info("Too early to autoscale");
       return;
     } else if (shouldExponentialBackoff()) {

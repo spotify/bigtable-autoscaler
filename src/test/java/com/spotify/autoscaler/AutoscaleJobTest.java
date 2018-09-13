@@ -203,4 +203,17 @@ public class AutoscaleJobTest {
     assertEquals(Duration.ofMinutes(59), job.computeSamplingDuration(Duration.ofMinutes(64)));
     assertEquals(Duration.ofMinutes(60), job.computeSamplingDuration(Duration.ofMinutes(100)));
   }
+
+  @Test
+  public void testWeResizeIfSizeConstraintsAreNotMet() {
+    BigtableCluster cluster = BigtableClusterBuilder.from(this.cluster)
+        .loadDelta(10)
+        .lastChange(Instant.now())
+        .build();
+    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 5);
+    job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
+    job.run();
+    assertEquals(15, newSize);
+  }
 }

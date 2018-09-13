@@ -40,6 +40,8 @@ public interface ClusterResizeLog {
 
   int maxNodes();
 
+  int loadDelta();
+
   double cpuTarget();
 
   Optional<Integer> overloadStep();

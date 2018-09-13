@@ -91,7 +91,8 @@ public class ClusterResources {
                                 @QueryParam("maxNodes") Integer maxNodes,
                                 @QueryParam("cpuTarget") Double cpuTarget,
                                 @QueryParam("overloadStep") Integer overloadStep,
-                                @QueryParam("enabled") @DefaultValue("true") Boolean enabled) {
+                                @QueryParam("enabled") @DefaultValue("true") Boolean enabled,
+                                @QueryParam("loadDelta") @DefaultValue("0") Integer loadDelta) {
     BigtableCluster cluster = new BigtableClusterBuilder()
         .projectId(projectId)
         .instanceId(instanceId)
@@ -101,6 +102,7 @@ public class ClusterResources {
         .cpuTarget(cpuTarget)
         .overloadStep(Optional.ofNullable(overloadStep))
         .enabled(enabled)
+        .loadDelta(loadDelta)
         .build();
     try {
       BigtableUtil.pushContext(cluster);
@@ -160,11 +162,43 @@ public class ClusterResources {
         .cpuTarget(0)
         .overloadStep(Optional.ofNullable(0))
         .enabled(true)
+        .loadDelta(0)
         .build();
     try {
       BigtableUtil.pushContext(cluster);
       if (db.deleteBigtableCluster(projectId, instanceId, clusterId)) {
         logger.info(String.format("cluster deleted: %s/%s/%s", projectId, instanceId, clusterId));
+        return Response.ok().build();
+      } else {
+        return Response.serverError().build();
+      }
+    } finally {
+      BigtableUtil.clearContext();
+    }
+  }
+
+  @PUT
+  @Path("load")
+  @Produces(MediaType.APPLICATION_JSON)
+  public Response setExtraLoad(@QueryParam("projectId") String projectId,
+                          @QueryParam("instanceId") String instanceId,
+                          @QueryParam("clusterId") String clusterId,
+                          @QueryParam("loadDelta") Integer loadDelta) {
+    BigtableCluster cluster = new BigtableClusterBuilder()
+        .projectId(projectId)
+        .instanceId(instanceId)
+        .clusterId(clusterId)
+        .minNodes(0)
+        .maxNodes(0)
+        .cpuTarget(0)
+        .overloadStep(Optional.ofNullable(0))
+        .enabled(true)
+        .loadDelta(loadDelta)
+        .build();
+    try {
+      BigtableUtil.pushContext(cluster);
+      if (db.updateLoadDelta(projectId, instanceId, clusterId, loadDelta)) {
+        logger.info("cluster loadDelta updated to {}", loadDelta);
         return Response.ok().build();
       } else {
         return Response.serverError().build();
