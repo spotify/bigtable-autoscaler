@@ -13,6 +13,7 @@ services:
   bigtable-autoscaler:
     depends_on:
       - postgres
+    command: ["wait-for-postgres.sh", "postgres", "/usr/bin/java", "-cp", "/usr/share/bigtable-autoscaler/bigtable-autoscaler.jar:/usr/share/bigtable-autoscaler/lib/*", "com.spotify.autoscaler.Main"]
     restart: always
     volumes:
       - ./${GOOGLE_APPLICATION_CREDENTIALS}:/secret/credentials.json
