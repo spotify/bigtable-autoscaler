@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 // Support two different paths for the moment while switching from instances->clusters
 @Path("/{ignored:instances|clusters}")
+@Produces(MediaType.APPLICATION_JSON)
 public class ClusterResources {
 
   private static final Logger logger = LoggerFactory.getLogger(ClusterResources.class);
@@ -61,7 +62,6 @@ public class ClusterResources {
   }
 
   @GET
-  @Produces(MediaType.APPLICATION_JSON)
   public Response getAllClusters() {
     try {
       return Response.ok(mapper.writeValueAsString(db.getBigtableClusters())).build();
@@ -72,7 +72,6 @@ public class ClusterResources {
 
   @GET
   @Path("logs")
-  @Produces(MediaType.APPLICATION_JSON)
   public Response getLogs(@QueryParam("projectId") String projectId,
                           @QueryParam("instanceId") String instanceId,
                           @QueryParam("clusterId") String clusterId) {

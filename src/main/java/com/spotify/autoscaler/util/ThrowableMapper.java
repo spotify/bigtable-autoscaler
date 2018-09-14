@@ -39,4 +39,5 @@ class ThrowableMapper implements ExceptionMapper<Throwable> {
     LOGGER.error("Unexpected exception when handling request", exception);
     return Response.serverError().entity(exception.toString()).build();
   }
+
 }

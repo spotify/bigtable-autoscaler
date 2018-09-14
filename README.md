@@ -25,6 +25,7 @@ with no manual intervention.
 * PostgreSQL database (for production use; in this quickstart session we're using a postgres docker 
 image)
 * Java 8 (the service is not compatible with Java 9 or later at the moment)
+* Maven
 
 ### Building
 
@@ -37,11 +38,23 @@ Run these commands to build the project and create a docker image:
 
 Start the service using a dockerized PostgreSQL instance:
 
-    GOOGLE_APPLICATION_CREDENTIALS=<credentials json file> docker-compose -f quickstart.yml up
+    GOOGLE_APPLICATION_CREDENTIALS=<credentials json file>\
+    docker-compose -f quickstart.yml up
 
 Register the Bigtable cluster that should be autoscaled in the service:
 
-    curl -X POST "http://localhost:8080/clusters?projectId=<gcp-project-id>&instanceId=<bigtable-instance-id>&<bigtable-cluster-id>&minNodes=4&maxNodes=6&cpuTarget=0.8"
+```console
+PROJECT_ID=<YOUR GCP PROJECT ID>\
+INSTANCE_ID=<YOUR INSTANCE ID>\
+CLUSTER_ID=<YOUR CLUSTER ID>\
+curl -v -X POST "http://localhost:8080/clusters?\
+projectId=$PROJECT_ID&\
+instanceId=$INSTANCE_ID&\
+clusterId=$CLUSTER_ID&\
+minNodes=4&\
+maxNodes=6&\
+cpuTarget=0.8"
+```
 
 If the cluster was at 3 nodes, this will immediately rescale the cluster to 4 nodes as that's the
 minimum threshold. If you generate some significant load to the cluster, it may scale up to 6 nodes.
