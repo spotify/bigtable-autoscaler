@@ -38,16 +38,15 @@ Run these commands to build the project and create a docker image:
 
 Start the service using a dockerized PostgreSQL instance:
 
-    GOOGLE_APPLICATION_CREDENTIALS=<credentials json file>
+    GOOGLE_APPLICATION_CREDENTIALS=<credentials json file>\
     docker-compose -f quickstart.yml up
 
 Register the Bigtable cluster that should be autoscaled in the service:
 
 ```console
-PROJECT_ID=<YOUR GCP PROJECT ID>
-INSTANCE_ID=<YOUR INSTANCE ID>
-CLUSTER_ID=<YOUR CLUSTER ID>
-
+PROJECT_ID=<YOUR GCP PROJECT ID>\
+INSTANCE_ID=<YOUR INSTANCE ID>\
+CLUSTER_ID=<YOUR CLUSTER ID>\
 curl -v -X POST "http://localhost:8080/clusters?\
 projectId=$PROJECT_ID&\
 instanceId=$INSTANCE_ID&\
