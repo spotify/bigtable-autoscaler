@@ -91,6 +91,10 @@ and then it sends a resize request.
 The autoscaler also provides an HTTP API to insert, update and delete Bigtable 
 clusters from being autoscaled.
 
+## Development Status
+
+**Beta**: We are using Bigtable Autoscaler in production clusters at Spotify, and we are actively developing it.
+
 ## FAQ
 
 ### Does it handle sudden load spikes, for instance Dataflow jobs reading/writing batch data?
