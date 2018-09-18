@@ -38,5 +38,5 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      # run tests and deploy to maven central
-      - run: mvn deploy
+      # run tests
+      - run: mvn verify
