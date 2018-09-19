@@ -22,24 +22,24 @@ with no manual intervention.
         * Role **Monitoring Viewer**, in particular the permissions
             * monitoring.timeSeries.list
 * Docker
-* PostgreSQL database (for production use; in this quickstart session we're using a postgres docker 
-image)
-* Java 8 (the service is not compatible with Java 9 or later at the moment)
-* Maven
+* (Optional) **PostgreSQL database** for production use. In this quickstart session we're using a postgres docker image)
+* [GNU make](https://www.gnu.org/software/make)
 
 ### Building
 
-Run these commands to build the project and create a docker image:
+Run these command to build the project and create a docker image:
 
-    mvn package
-    docker build .
+    make build-image
 
 ### Running
 
-Start the service using a dockerized PostgreSQL instance:
+First review and edit [.env](.env) with your Google cloud credentials.
+Start the service with docker-compose using a dockerized local postgres:
 
-    GOOGLE_APPLICATION_CREDENTIALS=<credentials json file>\
-    docker-compose -f quickstart.yml up
+    make up
+    
+    # to see service logs
+    make logs
 
 Register the Bigtable cluster that should be autoscaled in the service:
 
@@ -59,10 +59,24 @@ cpuTarget=0.8"
 If the cluster was at 3 nodes, this will immediately rescale the cluster to 4 nodes as that's the
 minimum threshold. If you generate some significant load to the cluster, it may scale up to 6 nodes.
 
+Stop docker-compose:
+
+    make down
+
 ### Using a Cloud SQL Postgres database as persistent storage
 
 If you want to run this in production, consider using a Cloud SQL postgres database to store the
-state. We recommend connecting using the [JDBC socket factory](https://cloud.google.com/sql/docs/postgres/connect-external-app#java). You can either specify the jdbcUrl in a custom [config file](/src/main/resources/bigtable-autoscaler.conf) or use the *JDBC_URL* environment variable when running the docker image [that we built](#building).
+state. We recommend connecting using the [JDBC socket factory](https://cloud.google.com/sql/docs/postgres/connect-external-app#java).
+
+Just update [.env](.env) with your postgres url, user and password and then run:
+
+    make run
+
+This uses the same image but only with docker (no docker-compose) and points to the postgresql you provided.
+
+In the same way you can see service logs (make logs) and then to stop the service:
+
+    make stop
 
 ## Registering Jersey Resources and Providers Dynamically
 You can register any additional JAX-RS resource, JAX-RS or Jersey contract provider or JAX-RS feature by editing the
