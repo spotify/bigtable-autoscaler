@@ -40,3 +40,7 @@ jobs:
 
       # run tests
       - run: mvn verify
+
+      - run: mvn javadoc:jar source:jar deploy -Prelease
+      - run: mvn release:clean release:prepare -Prelease
+      - run: mvn -s .circleci/.m2/settings.xml release:perform -Prelease
