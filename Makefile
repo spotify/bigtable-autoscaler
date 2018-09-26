@@ -49,7 +49,7 @@ build-image: maven-build Dockerfile
 maven-build: target/bigtable-autoscaler.jar
 
 # package service as jar
-target/bigtable-autoscaler.jar: build-maven-builder src
+target/bigtable-autoscaler.jar: build-maven-builder src/**/*
     docker run --name $(MVN_IMAGE_NAME) $(VOLUMES) --rm $(MVN_IMAGE_TAG) mvn -T 1C -o package
 
 # rebuild the maven image if pom.xml changed
