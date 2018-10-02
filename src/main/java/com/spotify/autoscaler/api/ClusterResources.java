@@ -62,9 +62,14 @@ public class ClusterResources {
   }
 
   @GET
-  public Response getAllClusters() {
+  public Response getAllClusters(@QueryParam("projectId") String projectId,
+                                 @QueryParam("instanceId") String instanceId,
+                                 @QueryParam("clusterId") String clusterId) {
     try {
-      return Response.ok(mapper.writeValueAsString(db.getBigtableClusters())).build();
+      return Response.ok(
+          mapper.writeValueAsString(
+              db.getBigtableClusters(projectId, instanceId, clusterId)
+      )).build();
     } catch (JsonProcessingException e) {
       return Response.serverError().build();
     }

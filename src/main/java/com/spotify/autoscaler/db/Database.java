@@ -22,13 +22,16 @@ package com.spotify.autoscaler.db;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface Database extends AutoCloseable {
 
-  Collection<BigtableCluster> getBigtableClusters();
+  List<BigtableCluster> getBigtableClusters();
+
+  List<BigtableCluster> getBigtableClusters(String projectId, String instanceId, String clusterId);
 
   Optional<BigtableCluster> getBigtableCluster(String projectId, String instanceId, String clusterId);
 
