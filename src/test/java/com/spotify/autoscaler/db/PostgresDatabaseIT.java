@@ -69,6 +69,19 @@ public class PostgresDatabaseIT {
         .build();
   }
 
+  private BigtableCluster anotherTestCluster() {
+    return new BigtableClusterBuilder()
+        .projectId("another-project")
+        .instanceId("another-instance")
+        .clusterId("another-cluster")
+        .minNodes(10)
+        .maxNodes(100)
+        .cpuTarget(0.8)
+        .overloadStep(10)
+        .enabled(true)
+        .build();
+  }
+
   @Before
   public void setup() throws SQLException, IOException {
 
@@ -138,8 +151,9 @@ public class PostgresDatabaseIT {
   @Test
   public void delete() {
     db.insertBigtableCluster(testCluster());
+    db.insertBigtableCluster(anotherTestCluster());
     db.deleteBigtableCluster(projectId, instanceId, clusterId);
-    assertEquals(0, db.getBigtableClusters().size());
+    assertEquals(1, db.getBigtableClusters().size());
   }
 
   @Test
@@ -150,6 +164,7 @@ public class PostgresDatabaseIT {
         .build();
 
     db.insertBigtableCluster(cluster);
+    db.insertBigtableCluster(anotherTestCluster());
 
     BigtableCluster retrievedCluster = db.getBigtableCluster(cluster.projectId(), cluster.instanceId(),
         cluster.clusterId()).orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));

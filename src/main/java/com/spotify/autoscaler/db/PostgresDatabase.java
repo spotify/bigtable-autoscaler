@@ -36,8 +36,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 import com.codahale.metrics.Gauge;
@@ -94,8 +97,20 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public Collection<BigtableCluster> getBigtableClusters() {
-    return jdbc.query(SELECT_ALL_COLUMNS, (rs, rowNum) -> buildClusterFromResultSet(rs));
+  public Optional<BigtableCluster> getBigtableCluster(final String projectId,
+                                                      final String instanceId,
+                                                      final String clusterId) {
+    if (projectId == null || instanceId == null || clusterId == null) {
+      throw new IllegalArgumentException();
+    }
+    final List<BigtableCluster> list = getBigtableClusters(projectId, instanceId, clusterId);
+    if (list.isEmpty()) {
+      return Optional.empty();
+    } else if (list.size() == 1) {
+      return Optional.of(list.get(0));
+    } else {
+      throw new IllegalStateException();
+    }
   }
 
   private BigtableCluster buildClusterFromResultSet(final ResultSet rs) throws SQLException {
@@ -118,13 +133,31 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public Optional<BigtableCluster> getBigtableCluster(final String projectId,
+  public List<BigtableCluster> getBigtableClusters(final String projectId,
                                                       final String instanceId,
                                                       final String clusterId) {
-    final String sql = SELECT_ALL_COLUMNS + " WHERE project_id = ? AND instance_id = ? AND cluster_id = ?";
-    final List<BigtableCluster> list = jdbc.getJdbcOperations().query(sql,
-      (rs, rowNum) -> buildClusterFromResultSet(rs), projectId, instanceId, clusterId);
-    return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    final Map<String, String> args = new TreeMap<>();
+    args.put("project_id", projectId);
+    args.put("instance_id", instanceId);
+    args.put("cluster_id", clusterId);
+    return jdbc.getJdbcOperations()
+        .query(
+            selectClustersQuery(args), 
+            (rs, rowNum) -> buildClusterFromResultSet(rs),
+            args.values().toArray()
+        );
+  }
+
+  private String selectClustersQuery(final Map<String, String> args) {
+    final StringBuilder sql = new StringBuilder(SELECT_ALL_COLUMNS);
+    args.values().removeIf(Objects::isNull);
+    if (args.size() > 0) {
+      sql.append(" WHERE ");
+      sql.append(String.join(" AND ",
+          // args.keys.map(key -> "$key = ?")
+          args.keySet().stream().map(key -> key + " = ?").collect(Collectors.toList())));
+    }
+    return sql.toString();
   }
 
   private boolean upsertBigtableCluster(BigtableCluster cluster) {

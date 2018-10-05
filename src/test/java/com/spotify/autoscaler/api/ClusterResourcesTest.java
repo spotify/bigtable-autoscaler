@@ -60,7 +60,8 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
     when(db.insertBigtableCluster(any())).thenAnswer(invocation -> insertBigtableClusterResult);
     when(db.updateBigtableCluster(any())).thenAnswer(invocation -> updateBigtableClusterResult);
     when(db.deleteBigtableCluster(any(), any(), any())).thenAnswer(invocation -> deleteBigtableClusterResult);
-    when(db.getBigtableClusters()).thenAnswer(invocation -> getBigtableClustersResult);
+    when(db.getBigtableClusters(any(), any(), any())).thenAnswer(invocation -> 
+        getBigtableClustersResult);
 
     Config config = ConfigFactory.load(SERVICE_NAME);
     ResourceConfig resourceConfig =
