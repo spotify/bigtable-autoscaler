@@ -29,7 +29,9 @@ import java.util.stream.Collectors;
 
 public interface Database extends AutoCloseable {
 
-  List<BigtableCluster> getBigtableClusters();
+  default List<BigtableCluster> getBigtableClusters() {
+    return getBigtableClusters(null, null, null);
+  }
 
   List<BigtableCluster> getBigtableClusters(String projectId, String instanceId, String clusterId);
 

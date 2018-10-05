@@ -97,16 +97,20 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public List<BigtableCluster> getBigtableClusters() {
-    return getBigtableClusters(null, null, null);
-  }
-
-  @Override
   public Optional<BigtableCluster> getBigtableCluster(final String projectId,
                                                       final String instanceId,
                                                       final String clusterId) {
+    if (projectId == null || instanceId == null || clusterId == null) {
+      throw new IllegalArgumentException();
+    }
     final List<BigtableCluster> list = getBigtableClusters(projectId, instanceId, clusterId);
-    return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    if (list.isEmpty()) {
+      return Optional.empty();
+    } else if (list.size() == 1) {
+      return Optional.of(list.get(0));
+    } else {
+      throw new IllegalStateException();
+    }
   }
 
   private BigtableCluster buildClusterFromResultSet(final ResultSet rs) throws SQLException {
