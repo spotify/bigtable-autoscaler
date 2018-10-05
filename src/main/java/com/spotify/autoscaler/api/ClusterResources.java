@@ -69,7 +69,24 @@ public class ClusterResources {
       return Response.ok(
           mapper.writeValueAsString(
               db.getBigtableClusters(projectId, instanceId, clusterId)
-      )).build();
+          )
+      ).build();
+    } catch (JsonProcessingException e) {
+      return Response.serverError().build();
+    }
+  }
+
+  @GET
+  @Path("enabled")
+  public Response enabled(@QueryParam("projectId") String projectId,
+                                 @QueryParam("instanceId") String instanceId,
+                                 @QueryParam("clusterId") String clusterId) {
+    try {
+      return Response.ok(
+          mapper.writeValueAsString(
+              db.getBigtableCluster(projectId, instanceId, clusterId).get().enabled()
+          )
+      ).build();
     } catch (JsonProcessingException e) {
       return Response.serverError().build();
     }
