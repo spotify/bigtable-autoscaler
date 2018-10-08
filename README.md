@@ -22,12 +22,12 @@ with no manual intervention.
         * Role **Monitoring Viewer**, in particular the permissions
             * monitoring.timeSeries.list
 * Docker
-* (Optional) **PostgreSQL database** for production use. In this quickstart session we're using a postgres docker image)
+* (Optional) **PostgreSQL database** for production use. In this quickstart session we're using a postgres docker image
 * [GNU make](https://www.gnu.org/software/make)
 
 ### Building
 
-Run these command to build the project and create a docker image:
+Run this command to build the project and create a docker image:
 
     make build-image
 
