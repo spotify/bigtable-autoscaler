@@ -257,6 +257,10 @@ public class AutoscaleJob implements Closeable {
   int storageConstraints(final Duration samplingDuration, int desiredNodes) {
 
     final Double storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
+    if (storageUtilization <= 0.0){
+      throw new RuntimeException(String.format("Storage utilization must be greater than 0%%. Reported: %f",
+          storageUtilization));
+    }
     int minNodesRequiredForStorage =
         (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
     logger.info("Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
@@ -269,8 +273,9 @@ public class AutoscaleJob implements Closeable {
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
-  boolean autoscalerBoundariesHonored(){
-    return currentNodes == sizeConstraints(currentNodes);
+  boolean autoscalerBoundariesHonored(Duration samplingDuration){
+    return currentNodes == sizeConstraints(currentNodes) && currentNodes >= storageConstraints(samplingDuration,
+        currentNodes);
   }
 
   int sizeConstraints(int desiredNodes) {
@@ -320,7 +325,8 @@ public class AutoscaleJob implements Closeable {
     hasRun = true;
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
-    if (autoscalerBoundariesHonored() && isTooEarlyToScale()) {
+    final Duration samplingDuration = getSamplingDuration();
+    if (autoscalerBoundariesHonored(samplingDuration) && isTooEarlyToScale()) {
       logger.info("Too early to autoscale");
       return;
     } else if (shouldExponentialBackoff()) {
@@ -328,10 +334,9 @@ public class AutoscaleJob implements Closeable {
       return;
     }
 
-    final Duration samplingDuration = getSamplingDuration();
     int desiredNodes = cpuStrategy(samplingDuration, currentNodes);
-    desiredNodes = storageConstraints(samplingDuration, desiredNodes);
     desiredNodes = frequencyConstraints(desiredNodes);
+    desiredNodes = storageConstraints(samplingDuration, desiredNodes);
     desiredNodes = sizeConstraints(desiredNodes);
 
     if (desiredNodes != currentNodes) {
