@@ -254,37 +254,18 @@ public class AutoscaleJob implements Closeable {
     return false;
   }
 
-  int storageConstraints(final Duration samplingDuration, int desiredNodes) {
-
+  Optional<Integer> storageConstraints(final Duration samplingDuration) {
     final Double storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
-    if (storageUtilization <= 0.0){
-      return Math.max(currentNodes, desiredNodes);
+    if (storageUtilization <= 0.0) {
+      logger.warn("Stackdriver reported 0% disk utilization. This indicates a bug in monitoring.");
+      return Optional.empty();
     }
     int minNodesRequiredForStorage =
         (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
     logger.info("Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
         minNodesRequiredForStorage, storageUtilization.toString(), currentNodes);
     log.storageUtilization(storageUtilization);
-    if (minNodesRequiredForStorage > desiredNodes) {
-      addResizeReason(String.format("Storage strategy: Target node count overriden(%d -> %d).", desiredNodes,
-          minNodesRequiredForStorage));
-    }
-    return Math.max(minNodesRequiredForStorage, desiredNodes);
-  }
-
-  boolean autoscalerBoundariesHonored(Duration samplingDuration){
-    return currentNodes == sizeConstraints(currentNodes) && currentNodes >= storageConstraints(samplingDuration,
-        currentNodes);
-  }
-
-  int sizeConstraints(int desiredNodes) {
-
-    // the desired size should be inside the autoscale boundaries
-    int finalNodes = Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
-    if (desiredNodes != finalNodes) {
-      addResizeReason(String.format("Size strategy: Target count overriden(%d -> %d)", desiredNodes, finalNodes));
-    }
-    return finalNodes;
+    return Optional.of(minNodesRequiredForStorage);
   }
 
   boolean isTooEarlyToScale() {
@@ -292,28 +273,45 @@ public class AutoscaleJob implements Closeable {
     return timeSinceLastChange.minus(MINIMUM_CHANGE_INTERVAL).isNegative();
   }
 
-  // Implements a stretegy to avoid autoscaling too often
-  int frequencyConstraints(int nodes) {
+  // Implements a strategy to avoid autoscaling too little too often
+  boolean cpuNodeChangeBigEnough(int nodes) {
     Duration timeSinceLastChange = getDurationSinceLastChange();
-    int desiredNodes = nodes;
+    boolean shouldScaleNow = true;
     // It's OK to do large changes often if needed, but only do small changes very rarely to avoid too much oscillation
     double changeWeight =
-        100.0 * Math.abs(1.0 - (double) desiredNodes / currentNodes) * timeSinceLastChange.getSeconds();
-    boolean scaleDown = (desiredNodes < currentNodes);
+        100.0 * Math.abs(1.0 - (double) nodes / currentNodes) * timeSinceLastChange.getSeconds();
+    boolean scaleDown = nodes < currentNodes;
     String path = "normal";
 
     if (scaleDown && (changeWeight < MINIMUM_DOWNSACLE_WEIGHT)) {
       // Avoid downscaling too frequently
       path = "downscale too small/frequent";
-      desiredNodes = currentNodes;
+      shouldScaleNow = false;
     } else if (!scaleDown && (changeWeight < MINIMUM_UPSCALE_WEIGHT)) {
       // Avoid upscaling too frequently
       path = "upscale too small/frequent";
-      desiredNodes = currentNodes;
+      shouldScaleNow = false;
     }
 
-    logger.info("Ideal node count: {}. Revised nodes: {}. Reason: {}.", nodes, desiredNodes, path);
-    return desiredNodes;
+    logger.info("Ideal node count: {}. Current node count: {}. Should scale: {}. Reason: {}.",
+        nodes, currentNodes, shouldScaleNow, path);
+    return shouldScaleNow;
+  }
+
+  // Decide on the new node count, respecting all constraints.
+  static int decideFinalNodeCount(int currentNodes, int effectiveMinNodes, int maxNodes, Optional<Integer> storageMinNodes,
+                                  int cpuDesiredNodes, boolean mustRespectCpuDesiredNodes) {
+    final boolean mustAdjustForConstraints =
+        currentNodes < effectiveMinNodes
+        || currentNodes > maxNodes
+        || (storageMinNodes.isPresent() && currentNodes < storageMinNodes.get());
+
+    final int effectiveStorageMinNodes = storageMinNodes.orElse(currentNodes);
+    if (mustAdjustForConstraints || mustRespectCpuDesiredNodes) {
+      return Math.min(maxNodes, Math.max(cpuDesiredNodes, Math.max(effectiveMinNodes, effectiveStorageMinNodes)));
+    } else {
+      return currentNodes;
+    }
   }
 
   void run() {
@@ -325,23 +323,35 @@ public class AutoscaleJob implements Closeable {
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
     final Duration samplingDuration = getSamplingDuration();
-    if (autoscalerBoundariesHonored(samplingDuration) && isTooEarlyToScale()) {
-      logger.info("Too early to autoscale");
-      return;
-    } else if (shouldExponentialBackoff()) {
+    if (shouldExponentialBackoff()) {
       logger.info("Exponential backoff");
       return;
     }
 
-    int desiredNodes = cpuStrategy(samplingDuration, currentNodes);
-    desiredNodes = frequencyConstraints(desiredNodes);
-    desiredNodes = storageConstraints(samplingDuration, desiredNodes);
-    desiredNodes = sizeConstraints(desiredNodes);
+    final Optional<Integer> storageMinNodes = storageConstraints(samplingDuration);
+    final int cpuDesiredNodes = cpuStrategy(samplingDuration, currentNodes);
+    final boolean cpuNodeChangeBigEnough = cpuNodeChangeBigEnough(cpuDesiredNodes);
+    final boolean mustRespectCpuDesiredNodes = !isTooEarlyToScale() && cpuNodeChangeBigEnough;
+    final int finalNodeCount = decideFinalNodeCount(currentNodes, cluster.effectiveMinNodes(), cluster.maxNodes(), storageMinNodes,
+        cpuDesiredNodes, mustRespectCpuDesiredNodes);
+    logger.debug(
+        "decideFinalNodeCount(currentNodes = {}, effectiveMinNodes = {}, maxNodes = {}, storageMinNodes = {}, " +
+            "cpuDesiredNodes = {}, mustRespectCpuDesiredNodes = {}) = {}",
+        currentNodes, cluster.effectiveMinNodes(), cluster.maxNodes(), storageMinNodes,
+        cpuDesiredNodes, mustRespectCpuDesiredNodes,
+        finalNodeCount);
+    addResizeReason("currentNodes: " + currentNodes);
+    addResizeReason("effectiveMinNodes: " + cluster.effectiveMinNodes());
+    addResizeReason("maxNodes: " + cluster.maxNodes());
+    addResizeReason("storageMinNodes: " + storageMinNodes);
+    addResizeReason("cpuDesiredNodes: " + cpuDesiredNodes);
+    addResizeReason("mustRespectCpuDesiredNodes: " + mustRespectCpuDesiredNodes);
+    addResizeReason("finalNodeCount: " + finalNodeCount);
 
-    if (desiredNodes != currentNodes) {
-      setSize(desiredNodes);
+    if (finalNodeCount != currentNodes) {
+      setSize(finalNodeCount);
       db.setLastChange(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSource.get());
-      logger.info("Changing nodes from {} to {}", currentNodes, desiredNodes);
+      logger.info("Changing nodes from {} to {}", currentNodes, finalNodeCount);
     } else {
       logger.info("No need to resize");
     }
@@ -351,7 +361,7 @@ public class AutoscaleJob implements Closeable {
 
   private void addResizeReason(String reason) {
     resizeReason.insert(0, reason);
-    resizeReason.insert(0, " >>");
+    resizeReason.insert(0, "\n");
   }
 
   public void close() throws IOException {

@@ -39,6 +39,8 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -88,34 +90,6 @@ public class AutoscaleJobTest {
 
   @Test
   public void testSetup() {
-  }
-
-  @Test
-  public void testDiskConstraintOverridesCpuTargetedNodeCount(){
-    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.8d);
-    int desiredNodes = job.storageConstraints(null, 50);
-    assertEquals(115, desiredNodes);
-  }
-
-  @Test
-  public void testDiskConstraintOverridesIfNotLoaded(){
-    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.6d);
-    int desiredNodes = job.storageConstraints(null, 50);
-    assertEquals(86, desiredNodes);
-  }
-
-  @Test
-  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnoughIfNotLoaded(){
-    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.6d);
-    int desiredNodes = job.storageConstraints(null, 90);
-    assertEquals(90, desiredNodes);
-  }
-
-  @Test
-  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnough(){
-    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.8d);
-    int desiredNodes = job.storageConstraints(null, 120);
-    assertEquals(120, desiredNodes);
   }
 
   @Test
@@ -229,5 +203,89 @@ public class AutoscaleJobTest {
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run();
     assertEquals(7, newSize);
+  }
+
+  @Test
+  public void testDecideFinalNodeCount1() {
+    assertEquals(5,
+        AutoscaleJob.decideFinalNodeCount(3, 4, 10, Optional.of(1), 5, false));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount2() {
+    assertEquals(4,
+        AutoscaleJob.decideFinalNodeCount(4, 4, 10, Optional.of(1), 5, false));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount3() {
+    assertEquals(7,
+        AutoscaleJob.decideFinalNodeCount(10, 4, 8, Optional.of(7), 6, false));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount4() {
+    assertEquals(6,
+        AutoscaleJob.decideFinalNodeCount(10, 4, 8, Optional.of(1), 6, false));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount5() {
+    assertEquals(5,
+        AutoscaleJob.decideFinalNodeCount(5, 4, 10, Optional.of(1), 5, true));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount6() {
+    assertEquals(8,
+        AutoscaleJob.decideFinalNodeCount(10, 3, 8, Optional.empty(), 3, true));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount7() {
+    assertEquals(3,
+        AutoscaleJob.decideFinalNodeCount(10, 3, 8, Optional.of(1), 3, true));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount8() {
+    assertEquals(6,
+        AutoscaleJob.decideFinalNodeCount(5, 3, 10, Optional.of(1), 6, true));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount9() {
+    assertEquals(10,
+        AutoscaleJob.decideFinalNodeCount(10, 3, 10, Optional.empty(), 3, true));
+  }
+
+  @Test
+  public void testDecideFinalNodeCount10() {
+    assertEquals(3,
+        AutoscaleJob.decideFinalNodeCount(10, 3, 10, Optional.of(0), 3, true));
+  }
+
+  @Test
+  public void testDiskConstraintOverridesCpuTargetedNodeCount() {
+    assertEquals(115,
+        AutoscaleJob.decideFinalNodeCount(100, 5, 500, Optional.of(115), 50, true));
+  }
+
+  @Test
+  public void testDiskConstraintOverridesIfNotLoaded() {
+    assertEquals(86,
+        AutoscaleJob.decideFinalNodeCount(100, 5, 500, Optional.of(86), 50, true));
+  }
+
+  @Test
+  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnoughIfNotLoaded(){
+    assertEquals(90,
+        AutoscaleJob.decideFinalNodeCount(100, 5, 500, Optional.of(86), 90, true));
+  }
+
+  @Test
+  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnough(){
+    assertEquals(120,
+        AutoscaleJob.decideFinalNodeCount(100, 5, 500, Optional.of(115), 120, true));
   }
 }
