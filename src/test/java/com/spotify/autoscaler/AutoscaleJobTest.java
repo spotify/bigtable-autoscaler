@@ -74,8 +74,8 @@ public class AutoscaleJobTest {
     initMocks(this);
     when(registry.meter(any())).thenReturn(new Meter());
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
+    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
-    when(stackdriverClient.getDiskUtilization(any())).thenReturn(new Double(0.00000001));
     job = new AutoscaleJob(bigtableSession, stackdriverClient, this.cluster, db, registry, clusterStats, () -> Instant.now());
     when(bigtableInstanceClient.updateCluster(any()))
         .thenAnswer(
@@ -216,18 +216,5 @@ public class AutoscaleJobTest {
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run();
     assertEquals(15, newSize);
-  }
-
-  @Test
-  public void testWeResizeIfStorageConstraintsAreNotMet() {
-    when(stackdriverClient.getDiskUtilization(any())).thenReturn(new Double(0.90));
-    BigtableCluster cluster = BigtableClusterBuilder.from(this.cluster)
-        .lastChange(Instant.now())
-        .build();
-    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 5);
-    job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
-    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
-    job.run();
-    assertEquals(7, newSize);
   }
 }
