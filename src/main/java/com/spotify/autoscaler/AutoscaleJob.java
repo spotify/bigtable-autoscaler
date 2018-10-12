@@ -272,10 +272,6 @@ public class AutoscaleJob implements Closeable {
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
-  boolean autoscalerBoundariesHonored(){
-    return currentNodes == sizeConstraints(currentNodes);
-  }
-
   int sizeConstraints(int desiredNodes) {
 
     // the desired size should be inside the autoscale boundaries
@@ -329,11 +325,11 @@ public class AutoscaleJob implements Closeable {
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
     if (isTooEarlyToFetchMetrics()) {
-      if (autoscalerBoundariesHonored()) {
+      int desiredNodes = sizeConstraints(currentNodes);
+      if (desiredNodes == currentNodes) {
         logger.info("Too early to autoscale");
         return;
       } else {
-        int desiredNodes = sizeConstraints(currentNodes);
         updateNodeCount(desiredNodes);
         return;
       }
