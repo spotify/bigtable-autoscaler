@@ -286,7 +286,7 @@ public class AutoscaleJob implements Closeable {
     return finalNodes;
   }
 
-  boolean isTooEarlyToScale() {
+  boolean isTooEarlyToFetchMetrics() {
     Duration timeSinceLastChange = getDurationSinceLastChange();
     return timeSinceLastChange.minus(MINIMUM_CHANGE_INTERVAL).isNegative();
   }
@@ -323,7 +323,7 @@ public class AutoscaleJob implements Closeable {
     hasRun = true;
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
-    if (autoscalerBoundariesHonored() && isTooEarlyToScale()) {
+    if (autoscalerBoundariesHonored() && isTooEarlyToFetchMetrics()) {
       logger.info("Too early to autoscale");
       return;
     } else if (shouldExponentialBackoff()) {
