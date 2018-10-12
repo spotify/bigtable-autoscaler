@@ -39,6 +39,8 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -66,7 +68,7 @@ public class AutoscaleJobTest {
   BigtableCluster cluster = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance").clusterId("cluster")
       .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).build();
-  int newSize;
+  Optional<Integer> newSize = Optional.empty();
   AutoscaleJob job;
 
   @Before
@@ -80,8 +82,8 @@ public class AutoscaleJobTest {
     when(bigtableInstanceClient.updateCluster(any()))
         .thenAnswer(
             invocationOnMock -> {
-              newSize = ((Cluster) invocationOnMock.getArgument(0)).getServeNodes();
-              AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, newSize);
+              newSize = Optional.of(((Cluster) invocationOnMock.getArgument(0)).getServeNodes());
+              AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, newSize.get());
               return null;
             });
   }
@@ -123,7 +125,7 @@ public class AutoscaleJobTest {
     // Test that we resize to correct target size
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.6);
     job.run();
-    assertEquals(75, newSize);
+    assertEquals(Optional.of(75), newSize);
   }
 
   @Test
@@ -133,7 +135,7 @@ public class AutoscaleJobTest {
     job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.9);
     job.run();
-    assertEquals(500, newSize);
+    assertEquals(Optional.of(500), newSize);
   }
 
   @Test
@@ -143,7 +145,7 @@ public class AutoscaleJobTest {
     job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.5);
     job.run();
-    assertEquals(5, newSize);
+    assertEquals(Optional.of(5), newSize);
   }
 
   @Test
@@ -151,7 +153,7 @@ public class AutoscaleJobTest {
     // To give the cluster a chance to settle in, don't resize too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.95);
     job.run();
-    assertEquals(200, newSize);
+    assertEquals(Optional.of(200), newSize);
   }
 
   @Test(expected = RuntimeException.class)
@@ -193,7 +195,7 @@ public class AutoscaleJobTest {
     // Even if we're very over-provisioned, only reduce by 30 %
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.3);
     job.run();
-    assertEquals(70, newSize);
+    assertEquals(Optional.of(70), newSize);
   }
 
   @Test
@@ -215,6 +217,29 @@ public class AutoscaleJobTest {
     job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run();
-    assertEquals(15, newSize);
+    assertEquals(Optional.of(15), newSize);
+  }
+
+  @Test
+  public void testWeResizeIfStorageConstraintsAreNotMet() {
+    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.90);
+    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 5);
+    job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
+    job.run();
+    assertEquals(Optional.of(7), newSize);
+  }
+
+  @Test
+  public void testWeDontResizeTooSoonEvenIfStorageConstraintsAreNotMet() {
+    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.90);
+    BigtableCluster cluster = BigtableClusterBuilder.from(this.cluster)
+        .lastChange(Instant.now())
+        .build();
+    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 5);
+    job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
+    job.run();
+    assertEquals(Optional.empty(), newSize);
   }
 }
