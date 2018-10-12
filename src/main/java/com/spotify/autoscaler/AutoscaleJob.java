@@ -257,6 +257,9 @@ public class AutoscaleJob implements Closeable {
   int storageConstraints(final Duration samplingDuration, int desiredNodes) {
 
     final Double storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
+    if (storageUtilization <= 0.0) {
+      return Math.max(currentNodes, desiredNodes);
+    }
     int minNodesRequiredForStorage =
         (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
     logger.info("Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",

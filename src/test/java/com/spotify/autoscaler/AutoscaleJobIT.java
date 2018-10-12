@@ -89,6 +89,7 @@ public class AutoscaleJobIT {
     when(registry.meter(any())).thenReturn(new Meter());
     db = initDatabase(cluster, registry);
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
+    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
     job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
     when(bigtableInstanceClient.updateCluster(any()))
