@@ -257,9 +257,6 @@ public class AutoscaleJob implements Closeable {
   int storageConstraints(final Duration samplingDuration, int desiredNodes) {
 
     final Double storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
-    if (storageUtilization <= 0.0){
-      return Math.max(currentNodes, desiredNodes);
-    }
     int minNodesRequiredForStorage =
         (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
     logger.info("Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
@@ -272,9 +269,8 @@ public class AutoscaleJob implements Closeable {
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
-  boolean autoscalerBoundariesHonored(Duration samplingDuration){
-    return currentNodes == sizeConstraints(currentNodes) && currentNodes >= storageConstraints(samplingDuration,
-        currentNodes);
+  boolean autoscalerBoundariesHonored(){
+    return currentNodes == sizeConstraints(currentNodes);
   }
 
   int sizeConstraints(int desiredNodes) {
@@ -324,8 +320,7 @@ public class AutoscaleJob implements Closeable {
     hasRun = true;
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
-    final Duration samplingDuration = getSamplingDuration();
-    if (autoscalerBoundariesHonored(samplingDuration) && isTooEarlyToScale()) {
+    if (autoscalerBoundariesHonored() && isTooEarlyToScale()) {
       logger.info("Too early to autoscale");
       return;
     } else if (shouldExponentialBackoff()) {
@@ -333,9 +328,10 @@ public class AutoscaleJob implements Closeable {
       return;
     }
 
+    final Duration samplingDuration = getSamplingDuration();
     int desiredNodes = cpuStrategy(samplingDuration, currentNodes);
-    desiredNodes = frequencyConstraints(desiredNodes);
     desiredNodes = storageConstraints(samplingDuration, desiredNodes);
+    desiredNodes = frequencyConstraints(desiredNodes);
     desiredNodes = sizeConstraints(desiredNodes);
 
     if (desiredNodes != currentNodes) {
