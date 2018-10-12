@@ -328,9 +328,15 @@ public class AutoscaleJob implements Closeable {
     hasRun = true;
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
-    if (autoscalerBoundariesHonored() && isTooEarlyToFetchMetrics()) {
-      logger.info("Too early to autoscale");
-      return;
+    if (isTooEarlyToFetchMetrics()) {
+      if (autoscalerBoundariesHonored()) {
+        logger.info("Too early to autoscale");
+        return;
+      } else {
+        int desiredNodes = sizeConstraints(currentNodes);
+        updateNodeCount(desiredNodes);
+        return;
+      }
     }
 
     final Duration samplingDuration = getSamplingDuration();
@@ -338,7 +344,10 @@ public class AutoscaleJob implements Closeable {
     desiredNodes = storageConstraints(samplingDuration, desiredNodes);
     desiredNodes = frequencyConstraints(desiredNodes);
     desiredNodes = sizeConstraints(desiredNodes);
+    updateNodeCount(desiredNodes);
+  }
 
+  void updateNodeCount(int desiredNodes) {
     if (desiredNodes != currentNodes) {
       setSize(desiredNodes);
       db.setLastChange(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSource.get());
