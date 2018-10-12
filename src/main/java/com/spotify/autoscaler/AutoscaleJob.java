@@ -316,6 +316,11 @@ public class AutoscaleJob implements Closeable {
   }
 
   void run() {
+    if (shouldExponentialBackoff()) {
+      logger.info("Exponential backoff");
+      return;
+    }
+
     if (hasRun) {
       throw new RuntimeException("An autoscale job should only be run once!");
     }
@@ -325,9 +330,6 @@ public class AutoscaleJob implements Closeable {
 
     if (autoscalerBoundariesHonored() && isTooEarlyToFetchMetrics()) {
       logger.info("Too early to autoscale");
-      return;
-    } else if (shouldExponentialBackoff()) {
-      logger.info("Exponential backoff");
       return;
     }
 
