@@ -272,10 +272,6 @@ public class AutoscaleJob implements Closeable {
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
-  boolean autoscalerBoundariesHonored(){
-    return currentNodes == sizeConstraints(currentNodes);
-  }
-
   int sizeConstraints(int desiredNodes) {
 
     // the desired size should be inside the autoscale boundaries
@@ -286,7 +282,7 @@ public class AutoscaleJob implements Closeable {
     return finalNodes;
   }
 
-  boolean isTooEarlyToScale() {
+  boolean isTooEarlyToFetchMetrics() {
     Duration timeSinceLastChange = getDurationSinceLastChange();
     return timeSinceLastChange.minus(MINIMUM_CHANGE_INTERVAL).isNegative();
   }
@@ -316,6 +312,11 @@ public class AutoscaleJob implements Closeable {
   }
 
   void run() {
+    if (shouldExponentialBackoff()) {
+      logger.info("Exponential backoff");
+      return;
+    }
+
     if (hasRun) {
       throw new RuntimeException("An autoscale job should only be run once!");
     }
@@ -323,20 +324,26 @@ public class AutoscaleJob implements Closeable {
     hasRun = true;
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
-    if (autoscalerBoundariesHonored() && isTooEarlyToScale()) {
-      logger.info("Too early to autoscale");
-      return;
-    } else if (shouldExponentialBackoff()) {
-      logger.info("Exponential backoff");
-      return;
+    if (isTooEarlyToFetchMetrics()) {
+      int newNodeCount = sizeConstraints(currentNodes);
+      if (newNodeCount == currentNodes) {
+        logger.info("Too early to autoscale");
+        return;
+      } else {
+        updateNodeCount(newNodeCount);
+        return;
+      }
     }
 
     final Duration samplingDuration = getSamplingDuration();
-    int desiredNodes = cpuStrategy(samplingDuration, currentNodes);
-    desiredNodes = storageConstraints(samplingDuration, desiredNodes);
-    desiredNodes = frequencyConstraints(desiredNodes);
-    desiredNodes = sizeConstraints(desiredNodes);
+    int newNodeCount = cpuStrategy(samplingDuration, currentNodes);
+    newNodeCount = storageConstraints(samplingDuration, newNodeCount);
+    newNodeCount = frequencyConstraints(newNodeCount);
+    newNodeCount = sizeConstraints(newNodeCount);
+    updateNodeCount(newNodeCount);
+  }
 
+  void updateNodeCount(int desiredNodes) {
     if (desiredNodes != currentNodes) {
       setSize(desiredNodes);
       db.setLastChange(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSource.get());
