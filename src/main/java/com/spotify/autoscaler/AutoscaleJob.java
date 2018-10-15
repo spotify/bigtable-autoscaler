@@ -325,22 +325,22 @@ public class AutoscaleJob implements Closeable {
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
     if (isTooEarlyToFetchMetrics()) {
-      int desiredNodes = sizeConstraints(currentNodes);
-      if (desiredNodes == currentNodes) {
+      int newNodeCount = sizeConstraints(currentNodes);
+      if (newNodeCount == currentNodes) {
         logger.info("Too early to autoscale");
         return;
       } else {
-        updateNodeCount(desiredNodes);
+        updateNodeCount(newNodeCount);
         return;
       }
     }
 
     final Duration samplingDuration = getSamplingDuration();
-    int desiredNodes = cpuStrategy(samplingDuration, currentNodes);
-    desiredNodes = storageConstraints(samplingDuration, desiredNodes);
-    desiredNodes = frequencyConstraints(desiredNodes);
-    desiredNodes = sizeConstraints(desiredNodes);
-    updateNodeCount(desiredNodes);
+    int newNodeCount = cpuStrategy(samplingDuration, currentNodes);
+    newNodeCount = storageConstraints(samplingDuration, newNodeCount);
+    newNodeCount = frequencyConstraints(newNodeCount);
+    newNodeCount = sizeConstraints(newNodeCount);
+    updateNodeCount(newNodeCount);
   }
 
   void updateNodeCount(int desiredNodes) {
