@@ -95,28 +95,28 @@ public class AutoscaleJobTest {
   @Test
   public void testDiskConstraintOverridesCpuTargetedNodeCount(){
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.8d);
-    int desiredNodes = job.storageConstraints(null, 50);
+    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 50);
     assertEquals(115, desiredNodes);
   }
 
   @Test
   public void testDiskConstraintOverridesIfNotLoaded(){
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.6d);
-    int desiredNodes = job.storageConstraints(null, 50);
+    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 50);
     assertEquals(86, desiredNodes);
   }
 
   @Test
   public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnoughIfNotLoaded(){
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.6d);
-    int desiredNodes = job.storageConstraints(null, 90);
+    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 90);
     assertEquals(90, desiredNodes);
   }
 
   @Test
   public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnough(){
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.8d);
-    int desiredNodes = job.storageConstraints(null, 120);
+    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 120);
     assertEquals(120, desiredNodes);
   }
 

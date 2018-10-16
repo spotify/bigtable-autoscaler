@@ -56,7 +56,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.testcontainers.containers.PostgreSQLContainer;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobIT {
   @ClassRule
   public static PostgreSQLContainer pg = new PostgreSQLContainer();
