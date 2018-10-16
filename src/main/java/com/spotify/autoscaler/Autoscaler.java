@@ -27,6 +27,7 @@ import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
@@ -39,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 public class Autoscaler implements Runnable {
 
+
   public interface SessionProvider {
     BigtableSession apply(BigtableCluster in) throws IOException;
   }
@@ -50,6 +52,7 @@ public class Autoscaler implements Runnable {
   private final SemanticMetricRegistry registry;
   private final Database db;
   private final ClusterStats clusterStats;
+  private final ClusterFilter filter;
 
   private final SessionProvider sessionProvider;
   private final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(CONCURRENCY_LIMIT);
@@ -57,11 +60,13 @@ public class Autoscaler implements Runnable {
   public Autoscaler(SemanticMetricRegistry registry,
                     Database db,
                     SessionProvider sessionProvider,
-                    ClusterStats clusterStats) {
+                    ClusterStats clusterStats,
+                    ClusterFilter filter) {
     this.registry = checkNotNull(registry);
     this.db = checkNotNull(db);
     this.sessionProvider = checkNotNull(sessionProvider);
     this.clusterStats = checkNotNull(clusterStats);
+    this.filter = checkNotNull(filter);
   }
 
   @Override
@@ -84,20 +89,22 @@ public class Autoscaler implements Runnable {
         public void run() {
           try {
             db.getCandidateCluster().flatMap(cluster -> {
-              BigtableUtil.pushContext(cluster);
-              logger.info("Autoscaling cluster!");
-              try (BigtableSession session = sessionProvider.apply(cluster);
-                   final AutoscaleJob job = new AutoscaleJob(session, new StackdriverClient(cluster), cluster, db,
-                       registry, clusterStats,
-                       () -> Instant.now()
-                   )) {
-                job.run();
-              } catch (Exception e) {
-                logger.error("Failed to autoscale cluster!", e);
-                db.increaseFailureCount(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), Instant.now(),
-                    e.getMessage());
+              if (filter.match(cluster)) {
+                BigtableUtil.pushContext(cluster);
+                logger.info("Autoscaling cluster!");
+                try (BigtableSession session = sessionProvider.apply(cluster);
+                     final AutoscaleJob job = new AutoscaleJob(session, new StackdriverClient(cluster), cluster, db,
+                         registry, clusterStats,
+                         () -> Instant.now()
+                     )) {
+                  job.run();
+                } catch (Exception e) {
+                  logger.error("Failed to autoscale cluster!", e);
+                  db.increaseFailureCount(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), Instant.now(),
+                      e.getMessage());
+                }
+                BigtableUtil.clearContext();
               }
-              BigtableUtil.clearContext();
               return Optional.empty();
             });
           } catch (Exception e) {

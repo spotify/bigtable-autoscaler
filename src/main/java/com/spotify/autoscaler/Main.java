@@ -25,6 +25,7 @@ import com.spotify.autoscaler.api.ClusterResources;
 import com.spotify.autoscaler.api.HealthCheck;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
+import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -109,7 +110,8 @@ public final class Main {
         db,
         cluster -> BigtableUtil
             .createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
-        new ClusterStats(registry, db));
+        new ClusterStats(registry, db),
+        new AllowAllClusterFilter());
 
     executor.scheduleWithFixedDelay(autoscaler,
         RUN_INTERVAL.toMillis(),
