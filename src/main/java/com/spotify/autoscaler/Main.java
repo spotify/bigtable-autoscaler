@@ -26,6 +26,7 @@ import com.spotify.autoscaler.api.HealthCheck;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
+import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -107,6 +108,16 @@ public final class Main {
         new AutoscaleResourceConfig(SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
+    ClusterFilter clusterFilter = new AllowAllClusterFilter();
+    String clusterFilterClass = config.getString("clusterFilter");
+    if (clusterFilterClass != null && !clusterFilterClass.isEmpty()) {
+      try {
+        clusterFilter = (ClusterFilter) Class.forName(clusterFilterClass).newInstance();
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        logger.error("Failed to create new instance of cluster filter " + clusterFilterClass, e);
+      }
+    }
+
     autoscaler = new Autoscaler(
         new AutoscaleJobFactory(),
         Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
@@ -115,7 +126,7 @@ public final class Main {
         cluster -> BigtableUtil
             .createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
         new ClusterStats(registry, db),
-        new AllowAllClusterFilter());
+        clusterFilter);
 
     executor.scheduleWithFixedDelay(autoscaler,
         RUN_INTERVAL.toMillis(),
