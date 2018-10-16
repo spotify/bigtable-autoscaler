@@ -146,6 +146,7 @@ public class AutoscaleJob implements Closeable {
       logger.error("Failed to set cluster size", e);
       log.errorMessage(Optional.of(e.toString()));
       log.success(false);
+      registry.meter(APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
     } catch (Throwable t) {
       log.errorMessage(Optional.of(t.toString()));
       log.success(false);
