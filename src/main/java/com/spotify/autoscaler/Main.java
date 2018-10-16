@@ -39,6 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,7 @@ public final class Main {
   public static final MetricId APP_PREFIX = MetricId.build("key", SERVICE_NAME);
 
   private static final Duration RUN_INTERVAL = Duration.ofSeconds(5);
+  private static final int CONCURRENCY_LIMIT = 5;
 
   private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
   private final Autoscaler autoscaler;
@@ -106,6 +108,8 @@ public final class Main {
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
     autoscaler = new Autoscaler(
+        new AutoscaleJobFactory(),
+        Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
         registry,
         db,
         cluster -> BigtableUtil

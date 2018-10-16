@@ -33,8 +33,7 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +44,6 @@ public class Autoscaler implements Runnable {
   }
 
   private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
-  private static final int CONCURRENCY_LIMIT = 5;
   private static final int BATCH_SIZE = 10;
 
   private final SemanticMetricRegistry registry;
@@ -54,13 +52,18 @@ public class Autoscaler implements Runnable {
   private final ClusterFilter filter;
 
   private final SessionProvider sessionProvider;
-  private final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(CONCURRENCY_LIMIT);
+  private final ExecutorService executorService;
+  private final AutoscaleJobFactory autoscaleJobFactory;
 
-  public Autoscaler(SemanticMetricRegistry registry,
+  public Autoscaler(AutoscaleJobFactory autoscaleJobFactory,
+                    ExecutorService executorService,
+                    SemanticMetricRegistry registry,
                     Database db,
                     SessionProvider sessionProvider,
                     ClusterStats clusterStats,
                     ClusterFilter filter) {
+    this.autoscaleJobFactory = checkNotNull(autoscaleJobFactory);
+    this.executorService = checkNotNull(executorService);
     this.registry = checkNotNull(registry);
     this.db = checkNotNull(db);
     this.sessionProvider = checkNotNull(sessionProvider);
@@ -83,7 +86,7 @@ public class Autoscaler implements Runnable {
 
   private void runUnsafe() throws IOException {
     for (int i = 0; i < BATCH_SIZE; i++) {
-      executor.submit(new Runnable() {
+      executorService.submit(new Runnable() {
         @Override
         public void run() {
           try {
@@ -92,14 +95,14 @@ public class Autoscaler implements Runnable {
                 BigtableUtil.pushContext(cluster);
                 logger.info("Autoscaling cluster!");
                 try (BigtableSession session = sessionProvider.apply(cluster);
-                     final AutoscaleJob job = new AutoscaleJob(session, new StackdriverClient(cluster), cluster, db,
-                         registry, clusterStats,
-                         () -> Instant.now()
-                     )) {
+                     final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
+                         session, new StackdriverClient(cluster), cluster, db, registry,
+                         clusterStats, () -> Instant.now())) {
                   job.run();
                 } catch (Exception e) {
                   logger.error("Failed to autoscale cluster!", e);
-                  db.increaseFailureCount(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), Instant.now(),
+                  db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
+                      cluster.clusterId(), Instant.now(),
                       e.getMessage());
                 }
                 BigtableUtil.clearContext();
@@ -117,7 +120,7 @@ public class Autoscaler implements Runnable {
   }
 
   public void close() throws IOException {
-    executor.shutdown();
+    executorService.shutdown();
   }
 
 }
