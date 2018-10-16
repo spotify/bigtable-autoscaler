@@ -137,6 +137,13 @@ public final class Main {
     registry.register(APP_PREFIX.tagged("what", "daily-resize-count"),
         (Gauge<Long>) () -> db.getDailyResizeCount());
 
+    registry.register(APP_PREFIX.tagged("what", "failing-cluster-count"),
+        (Gauge<Long>) () -> db.getBigtableClusters()
+                            .stream()
+                            .filter(p -> p.enabled())
+                            .filter(p -> p.consecutiveFailureCount() > 0)
+                            .count());
+
     server.start();
   }
 
