@@ -194,7 +194,7 @@ public class AutoscaleJob implements Closeable {
     try {
       currentCpu = getCurrentCpu(samplingDuration);
     } finally {
-      clusterStats.setNodeCount(cluster, nodes, currentCpu);
+      clusterStats.setLoad(cluster, currentCpu, ClusterStats.MetricType.CPU);
     }
 
     logger.info(
@@ -256,7 +256,12 @@ public class AutoscaleJob implements Closeable {
 
   int storageConstraints(final Duration samplingDuration, int desiredNodes) {
 
-    final Double storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
+    Double storageUtilization = 0.0;
+    try {
+      storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
+    } finally {
+      clusterStats.setLoad(cluster, storageUtilization, ClusterStats.MetricType.STORAGE);
+    }
     if (storageUtilization <= 0.0) {
       return Math.max(currentNodes, desiredNodes);
     }
@@ -334,7 +339,7 @@ public class AutoscaleJob implements Closeable {
         return;
       }
     }
-
+    clusterStats.setStats(cluster, currentNodes);
     final Duration samplingDuration = getSamplingDuration();
     int newNodeCount = cpuStrategy(samplingDuration, currentNodes);
     newNodeCount = storageConstraints(samplingDuration, newNodeCount);
