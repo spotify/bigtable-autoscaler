@@ -162,6 +162,14 @@ public class ClusterStats {
       this.registry.register(APP_PREFIX.tagged("what", "consecutive_failure_count").tagged("project-id", cluster.projectId()).tagged
               ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
           (Gauge<Integer>) () -> nodes.get(cluster.clusterName()).getConsecutiveFailureCount());
+
+      this.registry.register(APP_PREFIX.tagged("what", "cpu-target-ratio").tagged("project-id", cluster.projectId())
+              .tagged
+              ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
+          (Gauge<Double>) () -> {
+                                  final ClusterData data = nodes.get(cluster.clusterName());
+                                  return data.getCpuUtil() / cluster.cpuTarget();
+                                });
     }
     nodes.put(cluster.clusterName(), clusterData);
 
