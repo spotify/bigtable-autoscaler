@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 public class Autoscaler implements Runnable {
 
-
   public interface SessionProvider {
     BigtableSession apply(BigtableCluster in) throws IOException;
   }
