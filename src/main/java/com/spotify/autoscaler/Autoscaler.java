@@ -32,7 +32,9 @@ import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,12 +45,6 @@ public class Autoscaler implements Runnable {
   }
 
   private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
-
-  // BATCH_SIZE limits the number of autoscaleJobs we queue per invocation of run().
-  // This limits the throughput of an autoscaler instance to:
-  // BATCH_SIZE autoscaleJobs per Main.RUN_INTERVAL.
-  // So to increase throughput, increase this number or add more instances; both scale linearly.
-  static final int BATCH_SIZE = 10;
 
   private final SemanticMetricRegistry registry;
   private final Database db;
@@ -89,16 +85,18 @@ public class Autoscaler implements Runnable {
   }
 
   private void runUnsafe() {
-    db.getCandidateClusters()
+    registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
+
+    CompletableFuture[] futures = db.getCandidateClusters()
         .stream()
         // Order here is important - don't call updateLastChecked if a cluster is filtered.
         // That could lead to cluster starvation
         .filter(filter::match)
         .filter(db::updateLastChecked)
-        .limit(BATCH_SIZE)
-        .forEach(cluster -> executorService.submit(() -> runForCluster(cluster)));
+        .map(cluster -> CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
+        .toArray(CompletableFuture[]::new);
 
-    registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
+    CompletableFuture.allOf(futures).join();
   }
 
   private void runForCluster(BigtableCluster cluster) {

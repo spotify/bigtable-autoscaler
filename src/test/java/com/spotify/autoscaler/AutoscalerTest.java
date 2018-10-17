@@ -35,9 +35,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -179,45 +177,6 @@ public class AutoscalerTest {
     verify(autoscaleJobFactory).createAutoscaleJob(
         any(), any(), eq(cluster2), any(), any(), any(), any());
     verify(autoscaleJob, times(1)).run();
-
-    verifyNoMoreInteractions(database);
-    verifyNoMoreInteractions(autoscaleJobFactory);
-  }
-
-  @Test
-  public void testNoMoreThanBatchSizeClustersTouched() {
-    // The main purpose of this test is to ensure that
-    // updateLastChecked is not run on any more clusters beyond the first BATCH_SIZE.
-
-    List<BigtableCluster> clusters = new ArrayList<>();
-
-    when(database.getCandidateClusters())
-        .thenReturn(clusters);
-    for (int i = 0; i < Autoscaler.BATCH_SIZE + 1; i++) {
-      BigtableCluster cluster = BigtableClusterBuilder.from(cluster1).clusterId("c" + i).build();
-      clusters.add(cluster);
-      when(database.updateLastChecked(cluster))
-          .thenReturn(true)
-          .thenReturn(false);
-    }
-
-    Autoscaler autoscaler = new Autoscaler(
-        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
-        new AllowAllClusterFilter());
-
-    autoscaler.run();
-
-    verify(database).getCandidateClusters();
-    // Clusters should be checked in order since the unit test uses DirectExecutor executorservice
-    InOrder inOrder = inOrder(database, autoscaleJobFactory);
-    for (int i = 0; i < Autoscaler.BATCH_SIZE; i++) {
-      BigtableCluster cluster = clusters.get(i);
-      inOrder.verify(database).updateLastChecked(cluster);
-      inOrder.verify(autoscaleJobFactory).createAutoscaleJob(
-          any(), any(), eq(cluster), any(), any(), any(), any());
-    }
-
-    verify(autoscaleJob, times(Autoscaler.BATCH_SIZE)).run();
 
     verifyNoMoreInteractions(database);
     verifyNoMoreInteractions(autoscaleJobFactory);
