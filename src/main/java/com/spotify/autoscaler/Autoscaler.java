@@ -43,6 +43,11 @@ public class Autoscaler implements Runnable {
   }
 
   private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
+
+  // BATCH_SIZE limits the number of autoscaleJobs we queue per invocation of run().
+  // This limits the throughput of an autoscaler instance to:
+  // BATCH_SIZE autoscaleJobs per Main.RUN_INTERVAL.
+  // So to increase throughput, increase this number or add more instances; both scale linearly.
   static final int BATCH_SIZE = 10;
 
   private final SemanticMetricRegistry registry;
