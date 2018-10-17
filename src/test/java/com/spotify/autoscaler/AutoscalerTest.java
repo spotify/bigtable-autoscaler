@@ -20,15 +20,6 @@
 
 package com.spotify.autoscaler;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-
 import com.codahale.metrics.Meter;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
@@ -38,13 +29,21 @@ import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.metrics.core.SemanticMetricRegistry;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.concurrent.ExecutorService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 public class AutoscalerTest {
 
@@ -115,10 +114,10 @@ public class AutoscalerTest {
     // Since each task will try to process [cluster1, cluster2], we will have multiple
     // calls to updateLastChecked for the same cluster, but most of them will return false
     // (as given above)
-    verify(database, times(Autoscaler.BATCH_SIZE)).getCandidateClusters();
+    verify(database).getCandidateClusters();
     verify(autoscaleJob, times(2)).run();
-    verify(database, times(Autoscaler.BATCH_SIZE)).updateLastChecked(cluster1);
-    verify(database, times(Autoscaler.BATCH_SIZE - 1)).updateLastChecked(cluster2);
+    verify(database).updateLastChecked(cluster1);
+    verify(database).updateLastChecked(cluster2);
 
     // Clusters should be checked in order since the unit test uses DirectExecutor executorservice
     InOrder inOrder = inOrder(autoscaleJobFactory);
@@ -174,12 +173,51 @@ public class AutoscalerTest {
 
     autoscaler.run();
 
-    verify(database, times(Autoscaler.BATCH_SIZE)).getCandidateClusters();
-    verify(database, times(Autoscaler.BATCH_SIZE)).updateLastChecked(cluster2);
+    verify(database).getCandidateClusters();
+    verify(database).updateLastChecked(cluster2);
 
     verify(autoscaleJobFactory).createAutoscaleJob(
         any(), any(), eq(cluster2), any(), any(), any(), any());
     verify(autoscaleJob, times(1)).run();
+
+    verifyNoMoreInteractions(database);
+    verifyNoMoreInteractions(autoscaleJobFactory);
+  }
+
+  @Test
+  public void testNoMoreThanBatchSizeClustersTouched() {
+    // The main purpose of this test is to ensure that
+    // updateLastChecked is not run on any more clusters beyond the first BATCH_SIZE.
+
+    List<BigtableCluster> clusters = new ArrayList<>();
+
+    when(database.getCandidateClusters())
+        .thenReturn(clusters);
+    for (int i = 0; i < Autoscaler.BATCH_SIZE + 1; i++) {
+      BigtableCluster cluster = BigtableClusterBuilder.from(cluster1).clusterId("c" + i).build();
+      clusters.add(cluster);
+      when(database.updateLastChecked(cluster))
+          .thenReturn(true)
+          .thenReturn(false);
+    }
+
+    Autoscaler autoscaler = new Autoscaler(
+        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
+        new AllowAllClusterFilter());
+
+    autoscaler.run();
+
+    verify(database).getCandidateClusters();
+    // Clusters should be checked in order since the unit test uses DirectExecutor executorservice
+    InOrder inOrder = inOrder(database, autoscaleJobFactory);
+    for (int i = 0; i < Autoscaler.BATCH_SIZE; i++) {
+      BigtableCluster cluster = clusters.get(i);
+      inOrder.verify(database).updateLastChecked(cluster);
+      inOrder.verify(autoscaleJobFactory).createAutoscaleJob(
+          any(), any(), eq(cluster), any(), any(), any(), any());
+    }
+
+    verify(autoscaleJob, times(Autoscaler.BATCH_SIZE)).run();
 
     verifyNoMoreInteractions(database);
     verifyNoMoreInteractions(autoscaleJobFactory);

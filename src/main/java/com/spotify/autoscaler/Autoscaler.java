@@ -32,7 +32,6 @@ import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -84,45 +83,37 @@ public class Autoscaler implements Runnable {
     }
   }
 
-  private void runUnsafe() throws IOException {
-    for (int i = 0; i < BATCH_SIZE; i++) {
-      executorService.submit(() -> {
-        try {
-          db.getCandidateClusters()
-              .stream()
-              // Order here is important - don't call updateLastChecked if a cluster is filtered.
-              // That could lead to cluster starvation
-              .filter(filter::match)
-              .filter(db::updateLastChecked)
-              .findFirst()
-              .flatMap(cluster -> {
-            BigtableUtil.pushContext(cluster);
-            logger.info("Autoscaling cluster!");
-            try (BigtableSession session = sessionProvider.apply(cluster);
-                 final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
-                     session, new StackdriverClient(cluster), cluster, db, registry,
-                     clusterStats, () -> Instant.now())) {
-              job.run();
-            } catch (Exception e) {
-              logger.error("Failed to autoscale cluster!", e);
-              db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
-                  cluster.clusterId(), Instant.now(),
-                  e.getMessage());
-            }
-            BigtableUtil.clearContext();
-
-            return Optional.empty();
-          });
-        } catch (Exception e) {
-          logger.error("Failed getting candidate cluster", e);
-        }
-      });
-    }
+  private void runUnsafe() {
+    db.getCandidateClusters()
+        .stream()
+        // Order here is important - don't call updateLastChecked if a cluster is filtered.
+        // That could lead to cluster starvation
+        .filter(filter::match)
+        .filter(db::updateLastChecked)
+        .limit(BATCH_SIZE)
+        .forEach(cluster -> executorService.submit(() -> runForCluster(cluster)));
 
     registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
   }
 
-  public void close() throws IOException {
+  private void runForCluster(BigtableCluster cluster) {
+    BigtableUtil.pushContext(cluster);
+    logger.info("Autoscaling cluster!");
+    try (BigtableSession session = sessionProvider.apply(cluster);
+         final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
+             session, new StackdriverClient(cluster), cluster, db, registry,
+             clusterStats, Instant::now)) {
+      job.run();
+    } catch (Exception e) {
+      logger.error("Failed to autoscale cluster!", e);
+      db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
+          cluster.clusterId(), Instant.now(),
+          e.getMessage());
+    }
+    BigtableUtil.clearContext();
+  }
+
+  public void close() {
     executorService.shutdown();
   }
 
