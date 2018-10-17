@@ -146,6 +146,7 @@ public class AutoscaleJob implements Closeable {
       logger.error("Failed to set cluster size", e);
       log.errorMessage(Optional.of(e.toString()));
       log.success(false);
+      registry.meter(APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
     } catch (Throwable t) {
       log.errorMessage(Optional.of(t.toString()));
       log.success(false);
@@ -194,7 +195,7 @@ public class AutoscaleJob implements Closeable {
     try {
       currentCpu = getCurrentCpu(samplingDuration);
     } finally {
-      clusterStats.setNodeCount(cluster, nodes, currentCpu);
+      clusterStats.setLoad(cluster, currentCpu, ClusterStats.MetricType.CPU);
     }
 
     logger.info(
@@ -256,7 +257,12 @@ public class AutoscaleJob implements Closeable {
 
   int storageConstraints(final Duration samplingDuration, int desiredNodes) {
 
-    final Double storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
+    Double storageUtilization = 0.0;
+    try {
+      storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
+    } finally {
+      clusterStats.setLoad(cluster, storageUtilization, ClusterStats.MetricType.STORAGE);
+    }
     if (storageUtilization <= 0.0) {
       return Math.max(currentNodes, desiredNodes);
     }
@@ -312,6 +318,9 @@ public class AutoscaleJob implements Closeable {
   }
 
   void run() {
+
+    clusterStats.setStats(cluster, currentNodes);
+
     if (shouldExponentialBackoff()) {
       logger.info("Exponential backoff");
       return;
@@ -334,7 +343,6 @@ public class AutoscaleJob implements Closeable {
         return;
       }
     }
-
     final Duration samplingDuration = getSamplingDuration();
     int newNodeCount = cpuStrategy(samplingDuration, currentNodes);
     newNodeCount = storageConstraints(samplingDuration, newNodeCount);
