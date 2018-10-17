@@ -33,6 +33,13 @@
         * *overloadStep* (optional): In case the cluster is hitting 90% CPU utilization we don't really know how big the resize should be. With this parameter you can set how aggressive the resize step should be in that case. This is an additive factor, not a multiplier to the number of nodes.
         * *enabled* (default=true): Whether to have autoscaling enabled or disabled for the cluster.
     * Updates all of the autoscaler settings for a Bigtable cluster.
+* **PUT /clusters/load**
+    * Expected query parameters:
+        * *projectId*: The cluster's Project ID.
+        * *instanceId*: The cluster's Instance ID.
+        * *clusterId*: The cluster's Cluster ID.
+        * *loadDelta*: Extra nodes in addition to the configured `minNodes`. The autoscaler will not allow less than `minNodes + loadDelta` nodes.
+    * Updates the `loadDelta` setting for a Bigtable cluster. Intended use is short-lived needs for a substantially higher node minimum than `minNodes`.
 * **DELETE /clusters**
     * Expected query parameters:
         * *projectId*: The cluster's Project ID.
