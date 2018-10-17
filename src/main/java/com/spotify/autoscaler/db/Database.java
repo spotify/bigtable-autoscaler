@@ -45,7 +45,9 @@ public interface Database extends AutoCloseable {
 
   boolean setLastChange(String projectId, String instanceId, String clusterId, Instant lastChange);
 
-  Optional<BigtableCluster> getCandidateCluster();
+  List<BigtableCluster> getCandidateClusters();
+
+  boolean updateLastChecked(BigtableCluster cluster);
 
   boolean clearFailureCount(String projectId, String instanceId, String clusterId);
 

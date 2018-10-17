@@ -21,8 +21,11 @@
 package com.spotify.autoscaler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -36,10 +39,11 @@ import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
-import java.util.Optional;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 
 public class AutoscalerTest {
@@ -89,11 +93,18 @@ public class AutoscalerTest {
   }
 
   @Test
-  public void testJobsCreatedAndRun() {
-    when(database.getCandidateCluster())
-        .thenReturn(Optional.of(cluster1))
-        .thenReturn(Optional.of(cluster2))
-        .thenReturn(Optional.empty());
+  public void testTwoClustersFoundAndProcessed() {
+    // The main purpose of this test is to ensure that an Autoscale job can process multiple
+    // clusters in the same invocation of Autoscaler.run()
+
+    when(database.getCandidateClusters())
+        .thenReturn(Arrays.asList(cluster1, cluster2));
+    when(database.updateLastChecked(cluster1))
+        .thenReturn(true)
+        .thenReturn(false);
+    when(database.updateLastChecked(cluster2))
+        .thenReturn(true)
+        .thenReturn(false);
 
     Autoscaler autoscaler = new Autoscaler(
         autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
@@ -101,22 +112,76 @@ public class AutoscalerTest {
 
     autoscaler.run();
 
+    // Since each task will try to process [cluster1, cluster2], we will have multiple
+    // calls to updateLastChecked for the same cluster, but most of them will return false
+    // (as given above)
+    verify(database, times(Autoscaler.BATCH_SIZE)).getCandidateClusters();
     verify(autoscaleJob, times(2)).run();
+    verify(database, times(Autoscaler.BATCH_SIZE)).updateLastChecked(cluster1);
+    verify(database, times(Autoscaler.BATCH_SIZE - 1)).updateLastChecked(cluster2);
+
+    // Clusters should be checked in order since the unit test uses DirectExecutor executorservice
+    InOrder inOrder = inOrder(autoscaleJobFactory);
+    inOrder.verify(autoscaleJobFactory).createAutoscaleJob(
+        any(), any(), eq(cluster1), any(), any(), any(), any());
+    inOrder.verify(autoscaleJobFactory).createAutoscaleJob(
+        any(), any(), eq(cluster2), any(), any(), any(), any());
+
+    verifyNoMoreInteractions(database);
+    verifyNoMoreInteractions(autoscaleJobFactory);
   }
 
   @Test
-  public void testJobsFiltered() {
-    when(database.getCandidateCluster())
-        .thenReturn(Optional.of(cluster1))
-        .thenReturn(Optional.of(cluster2))
-        .thenReturn(Optional.empty());
+  public void testTwoClustersFoundOneProcessedOneTakenByAnotherHost() {
+    // The main purpose of this test is to ensure that an Autoscale job is only
+    // created (and executed) for cluster1, since although cluster2 passed our filter,
+    // another host "raced us first" and processed that cluster.
+
+    when(database.getCandidateClusters())
+        .thenReturn(Arrays.asList(cluster1, cluster2));
+    when(database.updateLastChecked(cluster1))
+        .thenReturn(false); // Simulate this cluster was "taken" by another host
+    when(database.updateLastChecked(cluster2))
+        .thenReturn(true)
+        .thenReturn(false);
 
     Autoscaler autoscaler = new Autoscaler(
         autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
-        cluster -> cluster.clusterId().equals("cluster1"));
+        new AllowAllClusterFilter());
 
     autoscaler.run();
 
+    verify(autoscaleJob).run();
+    verify(autoscaleJobFactory).createAutoscaleJob(
+        any(), any(), eq(cluster2), any(), any(), any(), any());
+    verifyNoMoreInteractions(autoscaleJobFactory);
+  }
+
+  @Test
+  public void testTwoClustersFoundOneProcessedOneFilteredOut() {
+    // The main purpose of this test is to ensure that
+    // updateLastChecked is not run on a cluster that's filtered out
+
+    when(database.getCandidateClusters())
+        .thenReturn(Arrays.asList(cluster1, cluster2));
+    when(database.updateLastChecked(cluster2))
+        .thenReturn(true)
+        .thenReturn(false);
+
+    Autoscaler autoscaler = new Autoscaler(
+        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
+        cluster -> cluster.clusterId().equals("cluster2"));
+
+    autoscaler.run();
+
+    verify(database, times(Autoscaler.BATCH_SIZE)).getCandidateClusters();
+    verify(database, times(Autoscaler.BATCH_SIZE)).updateLastChecked(cluster2);
+
+    verify(autoscaleJobFactory).createAutoscaleJob(
+        any(), any(), eq(cluster2), any(), any(), any(), any());
     verify(autoscaleJob, times(1)).run();
+
+    verifyNoMoreInteractions(database);
+    verifyNoMoreInteractions(autoscaleJobFactory);
   }
 }

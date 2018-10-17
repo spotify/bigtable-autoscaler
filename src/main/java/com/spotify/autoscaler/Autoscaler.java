@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class Autoscaler implements Runnable {
   }
 
   private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
-  private static final int BATCH_SIZE = 10;
+  static final int BATCH_SIZE = 10;
 
   private final SemanticMetricRegistry registry;
   private final Database db;
@@ -86,32 +87,35 @@ public class Autoscaler implements Runnable {
 
   private void runUnsafe() throws IOException {
     for (int i = 0; i < BATCH_SIZE; i++) {
-      executorService.submit(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            db.getCandidateCluster().flatMap(cluster -> {
-              if (filter.match(cluster)) {
-                BigtableUtil.pushContext(cluster);
-                logger.info("Autoscaling cluster!");
-                try (BigtableSession session = sessionProvider.apply(cluster);
-                     final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
-                         session, new StackdriverClient(cluster), cluster, db, registry,
-                         clusterStats, () -> Instant.now())) {
-                  job.run();
-                } catch (Exception e) {
-                  logger.error("Failed to autoscale cluster!", e);
-                  db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
-                      cluster.clusterId(), Instant.now(),
-                      e.getMessage());
-                }
-                BigtableUtil.clearContext();
-              }
-              return Optional.empty();
-            });
-          } catch (Exception e) {
-            logger.error("Failed getting candidate cluster", e);
-          }
+      executorService.submit(() -> {
+        try {
+          db.getCandidateClusters()
+              .stream()
+              // Order here is important - don't call updateLastChecked if a cluster is filtered.
+              // That could lead to cluster starvation
+              .filter(filter::match)
+              .filter(db::updateLastChecked)
+              .findFirst()
+              .flatMap(cluster -> {
+            BigtableUtil.pushContext(cluster);
+            logger.info("Autoscaling cluster!");
+            try (BigtableSession session = sessionProvider.apply(cluster);
+                 final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
+                     session, new StackdriverClient(cluster), cluster, db, registry,
+                     clusterStats, () -> Instant.now())) {
+              job.run();
+            } catch (Exception e) {
+              logger.error("Failed to autoscale cluster!", e);
+              db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
+                  cluster.clusterId(), Instant.now(),
+                  e.getMessage());
+            }
+            BigtableUtil.clearContext();
+
+            return Optional.empty();
+          });
+        } catch (Exception e) {
+          logger.error("Failed getting candidate cluster", e);
         }
       });
     }
