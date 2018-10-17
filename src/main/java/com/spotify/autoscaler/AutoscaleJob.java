@@ -318,6 +318,9 @@ public class AutoscaleJob implements Closeable {
   }
 
   void run() {
+
+    clusterStats.setStats(cluster, currentNodes);
+
     if (shouldExponentialBackoff()) {
       logger.info("Exponential backoff");
       return;
@@ -340,7 +343,6 @@ public class AutoscaleJob implements Closeable {
         return;
       }
     }
-    clusterStats.setStats(cluster, currentNodes);
     final Duration samplingDuration = getSamplingDuration();
     int newNodeCount = cpuStrategy(samplingDuration, currentNodes);
     newNodeCount = storageConstraints(samplingDuration, newNodeCount);

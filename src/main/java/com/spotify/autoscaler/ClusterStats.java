@@ -51,9 +51,9 @@ public class ClusterStats {
   private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
   private SemanticMetricRegistry registry;
   private Database db;
-  private Map<String, ClusterData> nodes = new ConcurrentHashMap<String, ClusterData>();
+  private Map<String, ClusterData> registeredClusters = new ConcurrentHashMap<String, ClusterData>();
   private static final List<String> METRICS = Arrays.asList(
-      new String[]{ "node-count", "cpu-util", "last-check-time", "consecutive_failure_count", "storage-util" }
+      new String[]{ "node-count", "cpu-util", "last-check-time", "consecutive-failure-count", "storage-util", "cpu-target-ratio" }
   );
 
   private final ScheduledExecutorService cleanupExecutor = new ScheduledThreadPoolExecutor(1, new ThreadFactory() {
@@ -81,9 +81,9 @@ public class ClusterStats {
 
   private void unregisterInactiveClustersMetrics(final SemanticMetricRegistry registry, final Database db) {
     Set<String> bigtableClusters = db.getActiveClusterKeys();
-    for (Map.Entry<String, ClusterData> entry : nodes.entrySet()) {
+    for (Map.Entry<String, ClusterData> entry : registeredClusters.entrySet()) {
       if (!bigtableClusters.contains(entry.getKey())) {
-        nodes.remove(entry.getKey());
+        registeredClusters.remove(entry.getKey());
         BigtableCluster cluster = entry.getValue().getCluster();
         BigtableUtil.pushContext(cluster);
         registry.removeMatching(
@@ -146,11 +146,11 @@ public class ClusterStats {
 
   public void setStats(BigtableCluster cluster, int count) {
     final ClusterData clusterData = new ClusterData(cluster, count, cluster.consecutiveFailureCount());
-    if (nodes.get(cluster.clusterName()) == null) {
+    if (registeredClusters.get(cluster.clusterName()) == null) {
       // First time we saw this cluster, register a gauge
       this.registry.register(APP_PREFIX.tagged("what", "node-count").tagged("project-id", cluster.projectId()).tagged
               ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> nodes.get(cluster.clusterName()).getNodeCount());
+          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getNodeCount());
 
       this.registry.register(APP_PREFIX.tagged("what", "last-check-time").tagged("project-id", cluster.projectId())
               .tagged
@@ -159,36 +159,36 @@ public class ClusterStats {
               .flatMap(p -> Optional.of(Duration.between(p.lastCheck().orElse(Instant.EPOCH), Instant.now())))
               .get()
               .getSeconds());
-      this.registry.register(APP_PREFIX.tagged("what", "consecutive_failure_count").tagged("project-id", cluster.projectId()).tagged
+      this.registry.register(APP_PREFIX.tagged("what", "consecutive-failure-count").tagged("project-id", cluster.projectId()).tagged
               ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> nodes.get(cluster.clusterName()).getConsecutiveFailureCount());
+          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getConsecutiveFailureCount());
 
       this.registry.register(APP_PREFIX.tagged("what", "cpu-target-ratio").tagged("project-id", cluster.projectId())
               .tagged
               ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
           (Gauge<Double>) () -> {
-                                  final ClusterData data = nodes.get(cluster.clusterName());
+                                  final ClusterData data = registeredClusters.get(cluster.clusterName());
                                   return data.getCpuUtil() / cluster.cpuTarget();
                                 });
     }
-    nodes.put(cluster.clusterName(), clusterData);
+    registeredClusters.put(cluster.clusterName(), clusterData);
 
   }
 
   public void setLoad(BigtableCluster cluster, double load, MetricType type){
-    if (nodes.get(cluster.clusterName()) == null){
+    if (registeredClusters.get(cluster.clusterName()) == null){
       return;
     }
-    ClusterData clusterData = nodes.get(cluster.clusterName());
+    ClusterData clusterData = registeredClusters.get(cluster.clusterName());
     Callable<Double> lambda;
     switch (type){
       case CPU:
         clusterData.setCpuUtil(load);
-        lambda = () -> nodes.get(cluster.clusterName()).getCpuUtil();
+        lambda = () -> clusterData.getCpuUtil();
         break;
       case STORAGE:
         clusterData.setStorageUtil(load);
-        lambda = () -> nodes.get(cluster.clusterName()).getStorageUtil();
+        lambda = () -> clusterData.getStorageUtil();
         break;
       default:
         throw new IllegalArgumentException(String.format("Undefined MetricType %s", type));
