@@ -27,13 +27,14 @@ import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Optional;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,24 +45,30 @@ public class Autoscaler implements Runnable {
   }
 
   private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
-  private static final int CONCURRENCY_LIMIT = 5;
-  private static final int BATCH_SIZE = 10;
 
   private final SemanticMetricRegistry registry;
   private final Database db;
   private final ClusterStats clusterStats;
+  private final ClusterFilter filter;
 
   private final SessionProvider sessionProvider;
-  private final ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(CONCURRENCY_LIMIT);
+  private final ExecutorService executorService;
+  private final AutoscaleJobFactory autoscaleJobFactory;
 
-  public Autoscaler(SemanticMetricRegistry registry,
+  public Autoscaler(AutoscaleJobFactory autoscaleJobFactory,
+                    ExecutorService executorService,
+                    SemanticMetricRegistry registry,
                     Database db,
                     SessionProvider sessionProvider,
-                    ClusterStats clusterStats) {
+                    ClusterStats clusterStats,
+                    ClusterFilter filter) {
+    this.autoscaleJobFactory = checkNotNull(autoscaleJobFactory);
+    this.executorService = checkNotNull(executorService);
     this.registry = checkNotNull(registry);
     this.db = checkNotNull(db);
     this.sessionProvider = checkNotNull(sessionProvider);
     this.clusterStats = checkNotNull(clusterStats);
+    this.filter = checkNotNull(filter);
   }
 
   @Override
@@ -77,41 +84,40 @@ public class Autoscaler implements Runnable {
     }
   }
 
-  private void runUnsafe() throws IOException {
-    for (int i = 0; i < BATCH_SIZE; i++) {
-      executor.submit(new Runnable() {
-        @Override
-        public void run() {
-          try {
-            db.getCandidateCluster().flatMap(cluster -> {
-              BigtableUtil.pushContext(cluster);
-              logger.info("Autoscaling cluster!");
-              try (BigtableSession session = sessionProvider.apply(cluster);
-                   final AutoscaleJob job = new AutoscaleJob(session, new StackdriverClient(cluster), cluster, db,
-                       registry, clusterStats,
-                       () -> Instant.now()
-                   )) {
-                job.run();
-              } catch (Exception e) {
-                logger.error("Failed to autoscale cluster!", e);
-                db.increaseFailureCount(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), Instant.now(),
-                    e.getMessage());
-              }
-              BigtableUtil.clearContext();
-              return Optional.empty();
-            });
-          } catch (Exception e) {
-            logger.error("Failed getting candidate cluster", e);
-          }
-        }
-      });
-    }
-
+  private void runUnsafe() {
     registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
+
+    CompletableFuture[] futures = db.getCandidateClusters()
+        .stream()
+        // Order here is important - don't call updateLastChecked if a cluster is filtered.
+        // That could lead to cluster starvation
+        .filter(filter::match)
+        .filter(db::updateLastChecked)
+        .map(cluster -> CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
+        .toArray(CompletableFuture[]::new);
+
+    CompletableFuture.allOf(futures).join();
   }
 
-  public void close() throws IOException {
-    executor.shutdown();
+  private void runForCluster(BigtableCluster cluster) {
+    BigtableUtil.pushContext(cluster);
+    logger.info("Autoscaling cluster!");
+    try (BigtableSession session = sessionProvider.apply(cluster);
+         final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
+             session, new StackdriverClient(cluster), cluster, db, registry,
+             clusterStats, Instant::now)) {
+      job.run();
+    } catch (Exception e) {
+      logger.error("Failed to autoscale cluster!", e);
+      db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
+          cluster.clusterId(), Instant.now(),
+          e.getMessage());
+    }
+    BigtableUtil.clearContext();
+  }
+
+  public void close() {
+    executorService.shutdown();
   }
 
 }

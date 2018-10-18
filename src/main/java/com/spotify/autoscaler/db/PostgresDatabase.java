@@ -22,6 +22,7 @@ package com.spotify.autoscaler.db;
 
 import static com.spotify.autoscaler.Main.APP_PREFIX;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -142,7 +143,7 @@ public class PostgresDatabase implements Database {
     args.put("cluster_id", clusterId);
     return jdbc.getJdbcOperations()
         .query(
-            selectClustersQuery(args), 
+            selectClustersQuery(args),
             (rs, rowNum) -> buildClusterFromResultSet(rs),
             args.values().toArray()
         );
@@ -203,24 +204,51 @@ public class PostgresDatabase implements Database {
     return numRowsUpdated == 1;
   }
 
+  @VisibleForTesting
+  boolean setLastCheck(String projectId, String instanceId, String clusterId, Instant lastCheck) {
+    final String sql = "UPDATE autoscale SET last_check = ? WHERE project_id = ? AND "
+                       + "instance_id = ? AND cluster_id = ?";
+    int numRowsUpdated = jdbc.getJdbcOperations().update(sql, Timestamp.from(lastCheck), projectId, instanceId, clusterId);
+    return numRowsUpdated == 1;
+  }
+
   /**
-   * Fetch a cluster that we can autoscale.
-   * To ensure other threads don't pick this cluster we update lastCheck in the same transaction and ignore cluster
-   * where lastCheck is recent. This is done using "FOR UPDATE SKIP LOCKED" which also ensure other threads don't block.
+   * Fetch a list of enabled clusters that haven't been checked for autoscaling for at least
+   * CHECK_INTERVAL seconds.
+   *
+   * Note that we need to return all possible clusters here because there will be additional
+   * client side filtering done later, so any limiting could cause starvation.
+   * This shouldn't be a problem unless we have thousands of clusters.
    */
   @Override
-  public Optional<BigtableCluster> getCandidateCluster() {
-    final String sql = "UPDATE autoscale SET last_check = current_timestamp "
-        + "WHERE (project_id, instance_id, cluster_id) = "
-        + "(SELECT project_id, instance_id, cluster_id FROM autoscale "
-        + "WHERE enabled=true AND coalesce(last_check,'epoch') < current_timestamp - CAST(:check_interval AS interval) "
-        + "ORDER BY coalesce(last_check,'epoch') ASC LIMIT 1 FOR UPDATE SKIP LOCKED ) "
-        + "RETURNING " + ALL_COLUMNS;
+  public List<BigtableCluster> getCandidateClusters() {
+    final String sql = "SELECT " + ALL_COLUMNS + " FROM autoscale "
+        + "WHERE enabled = true AND coalesce(last_check, 'epoch') < current_timestamp - CAST"
+                       + "(:check_interval AS interval) "
+        + "ORDER BY coalesce(last_check, 'epoch') ASC";
 
     final List<BigtableCluster> list = jdbc.query(sql,
       ImmutableMap.of("check_interval", AutoscaleJob.CHECK_INTERVAL.getSeconds() + " seconds"),
       (rs, rowNum) -> buildClusterFromResultSet(rs));
-    return list.isEmpty() ? Optional.empty() : Optional.of(list.get(0));
+    return list;
+  }
+
+  /**
+   * Updates last checked of a specific cluster atomically if the lastChecked value is the same
+   * as in the database.
+   * This ensures that only one thread/host will update this cluster.
+   * @return true if last checked got updated, false if it was already updated by some other thread
+   */
+  @Override
+  public boolean updateLastChecked(BigtableCluster cluster) {
+    final String sql = "UPDATE autoscale SET last_check = current_timestamp WHERE project_id = ? AND instance_id = "
+                       + "? AND cluster_id = ? AND coalesce(last_check, 'epoch') = ?";
+
+    int numRowsUpdated = jdbc.getJdbcOperations().update(sql, cluster.projectId(),
+        cluster.instanceId(), cluster.clusterId(),
+        cluster.lastCheck().isPresent() ? Timestamp.from(cluster.lastCheck().get()) :
+        Timestamp.from(Instant.ofEpochSecond(0)));
+    return numRowsUpdated == 1;
   }
 
   @Override

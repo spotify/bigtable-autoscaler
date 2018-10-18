@@ -25,6 +25,8 @@ import com.spotify.autoscaler.api.ClusterResources;
 import com.spotify.autoscaler.api.HealthCheck;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
+import com.spotify.autoscaler.filters.AllowAllClusterFilter;
+import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -38,6 +40,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +61,7 @@ public final class Main {
   public static final MetricId APP_PREFIX = MetricId.build("key", SERVICE_NAME);
 
   private static final Duration RUN_INTERVAL = Duration.ofSeconds(5);
+  private static final int CONCURRENCY_LIMIT = 5;
 
   private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
   private final Autoscaler autoscaler;
@@ -104,12 +108,25 @@ public final class Main {
         new AutoscaleResourceConfig(SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
+    ClusterFilter clusterFilter = new AllowAllClusterFilter();
+    String clusterFilterClass = config.getString("clusterFilter");
+    if (clusterFilterClass != null && !clusterFilterClass.isEmpty()) {
+      try {
+        clusterFilter = (ClusterFilter) Class.forName(clusterFilterClass).newInstance();
+      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        logger.error("Failed to create new instance of cluster filter " + clusterFilterClass, e);
+      }
+    }
+
     autoscaler = new Autoscaler(
+        new AutoscaleJobFactory(),
+        Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
         registry,
         db,
         cluster -> BigtableUtil
             .createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
-        new ClusterStats(registry, db));
+        new ClusterStats(registry, db),
+        clusterFilter);
 
     executor.scheduleWithFixedDelay(autoscaler,
         RUN_INTERVAL.toMillis(),
