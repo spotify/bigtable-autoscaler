@@ -176,9 +176,39 @@ public class AutoscalerTest {
 
     verify(autoscaleJobFactory).createAutoscaleJob(
         any(), any(), eq(cluster2), any(), any(), any(), any());
-    verify(autoscaleJob, times(1)).run();
+    verify(autoscaleJob).run();
 
     verifyNoMoreInteractions(database);
+    verifyNoMoreInteractions(autoscaleJobFactory);
+  }
+
+  @Test
+  public void testOneClusterThrowsException() {
+    // The main purpose of this test is to ensure that
+    // in cluster fails, later clusters still finish.
+
+    when(database.getCandidateClusters())
+        .thenReturn(Arrays.asList(cluster1, cluster2));
+    when(database.updateLastChecked(cluster1))
+        .thenReturn(true)
+        .thenReturn(false);
+    when(database.updateLastChecked(cluster2))
+        .thenReturn(true)
+        .thenReturn(false);
+    when(autoscaleJobFactory.createAutoscaleJob(
+        any(), any(), eq(cluster1), any(), any(), any(), any())).thenThrow(new RuntimeException("cluster1"));
+
+    Autoscaler autoscaler = new Autoscaler(
+        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
+        new AllowAllClusterFilter());
+
+    autoscaler.run();
+
+    verify(autoscaleJobFactory).createAutoscaleJob(
+        any(), any(), eq(cluster1), any(), any(), any(), any());
+    verify(autoscaleJobFactory).createAutoscaleJob(
+        any(), any(), eq(cluster2), any(), any(), any(), any());
+
     verifyNoMoreInteractions(autoscaleJobFactory);
   }
 }
