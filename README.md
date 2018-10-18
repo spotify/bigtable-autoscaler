@@ -113,8 +113,9 @@ clusters from being autoscaled.
 
 ### Does it handle sudden load spikes, for instance Dataflow jobs reading/writing batch data?
 
-Not well enough. Online requests may be slowed when the job starts. We are working on improving 
-this.
+Not on its own. In order to not overwhelm Bigtable, you can PUT to the `/clusers/load/` endpoint, passing it a "loadDelta" which effectively is an amount of extra nodes, on top of `minNodes`, that the autoscaler must immediately respect. The [official Google documentation](https://cloud.google.com/bigtable/docs/scaling) states that if you are doing big batch jobs, you should rescale in advance and wait up to 20 minutes before starting the actual job. Then, of course, reset it back to 0 once the job has completed.
+
+We realize that this can be inconvenient and welcome any ideas on how to approach this problem better.
 
 ### Does it enforce storage constraints?
 
