@@ -81,12 +81,13 @@ public class ClusterResources {
   public Response enabled(@QueryParam("projectId") String projectId,
                                  @QueryParam("instanceId") String instanceId,
                                  @QueryParam("clusterId") String clusterId) {
+    final Optional<BigtableCluster> cluster = db.getBigtableCluster(projectId, instanceId, clusterId);
     try {
-      return Response.ok(
-          mapper.writeValueAsString(
-              db.getBigtableCluster(projectId, instanceId, clusterId).get().enabled()
-          )
-      ).build();
+      if (cluster.isPresent()) {
+        return Response.ok(mapper.writeValueAsString(cluster.get().enabled())).build();
+      } else {
+        return Response.status(Response.Status.NOT_FOUND).build();
+      }
     } catch (JsonProcessingException e) {
       return Response.serverError().build();
     }
