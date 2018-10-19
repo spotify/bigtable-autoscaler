@@ -121,6 +121,14 @@ public class ClusterStats {
       return cpuUtil;
     }
 
+    void setNodeCount(final int nodeCount) {
+      this.nodeCount = nodeCount;
+    }
+
+    void setConsecutiveFailureCount(final int consecutiveFailureCount) {
+      this.consecutiveFailureCount = consecutiveFailureCount;
+    }
+
     double getStorageUtil() {
       return storageUtil;
     }
@@ -145,8 +153,10 @@ public class ClusterStats {
   }
 
   public void setStats(BigtableCluster cluster, int count) {
-    final ClusterData clusterData = new ClusterData(cluster, count, cluster.consecutiveFailureCount());
-    if (registeredClusters.get(cluster.clusterName()) == null) {
+    final ClusterData clusterData = registeredClusters.putIfAbsent(cluster.clusterName(),
+        new ClusterData(cluster, count, cluster.consecutiveFailureCount()));
+
+    if (clusterData == null) {
       // First time we saw this cluster, register a gauge
       this.registry.register(APP_PREFIX.tagged("what", "node-count").tagged("project-id", cluster.projectId()).tagged
               ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
@@ -165,14 +175,15 @@ public class ClusterStats {
 
       this.registry.register(APP_PREFIX.tagged("what", "cpu-target-ratio").tagged("project-id", cluster.projectId())
               .tagged
-              ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
+                  ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
           (Gauge<Double>) () -> {
-                                  final ClusterData data = registeredClusters.get(cluster.clusterName());
-                                  return data.getCpuUtil() / cluster.cpuTarget();
-                                });
+            final ClusterData data = registeredClusters.get(cluster.clusterName());
+            return data.getCpuUtil() / cluster.cpuTarget();
+          });
+    } else {
+      clusterData.setNodeCount(count);
+      clusterData.setConsecutiveFailureCount(cluster.consecutiveFailureCount());
     }
-    registeredClusters.put(cluster.clusterName(), clusterData);
-
   }
 
   public void setLoad(BigtableCluster cluster, double load, MetricType type){
@@ -184,11 +195,11 @@ public class ClusterStats {
     switch (type){
       case CPU:
         clusterData.setCpuUtil(load);
-        lambda = () -> clusterData.getCpuUtil();
+        lambda = clusterData::getCpuUtil;
         break;
       case STORAGE:
         clusterData.setStorageUtil(load);
-        lambda = () -> clusterData.getStorageUtil();
+        lambda = clusterData::getStorageUtil;
         break;
       default:
         throw new IllegalArgumentException(String.format("Undefined MetricType %s", type));
