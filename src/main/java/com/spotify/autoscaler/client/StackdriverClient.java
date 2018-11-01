@@ -39,10 +39,10 @@ import java.util.function.Function;
 public class StackdriverClient implements Closeable {
 
   private static final String CPU_METRIC = "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\""
-                                           + " AND resource.labels.instance=\"%s\"";
+                                           + " AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
 
   private static final String DISK_USAGE_METRIC = "metric.type=\"bigtable.googleapis.com/cluster/storage_utilization\""
-                                           + " AND resource.labels.instance=\"%s\"";
+                                           + " AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
 
   private final MetricServiceClient metricServiceClient;
   private final BigtableCluster bigtableCluster;
@@ -56,7 +56,8 @@ public class StackdriverClient implements Closeable {
 
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
-            ProjectName.of(bigtableCluster.projectId()), String.format(DISK_USAGE_METRIC, bigtableCluster.instanceId()),
+            ProjectName.of(bigtableCluster.projectId()),
+            String.format(DISK_USAGE_METRIC, bigtableCluster.instanceId(), bigtableCluster.clusterId()),
             interval(duration),
             ListTimeSeriesRequest.TimeSeriesView.FULL);
     return maxValueFromPagedResponse(response, 0.0, TypedValue::getDoubleValue);
@@ -65,7 +66,8 @@ public class StackdriverClient implements Closeable {
   public Double getCpuLoad(final Duration duration) {
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
-            ProjectName.of(bigtableCluster.projectId()), String.format(CPU_METRIC, bigtableCluster.instanceId()),
+            ProjectName.of(bigtableCluster.projectId()),
+            String.format(CPU_METRIC, bigtableCluster.instanceId(), bigtableCluster.clusterId()),
             interval(duration),
             ListTimeSeriesRequest.TimeSeriesView.FULL);
     return maxValueFromPagedResponse(response, 0.0, TypedValue::getDoubleValue);
@@ -103,4 +105,5 @@ public class StackdriverClient implements Closeable {
       throw new RuntimeException(e);
     }
   }
+
 }
