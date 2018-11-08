@@ -18,8 +18,8 @@
         <findbugs.excludeFilterFile>findbugsexclude.xml</findbugs.excludeFilterFile>
         <maven.install.skip>true</maven.install.skip>
         <checkstyle.violationSeverity>warning</checkstyle.violationSeverity>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
@@ -84,6 +84,11 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>2.3.1</version>
+        </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-core</artifactId>
@@ -189,7 +194,7 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.17.0</version>
+            <version>2.23.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -221,6 +226,11 @@
             <artifactId>jersey-test-framework-provider-inmemory</artifactId>
             <version>2.23.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
 
@@ -288,13 +298,9 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.4</version>
-            </plugin>
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
