@@ -21,7 +21,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       GOOGLE_APPLICATION_CREDENTIALS: /secret/credentials.json
     volumes:
-      - ./${GOOGLE_APPLICATION_CREDENTIALS}:/secret/credentials.json
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/secret/credentials.json
     image: spotify/bigtable-autoscaler:latest
     ports:
       - 8080:8080

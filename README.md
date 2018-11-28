@@ -36,24 +36,22 @@ Run this command to build the project and create a docker image:
 First review and edit [.env](.env) with your Google cloud credentials.
 Start the service with docker-compose using a dockerized local postgres:
 
+    # source your environment
+    . ./.env
+    # start the service with docker compose
     make up
     
-    # to see service logs
+    # see service logs
     make logs
 
 Register the Bigtable cluster that should be autoscaled in the service:
 
-```console
-PROJECT_ID=<YOUR GCP PROJECT ID>\
-INSTANCE_ID=<YOUR INSTANCE ID>\
-CLUSTER_ID=<YOUR CLUSTER ID>\
-curl -v -X POST "http://localhost:8080/clusters?\
-projectId=$PROJECT_ID&\
-instanceId=$INSTANCE_ID&\
-clusterId=$CLUSTER_ID&\
-minNodes=4&\
-maxNodes=6&\
-cpuTarget=0.8"
+```
+PROJECT_ID=<YOUR GCP PROJECT ID>
+INSTANCE_ID=<YOUR INSTANCE ID>
+CLUSTER_ID=<YOUR CLUSTER ID>
+
+curl -v -X POST "http://localhost:8080/clusters?projectId=$PROJECT_ID&instanceId=$INSTANCE_ID&clusterId=$CLUSTER_ID&minNodes=4&maxNodes=6&cpuTarget=0.8"
 ```
 
 If the cluster was at 3 nodes, this will immediately rescale the cluster to 4 nodes as that's the
