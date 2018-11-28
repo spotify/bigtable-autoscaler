@@ -1,5 +1,3 @@
-.RECIPEPREFIX +=
-
 NS = spotify
 
 SERVICE_NAME = bigtable-autoscaler
