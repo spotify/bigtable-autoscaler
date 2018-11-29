@@ -31,6 +31,7 @@ import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.util.BigtableUtil;
 import io.norberg.automatter.jackson.AutoMatterModule;
 import java.util.Optional;
+import javax.validation.constraints.Size;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -62,9 +63,9 @@ public class ClusterResources {
   }
 
   @GET
-  public Response getAllClusters(@QueryParam("projectId") String projectId,
-                                 @QueryParam("instanceId") String instanceId,
-                                 @QueryParam("clusterId") String clusterId) {
+  public Response getAllClusters(@QueryParam("projectId") @Size(min = 1) String projectId,
+                                 @QueryParam("instanceId") @Size(min = 1) String instanceId,
+                                 @QueryParam("clusterId") @Size(min = 1) String clusterId) {
     try {
       return Response.ok(
           mapper.writeValueAsString(
@@ -78,9 +79,9 @@ public class ClusterResources {
 
   @GET
   @Path("enabled")
-  public Response enabled(@QueryParam("projectId") String projectId,
-                                 @QueryParam("instanceId") String instanceId,
-                                 @QueryParam("clusterId") String clusterId) {
+  public Response enabled(@QueryParam("projectId") @Size(min = 1) String projectId,
+                          @QueryParam("instanceId") @Size(min = 1) String instanceId,
+                          @QueryParam("clusterId") @Size(min = 1) String clusterId) {
     final Optional<BigtableCluster> cluster = db.getBigtableCluster(projectId, instanceId, clusterId);
     try {
       if (cluster.isPresent()) {
@@ -95,9 +96,9 @@ public class ClusterResources {
 
   @GET
   @Path("logs")
-  public Response getLogs(@QueryParam("projectId") String projectId,
-                          @QueryParam("instanceId") String instanceId,
-                          @QueryParam("clusterId") String clusterId) {
+  public Response getLogs(@QueryParam("projectId") @Size(min = 1) String projectId,
+                          @QueryParam("instanceId") @Size(min = 1) String instanceId,
+                          @QueryParam("clusterId") @Size(min = 1) String clusterId) {
     try {
       return Response.ok(mapper.writeValueAsString(db.getLatestResizeEvents(projectId, instanceId, clusterId))).build();
     } catch (JsonProcessingException e) {
@@ -106,9 +107,9 @@ public class ClusterResources {
   }
 
   @POST
-  public Response createCluster(@QueryParam("projectId") String projectId,
-                                @QueryParam("instanceId") String instanceId,
-                                @QueryParam("clusterId") String clusterId,
+  public Response createCluster(@QueryParam("projectId") @Size(min = 1) String projectId,
+                                @QueryParam("instanceId") @Size(min = 1) String instanceId,
+                                @QueryParam("clusterId") @Size(min = 1) String clusterId,
                                 @QueryParam("minNodes") Integer minNodes,
                                 @QueryParam("maxNodes") Integer maxNodes,
                                 @QueryParam("cpuTarget") Double cpuTarget,
@@ -140,9 +141,9 @@ public class ClusterResources {
   }
 
   @PUT
-  public Response updateCluster(@QueryParam("projectId") String projectId,
-                                @QueryParam("instanceId") String instanceId,
-                                @QueryParam("clusterId") String clusterId,
+  public Response updateCluster(@QueryParam("projectId") @Size(min = 1) String projectId,
+                                @QueryParam("instanceId") @Size(min = 1) String instanceId,
+                                @QueryParam("clusterId") @Size(min = 1) String clusterId,
                                 @QueryParam("minNodes") Integer minNodes,
                                 @QueryParam("maxNodes") Integer maxNodes,
                                 @QueryParam("cpuTarget") Double cpuTarget,
@@ -172,9 +173,9 @@ public class ClusterResources {
   }
 
   @DELETE
-  public Response deleteCluster(@QueryParam("projectId") String projectId,
-                                @QueryParam("instanceId") String instanceId,
-                                @QueryParam("clusterId") String clusterId) {
+  public Response deleteCluster(@QueryParam("projectId") @Size(min = 1) String projectId,
+                                @QueryParam("instanceId") @Size(min = 1) String instanceId,
+                                @QueryParam("clusterId") @Size(min = 1) String clusterId) {
     BigtableCluster cluster = new BigtableClusterBuilder()
         .projectId(projectId)
         .instanceId(instanceId)
@@ -201,10 +202,10 @@ public class ClusterResources {
 
   @PUT
   @Path("load")
-  public Response setExtraLoad(@QueryParam("projectId") String projectId,
-                          @QueryParam("instanceId") String instanceId,
-                          @QueryParam("clusterId") String clusterId,
-                          @QueryParam("loadDelta") Integer loadDelta) {
+  public Response setExtraLoad(@QueryParam("projectId") @Size(min = 1) String projectId,
+                               @QueryParam("instanceId") @Size(min = 1) String instanceId,
+                               @QueryParam("clusterId") @Size(min = 1) String clusterId,
+                               @QueryParam("loadDelta") Integer loadDelta) {
     BigtableCluster cluster = new BigtableClusterBuilder()
         .projectId(projectId)
         .instanceId(instanceId)
