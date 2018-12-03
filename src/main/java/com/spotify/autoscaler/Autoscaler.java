@@ -111,7 +111,7 @@ public class Autoscaler implements Runnable {
       logger.error("Failed to autoscale cluster!", e);
       db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
           cluster.clusterId(), Instant.now(),
-          e.getMessage());
+          e.toString());
     }
     BigtableUtil.clearContext();
   }
