@@ -182,7 +182,7 @@ public final class Main {
     try {
       db.close();
     } catch (Exception e) {
-      new RuntimeException(e);
+      throw new RuntimeException(e);
     }
     logger.info("Database connection closed");
   }
