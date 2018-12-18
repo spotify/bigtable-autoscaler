@@ -25,18 +25,24 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.metrics.core.SemanticMetricRegistry;
+
+import java.io.IOException;
 import java.time.Instant;
 import java.util.function.Supplier;
 
 public class AutoscaleJobFactory {
   public AutoscaleJob createAutoscaleJob(final BigtableSession bigtableSession,
-                                         final StackdriverClient stackdriverClient,
+                                         final IOSupplier<StackdriverClient> stackdriverClient,
                                          final BigtableCluster cluster,
                                          final Database db,
                                          final SemanticMetricRegistry registry,
                                          final ClusterStats clusterStats,
-                                         final Supplier<Instant> timeSource) {
+                                         final Supplier<Instant> timeSource) throws IOException {
     return new AutoscaleJob(
-        bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, timeSource);
+        bigtableSession, stackdriverClient.get(), cluster, db, registry, clusterStats, timeSource);
+  }
+
+  public interface IOSupplier<T> {
+    T get() throws IOException;
   }
 }

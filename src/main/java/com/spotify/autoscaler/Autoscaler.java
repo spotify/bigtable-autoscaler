@@ -104,7 +104,7 @@ public class Autoscaler implements Runnable {
     logger.info("Autoscaling cluster!");
     try (BigtableSession session = sessionProvider.apply(cluster);
          final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
-             session, new StackdriverClient(cluster), cluster, db, registry,
+             session, () -> new StackdriverClient(cluster), cluster, db, registry,
              clusterStats, Instant::now)) {
       job.run();
     } catch (Exception e) {

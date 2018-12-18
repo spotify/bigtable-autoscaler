@@ -90,7 +90,7 @@ public class AutoscalerTest {
   }
 
   @Test
-  public void testTwoClustersFoundAndProcessed() {
+  public void testTwoClustersFoundAndProcessed() throws IOException {
     // The main purpose of this test is to ensure that an Autoscale job can process multiple
     // clusters in the same invocation of Autoscaler.run()
 
@@ -129,7 +129,7 @@ public class AutoscalerTest {
   }
 
   @Test
-  public void testTwoClustersFoundOneProcessedOneTakenByAnotherHost() {
+  public void testTwoClustersFoundOneProcessedOneTakenByAnotherHost() throws IOException {
     // The main purpose of this test is to ensure that an Autoscale job is only
     // created (and executed) for cluster1, since although cluster2 passed our filter,
     // another host "raced us first" and processed that cluster.
@@ -155,7 +155,7 @@ public class AutoscalerTest {
   }
 
   @Test
-  public void testTwoClustersFoundOneProcessedOneFilteredOut() {
+  public void testTwoClustersFoundOneProcessedOneFilteredOut() throws IOException {
     // The main purpose of this test is to ensure that
     // updateLastChecked is not run on a cluster that's filtered out
 
@@ -183,7 +183,7 @@ public class AutoscalerTest {
   }
 
   @Test
-  public void testOneClusterThrowsException() {
+  public void testOneClusterThrowsException() throws IOException {
     // The main purpose of this test is to ensure that
     // in cluster fails, later clusters still finish.
 
