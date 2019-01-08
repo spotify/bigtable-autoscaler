@@ -192,9 +192,15 @@ public class PostgresDatabase implements Database {
 
   @Override
   public boolean deleteBigtableCluster(String projectId, String instanceId, String clusterId) {
-    final String sql = "DELETE FROM autoscale WHERE project_id = ? AND instance_id = ? AND cluster_id = ?";
+    final String sql = "UPDATE autoscale SET enabled = false WHERE project_id = ? AND instance_id = ? AND cluster_id = ?";
     int numRowsUpdated = jdbc.getJdbcOperations().update(sql, projectId, instanceId, clusterId);
     return numRowsUpdated == 1;
+  }
+
+  @Override
+  public void truncate() {
+    final String sql = "TRUNCATE TABLE autoscale";
+    jdbc.getJdbcOperations().execute(sql);
   }
 
   @Override

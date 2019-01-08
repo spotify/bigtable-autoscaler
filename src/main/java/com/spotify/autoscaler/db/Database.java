@@ -43,6 +43,8 @@ public interface Database extends AutoCloseable {
 
   boolean deleteBigtableCluster(String projectId, String instanceId, String clusterId);
 
+  void truncate();
+
   boolean setLastChange(String projectId, String instanceId, String clusterId, Instant lastChange);
 
   List<BigtableCluster> getCandidateClusters();

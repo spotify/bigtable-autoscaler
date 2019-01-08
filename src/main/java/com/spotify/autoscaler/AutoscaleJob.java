@@ -32,6 +32,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.util.ErrorHandlingBigtableInstanceClient;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.Closeable;
 import java.io.IOException;
@@ -60,6 +61,7 @@ public class AutoscaleJob implements Closeable {
   private final int currentNodes;
   private ClusterResizeLogBuilder log;
   private StringBuilder resizeReason = new StringBuilder();
+  private BigtableInstanceClient adminClient;
 
   // CPU related constants
   private static final double MAX_REDUCTION_RATIO = 0.7;
@@ -82,6 +84,7 @@ public class AutoscaleJob implements Closeable {
   // but a twenty percent change can happen as often as every 48 minutes.
   public static final double MINIMUM_DOWNSACLE_WEIGHT = 57600;
 
+
   // Storage related constants
 
   public AutoscaleJob(final BigtableSession bigtableSession,
@@ -98,6 +101,11 @@ public class AutoscaleJob implements Closeable {
     this.clusterStats = checkNotNull(clusterStats);
     this.timeSource = checkNotNull(timeSource);
     this.db = checkNotNull(db);
+    try {
+      adminClient = ErrorHandlingBigtableInstanceClient.create(this.bigtableSession.getInstanceAdminClient(), db);
+    }  catch (IOException e) {
+      logger.error("Failed to create client", e);
+    }
     this.currentNodes = getSize();
     log = new ClusterResizeLogBuilder()
         .timestamp(new Date())
@@ -115,12 +123,6 @@ public class AutoscaleJob implements Closeable {
 
   int getSize() {
     registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
-    BigtableInstanceClient adminClient = null;
-    try {
-      adminClient = bigtableSession.getInstanceAdminClient();
-    } catch (IOException e) {
-      logger.error("Failed to get cluster size", e);
-    }
     return adminClient.getCluster(
         GetClusterRequest.newBuilder()
             .setName(cluster.clusterName())
@@ -139,14 +141,9 @@ public class AutoscaleJob implements Closeable {
     registry.meter(APP_PREFIX.tagged("what", "call-to-set-size")).mark();
     try {
       log.targetNodes(newSize);
-      bigtableSession.getInstanceAdminClient().updateCluster(cluster);
+      adminClient.updateCluster(cluster);
       log.success(true);
       registry.meter(APP_PREFIX.tagged("what", "clusters-changed")).mark();
-    } catch (IOException e) {
-      logger.error("Failed to set cluster size", e);
-      log.errorMessage(Optional.of(e.toString()));
-      log.success(false);
-      registry.meter(APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
     } catch (Throwable t) {
       log.errorMessage(Optional.of(t.toString()));
       log.success(false);

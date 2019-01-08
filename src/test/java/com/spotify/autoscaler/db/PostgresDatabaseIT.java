@@ -106,9 +106,7 @@ public class PostgresDatabaseIT {
 
   @After
   public void tearDown() {
-    db.getBigtableClusters()
-        .stream()
-        .forEach(cluster -> db.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()));
+    db.truncate();
     db.close();
   }
 
@@ -157,7 +155,7 @@ public class PostgresDatabaseIT {
     db.insertBigtableCluster(testCluster());
     db.insertBigtableCluster(anotherTestCluster());
     db.deleteBigtableCluster(projectId, instanceId, clusterId);
-    assertEquals(1, db.getBigtableClusters().size());
+    assertEquals(1, db.getBigtableClusters().stream().filter(BigtableCluster::enabled).count());
   }
 
   @Test
