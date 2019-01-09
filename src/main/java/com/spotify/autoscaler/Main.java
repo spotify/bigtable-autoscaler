@@ -28,6 +28,7 @@ import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.util.BigtableUtil;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
@@ -154,13 +155,15 @@ public final class Main {
     registry.register(APP_PREFIX.tagged("what", "daily-resize-count"),
         (Gauge<Long>) () -> db.getDailyResizeCount());
 
-    registry.register(APP_PREFIX.tagged("what", "failing-cluster-count"),
-        (Gauge<Long>) () -> db.getBigtableClusters()
-                            .stream()
-                            .filter(p -> p.enabled())
-                            .filter(p -> p.exists())
-                            .filter(p -> p.consecutiveFailureCount() > 0)
-                            .count());
+      for (ErrorCode code : ErrorCode.values()) {
+        registry.register(APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
+            (Gauge<Long>) () -> db.getBigtableClusters()
+                .stream()
+                .filter(p -> p.enabled())
+                .filter(p -> p.errorCode().orElse(ErrorCode.OK) == code)
+                .filter(p -> p.consecutiveFailureCount() > 0)
+                .count());
+      }
 
     server.start();
   }

@@ -29,9 +29,11 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.util.BigtableUtil;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 
@@ -108,10 +110,11 @@ public class Autoscaler implements Runnable {
              clusterStats, Instant::now)) {
       job.run();
     } catch (Exception e) {
+      ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
       logger.error("Failed to autoscale cluster!", e);
       db.increaseFailureCount(cluster.projectId(), cluster.instanceId(),
           cluster.clusterId(), Instant.now(),
-          e.toString());
+          e.toString(), errorCode);
     }
     BigtableUtil.clearContext();
   }

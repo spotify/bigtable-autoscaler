@@ -126,7 +126,6 @@ public class ClusterResources {
         .overloadStep(Optional.ofNullable(overloadStep))
         .enabled(enabled)
         .loadDelta(loadDelta)
-        .exists(true)
         .build();
     try {
       BigtableUtil.pushContext(cluster);
@@ -187,7 +186,6 @@ public class ClusterResources {
         .overloadStep(Optional.ofNullable(0))
         .enabled(true)
         .loadDelta(0)
-        .exists(true)
         .build();
     try {
       BigtableUtil.pushContext(cluster);
@@ -218,7 +216,6 @@ public class ClusterResources {
         .overloadStep(Optional.ofNullable(0))
         .enabled(true)
         .loadDelta(loadDelta)
-        .exists(true)
         .build();
     try {
       BigtableUtil.pushContext(cluster);

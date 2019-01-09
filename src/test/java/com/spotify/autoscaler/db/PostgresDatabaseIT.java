@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -45,6 +46,7 @@ import java.util.Optional;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -70,7 +72,7 @@ public class PostgresDatabaseIT {
         .cpuTarget(0.8)
         .overloadStep(10)
         .enabled(true)
-        .exists(true)
+        .errorCode(Optional.of(ErrorCode.OK))
         .build();
   }
 
@@ -84,19 +86,21 @@ public class PostgresDatabaseIT {
         .cpuTarget(0.8)
         .overloadStep(10)
         .enabled(true)
-        .exists(true)
+        .errorCode(Optional.of(ErrorCode.OK))
         .build();
   }
 
-  @Before
-  public void setup() throws SQLException, IOException {
-
+  @BeforeClass
+  public static void createDB() throws SQLException, IOException {
     Connection connection = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
     // create the table
     String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
     PreparedStatement createTable = connection.prepareStatement(table);
     createTable.executeUpdate();
+  }
 
+  @Before
+  public void setup() throws SQLException, IOException {
     // insert a test cluster
     Config config = ConfigFactory.empty()
         .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))

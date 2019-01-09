@@ -36,6 +36,7 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -47,8 +48,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Random;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,8 +83,18 @@ public class AutoscaleJobIT {
   AutoscaleJob job;
   BigtableCluster cluster = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance").clusterId("cluster")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).enabled(true).exists(true).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).enabled(true).errorCode(Optional.of(ErrorCode.OK)).build();
   int newSize;
+
+  @BeforeClass
+  public static void createDB() throws SQLException, IOException {
+    // create the tables in the database
+    Connection connection = DriverManager
+        .getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+    String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
+    PreparedStatement createTable = connection.prepareStatement(table);
+    createTable.executeUpdate();
+  }
 
   @Before
   public void setUp() throws IOException, SQLException {
@@ -106,13 +119,6 @@ public class AutoscaleJobIT {
         .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))
         .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
         .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
-
-    // create the tables in the database
-    Connection connection = DriverManager
-        .getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-    String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
-    PreparedStatement createTable = connection.prepareStatement(table);
-    createTable.executeUpdate();
 
     Database db = new PostgresDatabase(config, registry);
     db.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());

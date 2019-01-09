@@ -26,9 +26,11 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
+import com.spotify.autoscaler.util.ErrorCode;
 import io.norberg.automatter.jackson.AutoMatterModule;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
@@ -48,7 +50,7 @@ public interface ApiTestResources {
       .maxNodes(5)
       .enabled(true)
       .loadDelta(10)
-      .exists(true)
+      .errorCode(Optional.of(ErrorCode.OK))
       .build();
 
   ObjectMapper MAPPER = new ObjectMapper()

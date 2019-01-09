@@ -20,6 +20,7 @@
 
 package com.spotify.autoscaler.db;
 
+import com.spotify.autoscaler.util.ErrorCode;
 import io.norberg.automatter.AutoMatter;
 import java.time.Instant;
 import java.util.Optional;
@@ -55,7 +56,7 @@ public interface BigtableCluster {
 
   int loadDelta(); //0 means no extra load to consider, gt 0 means minNodes is effectively minNodes+loadDelta
 
-  boolean exists();
+  Optional<ErrorCode> errorCode();
 
   default String clusterName() {
     return "projects/" + projectId() + "/instances/" + instanceId() + "/clusters/" + clusterId();
@@ -67,6 +68,10 @@ public interface BigtableCluster {
 
   default int effectiveMinNodes(){
     return Math.min(minNodes() + loadDelta() , maxNodes());
+  }
+
+  default boolean exists() {
+    return errorCode().orElse(ErrorCode.OK) != ErrorCode.GRPC_NOT_FOUND;
   }
 
 }

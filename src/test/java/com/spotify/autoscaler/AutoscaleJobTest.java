@@ -35,6 +35,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
@@ -67,7 +68,7 @@ public class AutoscaleJobTest {
 
   BigtableCluster cluster = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance").clusterId("cluster")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).exists(true).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).errorCode(Optional.of(ErrorCode.OK)).build();
   Optional<Integer> newSize = Optional.empty();
   AutoscaleJob job;
 

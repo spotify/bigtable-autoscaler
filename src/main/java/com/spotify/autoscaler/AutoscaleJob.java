@@ -32,8 +32,6 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.metrics.core.SemanticMetricRegistry;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
@@ -119,24 +117,12 @@ public class AutoscaleJob implements Closeable {
     return currentNodes;
   }
 
-  Cluster getClusterInfoAndCheckExistence() throws IOException{
+  Cluster getClusterInfo() throws IOException{
     BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
-    Cluster clusterInfo;
-    try {
-      clusterInfo = adminClient.getCluster(
+    return adminClient.getCluster(
           GetClusterRequest.newBuilder()
               .setName(this.cluster.clusterName())
               .build());
-    } catch (StatusRuntimeException e) {
-      if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-        db.setClusterExists(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), false);
-      }
-      throw e;
-    }
-    if (!cluster.exists()) {
-      db.setClusterExists(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), true);
-    }
-    return clusterInfo;
   }
 
   void setSize(int newSize) {
@@ -331,7 +317,7 @@ public class AutoscaleJob implements Closeable {
 
   void run() throws IOException {
 
-    final Cluster clusterInfo = getClusterInfoAndCheckExistence();
+    final Cluster clusterInfo = getClusterInfo();
 
     this.currentNodes = getSize(clusterInfo);
     clusterStats.setStats(this.cluster, currentNodes);
