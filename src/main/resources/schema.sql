@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS autoscale (
     consecutive_failure_count int default(0),
     last_failure_message text,
     load_delta integer NOT NULL default(0),
+    cluster_exists boolean NOT NULL default(true),
     CONSTRAINT full_name PRIMARY KEY(project_id, instance_id, cluster_id),
     CONSTRAINT autoscale_cpu_target_check CHECK ((cpu_target > (0.0)::double precision)),
     CONSTRAINT autoscale_cpu_target_check1 CHECK ((cpu_target < (1.0)::double precision)),

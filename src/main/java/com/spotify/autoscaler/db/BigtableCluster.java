@@ -55,6 +55,8 @@ public interface BigtableCluster {
 
   int loadDelta(); //0 means no extra load to consider, gt 0 means minNodes is effectively minNodes+loadDelta
 
+  boolean exists();
+
   default String clusterName() {
     return "projects/" + projectId() + "/instances/" + instanceId() + "/clusters/" + clusterId();
   }

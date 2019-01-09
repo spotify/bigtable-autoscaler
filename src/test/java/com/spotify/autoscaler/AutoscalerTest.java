@@ -73,11 +73,11 @@ public class AutoscalerTest {
 
   BigtableCluster cluster1 = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance1").clusterId("cluster1")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).exists(true).build();
 
   BigtableCluster cluster2 = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance2").clusterId("cluster2")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).exists(true).build();
 
   @Before
   public void setUp() throws IOException {

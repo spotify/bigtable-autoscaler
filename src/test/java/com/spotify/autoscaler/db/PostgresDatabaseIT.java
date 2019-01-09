@@ -70,6 +70,7 @@ public class PostgresDatabaseIT {
         .cpuTarget(0.8)
         .overloadStep(10)
         .enabled(true)
+        .exists(true)
         .build();
   }
 
@@ -83,6 +84,7 @@ public class PostgresDatabaseIT {
         .cpuTarget(0.8)
         .overloadStep(10)
         .enabled(true)
+        .exists(true)
         .build();
   }
 

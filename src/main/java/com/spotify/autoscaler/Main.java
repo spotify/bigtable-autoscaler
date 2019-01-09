@@ -158,6 +158,7 @@ public final class Main {
         (Gauge<Long>) () -> db.getBigtableClusters()
                             .stream()
                             .filter(p -> p.enabled())
+                            .filter(p -> p.exists())
                             .filter(p -> p.consecutiveFailureCount() > 0)
                             .count());
 

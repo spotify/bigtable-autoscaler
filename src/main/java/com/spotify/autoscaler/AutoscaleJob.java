@@ -22,7 +22,6 @@ package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
 import static com.spotify.autoscaler.Main.APP_PREFIX;
-
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
@@ -33,6 +32,8 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.metrics.core.SemanticMetricRegistry;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
@@ -57,7 +58,7 @@ public class AutoscaleJob implements Closeable {
 
   public static final Duration CHECK_INTERVAL = Duration.ofSeconds(30);
   private boolean hasRun = false;
-  private final int currentNodes;
+  private int currentNodes;
   private ClusterResizeLogBuilder log;
   private StringBuilder resizeReason = new StringBuilder();
 
@@ -98,7 +99,6 @@ public class AutoscaleJob implements Closeable {
     this.clusterStats = checkNotNull(clusterStats);
     this.timeSource = checkNotNull(timeSource);
     this.db = checkNotNull(db);
-    this.currentNodes = getSize();
     log = new ClusterResizeLogBuilder()
         .timestamp(new Date())
         .projectId(cluster.projectId())
@@ -108,23 +108,35 @@ public class AutoscaleJob implements Closeable {
         .maxNodes(cluster.maxNodes())
         .cpuTarget(cluster.cpuTarget())
         .overloadStep(cluster.overloadStep())
-        .currentNodes(currentNodes)
         .loadDelta(cluster.loadDelta());
 
   }
 
-  int getSize() {
+  int getSize(Cluster clusterInfo) {
     registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
-    BigtableInstanceClient adminClient = null;
+    int currentNodes = clusterInfo.getServeNodes();
+    log.currentNodes(currentNodes);
+    return currentNodes;
+  }
+
+  Cluster getClusterInfoAndCheckExistence() throws IOException{
+    BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
+    Cluster clusterInfo;
     try {
-      adminClient = bigtableSession.getInstanceAdminClient();
-    } catch (IOException e) {
-      logger.error("Failed to get cluster size", e);
+      clusterInfo = adminClient.getCluster(
+          GetClusterRequest.newBuilder()
+              .setName(this.cluster.clusterName())
+              .build());
+    } catch (StatusRuntimeException e) {
+      if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+        db.setClusterExists(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), false);
+      }
+      throw e;
     }
-    return adminClient.getCluster(
-        GetClusterRequest.newBuilder()
-            .setName(cluster.clusterName())
-            .build()).getServeNodes();
+    if (!cluster.exists()) {
+      db.setClusterExists(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), true);
+    }
+    return clusterInfo;
   }
 
   void setSize(int newSize) {
@@ -317,9 +329,12 @@ public class AutoscaleJob implements Closeable {
     return desiredNodes;
   }
 
-  void run() {
+  void run() throws IOException {
 
-    clusterStats.setStats(cluster, currentNodes);
+    final Cluster clusterInfo = getClusterInfoAndCheckExistence();
+
+    this.currentNodes = getSize(clusterInfo);
+    clusterStats.setStats(this.cluster, currentNodes);
 
     if (shouldExponentialBackoff()) {
       logger.info("Exponential backoff");

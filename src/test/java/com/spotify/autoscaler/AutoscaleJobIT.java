@@ -80,7 +80,7 @@ public class AutoscaleJobIT {
   AutoscaleJob job;
   BigtableCluster cluster = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance").clusterId("cluster")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).enabled(true).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).enabled(true).exists(true).build();
   int newSize;
 
   @Before
@@ -121,7 +121,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void testWeDontResizeTooOften() {
+  public void testWeDontResizeTooOften() throws IOException {
     // To give the cluster a chance to settle in, don't resize too often
 
     // first time we get the last event from the DB we get nothing
@@ -140,7 +140,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void testSmallResizesDontHappenTooOften() {
+  public void testSmallResizesDontHappenTooOften() throws IOException {
     // To avoid oscillating, don't do small size changes too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.7);
     job.run();
@@ -156,7 +156,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void testSmallResizesHappenEventually() {
+  public void testSmallResizesHappenEventually() throws IOException {
     // To avoid oscillating, don't do small size changes too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.7);
     job.run();
@@ -172,7 +172,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void stressTest() {
+  public void stressTest() throws IOException {
     // This test is useful to see that we don't get stuck at any point, for example
     // there is no Connection leak.
     Random random = new Random();

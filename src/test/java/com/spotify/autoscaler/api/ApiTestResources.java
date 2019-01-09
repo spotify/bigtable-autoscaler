@@ -48,6 +48,7 @@ public interface ApiTestResources {
       .maxNodes(5)
       .enabled(true)
       .loadDelta(10)
+      .exists(true)
       .build();
 
   ObjectMapper MAPPER = new ObjectMapper()

@@ -45,6 +45,8 @@ public interface Database extends AutoCloseable {
 
   boolean setLastChange(String projectId, String instanceId, String clusterId, Instant lastChange);
 
+  boolean setClusterExists(String projectId, String instanceId, String clusterId, boolean exists);
+
   List<BigtableCluster> getCandidateClusters();
 
   boolean updateLastChecked(BigtableCluster cluster);
@@ -58,6 +60,7 @@ public interface Database extends AutoCloseable {
     return getBigtableClusters()
         .stream()
         .filter(BigtableCluster::enabled)
+        .filter(BigtableCluster::exists)
         .map(BigtableCluster::clusterName)
         .collect(Collectors.toSet());
   }
