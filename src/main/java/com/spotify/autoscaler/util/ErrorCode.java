@@ -52,16 +52,15 @@ public enum ErrorCode {
 
   public static ErrorCode fromException(Optional<Exception> e) {
 
-    if (!e.isPresent()) {
-      return OK;
-    }
-    Exception ex = e.get();
+    return e
+        .map(ex -> {
+          if (ex instanceof StatusRuntimeException) {
+            return valueOf(GRPC_PREFIX + ((StatusRuntimeException) ex).getStatus().getCode());
+          }
 
-    if (ex instanceof StatusRuntimeException) {
-      return valueOf(GRPC_PREFIX + ((StatusRuntimeException) ex).getStatus().getCode());
-    }
-
-    return AUTOSCALER_INTERNAL;
+          return AUTOSCALER_INTERNAL;
+        })
+        .orElse(OK);
   }
 
 }
