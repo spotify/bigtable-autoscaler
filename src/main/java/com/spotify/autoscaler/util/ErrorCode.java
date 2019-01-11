@@ -20,6 +20,7 @@
 
 package com.spotify.autoscaler.util;
 
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import java.util.Optional;
 
@@ -41,7 +42,8 @@ public enum ErrorCode {
   GRPC_UNAVAILABLE(14),
   GRPC_DATA_LOSS(15),
   GRPC_UNAUTHENTICATED(16),
-  AUTOSCALER_INTERNAL(17);
+  PROJECT_NOT_FOUND(17),
+  AUTOSCALER_INTERNAL(18);
 
   private final int value;
   private static final String GRPC_PREFIX = "GRPC_";
@@ -55,7 +57,14 @@ public enum ErrorCode {
     return e
         .map(ex -> {
           if (ex instanceof StatusRuntimeException) {
-            return valueOf(GRPC_PREFIX + ((StatusRuntimeException) ex).getStatus().getCode());
+            StatusRuntimeException sre = (StatusRuntimeException) ex;
+            final Status.Code code = sre.getStatus().getCode();
+
+            if (code == Status.Code.INVALID_ARGUMENT
+               && sre.getStatus().getDescription().matches("Error resolving project (\\S+) : Invalid Id")) {
+              return PROJECT_NOT_FOUND;
+            }
+            return valueOf(GRPC_PREFIX + code);
           }
 
           return AUTOSCALER_INTERNAL;
