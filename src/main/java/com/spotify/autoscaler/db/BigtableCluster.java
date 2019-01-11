@@ -71,7 +71,8 @@ public interface BigtableCluster {
   }
 
   default boolean exists() {
-    return errorCode().orElse(ErrorCode.OK) != ErrorCode.GRPC_NOT_FOUND;
+    final ErrorCode errorCode = errorCode().orElse(ErrorCode.OK);
+    return errorCode != ErrorCode.GRPC_NOT_FOUND && errorCode != ErrorCode.PROJECT_NOT_FOUND;
   }
 
 }
