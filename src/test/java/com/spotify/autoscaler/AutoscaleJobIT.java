@@ -36,6 +36,7 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -47,8 +48,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.Random;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,8 +83,18 @@ public class AutoscaleJobIT {
   AutoscaleJob job;
   BigtableCluster cluster = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance").clusterId("cluster")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).enabled(true).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).enabled(true).errorCode(Optional.of(ErrorCode.OK)).build();
   int newSize;
+
+  @BeforeClass
+  public static void createDB() throws SQLException, IOException {
+    // create the tables in the database
+    Connection connection = DriverManager
+        .getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+    String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
+    PreparedStatement createTable = connection.prepareStatement(table);
+    createTable.executeUpdate();
+  }
 
   @Before
   public void setUp() throws IOException, SQLException {
@@ -107,13 +120,6 @@ public class AutoscaleJobIT {
         .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
         .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
 
-    // create the tables in the database
-    Connection connection = DriverManager
-        .getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-    String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
-    PreparedStatement createTable = connection.prepareStatement(table);
-    createTable.executeUpdate();
-
     Database db = new PostgresDatabase(config, registry);
     db.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
     db.insertBigtableCluster(cluster);
@@ -121,7 +127,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void testWeDontResizeTooOften() {
+  public void testWeDontResizeTooOften() throws IOException {
     // To give the cluster a chance to settle in, don't resize too often
 
     // first time we get the last event from the DB we get nothing
@@ -140,7 +146,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void testSmallResizesDontHappenTooOften() {
+  public void testSmallResizesDontHappenTooOften() throws IOException {
     // To avoid oscillating, don't do small size changes too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.7);
     job.run();
@@ -156,7 +162,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void testSmallResizesHappenEventually() {
+  public void testSmallResizesHappenEventually() throws IOException {
     // To avoid oscillating, don't do small size changes too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.7);
     job.run();
@@ -172,7 +178,7 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void stressTest() {
+  public void stressTest() throws IOException {
     // This test is useful to see that we don't get stuck at any point, for example
     // there is no Connection leak.
     Random random = new Random();

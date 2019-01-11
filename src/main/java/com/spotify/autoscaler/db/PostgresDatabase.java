@@ -23,6 +23,7 @@ package com.spotify.autoscaler.db;
 import static com.spotify.autoscaler.Main.APP_PREFIX;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.spotify.autoscaler.util.ErrorCode;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -59,7 +60,7 @@ public class PostgresDatabase implements Database {
       new String[]{ "project_id", "instance_id", "cluster_id", "min_nodes",
                     "max_nodes", "cpu_target", "overload_step", "last_change", "last_check",
                     "enabled", "last_failure",
-                    "consecutive_failure_count", "last_failure_message" , "load_delta" };
+                    "consecutive_failure_count", "last_failure_message" , "load_delta" , "error_code"};
 
   private static final String ALL_COLUMNS = String.join(", ", COLUMNS);
 
@@ -130,6 +131,7 @@ public class PostgresDatabase implements Database {
         .lastFailureMessage(Optional.ofNullable(rs.getString("last_failure_message")))
         .consecutiveFailureCount(rs.getInt("consecutive_failure_count"))
         .loadDelta(rs.getInt("load_delta"))
+        .errorCode(Optional.of(ErrorCode.valueOf(rs.getString("error_code"))))
         .build();
   }
 
@@ -259,12 +261,13 @@ public class PostgresDatabase implements Database {
 
   @Override
   public boolean increaseFailureCount(String projectId, String instanceId, String clusterId, Instant lastFailure,
-      String lastFailureMessage) {
+                                      String lastFailureMessage, ErrorCode errorCode) {
     final String sql = "UPDATE autoscale "
         + "SET last_failure = ?, consecutive_failure_count = consecutive_failure_count + 1, last_failure_message = ? "
+                       + ", error_code = ?::error_code "
         + "WHERE project_id = ? AND instance_id = ? AND cluster_id = ?";
     int numRowsUpdated = jdbc.getJdbcOperations().update(sql,
-        Timestamp.from(lastFailure), lastFailureMessage, projectId, instanceId, clusterId);
+        Timestamp.from(lastFailure), lastFailureMessage, errorCode.name(), projectId,  instanceId, clusterId);
     return numRowsUpdated == 1;
   }
 

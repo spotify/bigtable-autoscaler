@@ -1,3 +1,25 @@
+CREATE TYPE error_code AS ENUM(
+  'OK',
+  'GRPC_CANCELLED',
+  'GRPC_UNKNOWN',
+  'GRPC_INVALID_ARGUMENT',
+  'GRPC_DEADLINE_EXCEEDED',
+  'GRPC_NOT_FOUND',
+  'GRPC_ALREADY_EXISTS',
+  'GRPC_PERMISSION_DENIED',
+  'GRPC_RESOURCE_EXHAUSTED',
+  'GRPC_FAILED_PRECONDITION',
+  'GRPC_ABORTED',
+  'GRPC_OUT_OF_RANGE',
+  'GRPC_UNIMPLEMENTED',
+  'GRPC_INTERNAL',
+  'GRPC_UNAVAILABLE',
+  'GRPC_DATA_LOSS',
+  'GRPC_UNAUTHENTICATED',
+  'AUTOSCALER_INTERNAL'
+);
+
+
 CREATE TABLE IF NOT EXISTS autoscale (
     project_id character varying(256) NOT NULL,
     instance_id character varying(256) NOT NULL,
@@ -13,6 +35,7 @@ CREATE TABLE IF NOT EXISTS autoscale (
     consecutive_failure_count int default(0),
     last_failure_message text,
     load_delta integer NOT NULL default(0),
+    error_code error_code NOT NULL default('OK'),
     CONSTRAINT full_name PRIMARY KEY(project_id, instance_id, cluster_id),
     CONSTRAINT autoscale_cpu_target_check CHECK ((cpu_target > (0.0)::double precision)),
     CONSTRAINT autoscale_cpu_target_check1 CHECK ((cpu_target < (1.0)::double precision)),

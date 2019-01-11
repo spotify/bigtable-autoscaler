@@ -28,7 +28,9 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -73,11 +75,11 @@ public class AutoscalerTest {
 
   BigtableCluster cluster1 = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance1").clusterId("cluster1")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).errorCode(Optional.of(ErrorCode.OK)).build();
 
   BigtableCluster cluster2 = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance2").clusterId("cluster2")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).errorCode(Optional.of(ErrorCode.OK)).build();
 
   @Before
   public void setUp() throws IOException {

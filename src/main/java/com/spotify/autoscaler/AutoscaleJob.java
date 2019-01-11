@@ -22,7 +22,6 @@ package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
 import static com.spotify.autoscaler.Main.APP_PREFIX;
-
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
@@ -57,7 +56,6 @@ public class AutoscaleJob implements Closeable {
 
   public static final Duration CHECK_INTERVAL = Duration.ofSeconds(30);
   private boolean hasRun = false;
-  private final int currentNodes;
   private ClusterResizeLogBuilder log;
   private StringBuilder resizeReason = new StringBuilder();
 
@@ -98,7 +96,6 @@ public class AutoscaleJob implements Closeable {
     this.clusterStats = checkNotNull(clusterStats);
     this.timeSource = checkNotNull(timeSource);
     this.db = checkNotNull(db);
-    this.currentNodes = getSize();
     log = new ClusterResizeLogBuilder()
         .timestamp(new Date())
         .projectId(cluster.projectId())
@@ -108,23 +105,22 @@ public class AutoscaleJob implements Closeable {
         .maxNodes(cluster.maxNodes())
         .cpuTarget(cluster.cpuTarget())
         .overloadStep(cluster.overloadStep())
-        .currentNodes(currentNodes)
         .loadDelta(cluster.loadDelta());
-
   }
 
-  int getSize() {
+  int getSize(Cluster clusterInfo) {
     registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
-    BigtableInstanceClient adminClient = null;
-    try {
-      adminClient = bigtableSession.getInstanceAdminClient();
-    } catch (IOException e) {
-      logger.error("Failed to get cluster size", e);
-    }
+    int currentNodes = clusterInfo.getServeNodes();
+    log.currentNodes(currentNodes);
+    return currentNodes;
+  }
+
+  Cluster getClusterInfo() throws IOException{
+    BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
     return adminClient.getCluster(
-        GetClusterRequest.newBuilder()
-            .setName(cluster.clusterName())
-            .build()).getServeNodes();
+          GetClusterRequest.newBuilder()
+              .setName(this.cluster.clusterName())
+              .build());
   }
 
   void setSize(int newSize) {
@@ -255,7 +251,7 @@ public class AutoscaleJob implements Closeable {
     return false;
   }
 
-  int storageConstraints(final Duration samplingDuration, int desiredNodes) {
+  int storageConstraints(final Duration samplingDuration, int desiredNodes, int currentNodes) {
 
     Double storageUtilization = 0.0;
     try {
@@ -294,7 +290,7 @@ public class AutoscaleJob implements Closeable {
   }
 
   // Implements a stretegy to avoid autoscaling too often
-  int frequencyConstraints(int nodes) {
+  int frequencyConstraints(int nodes, int currentNodes) {
     Duration timeSinceLastChange = getDurationSinceLastChange();
     int desiredNodes = nodes;
     // It's OK to do large changes often if needed, but only do small changes very rarely to avoid too much oscillation
@@ -317,9 +313,12 @@ public class AutoscaleJob implements Closeable {
     return desiredNodes;
   }
 
-  void run() {
+  void run() throws IOException {
 
-    clusterStats.setStats(cluster, currentNodes);
+    final Cluster clusterInfo = getClusterInfo();
+
+    int currentNodes = getSize(clusterInfo);
+    clusterStats.setStats(this.cluster, currentNodes);
 
     if (shouldExponentialBackoff()) {
       logger.info("Exponential backoff");
@@ -339,19 +338,19 @@ public class AutoscaleJob implements Closeable {
         logger.info("Too early to autoscale");
         return;
       } else {
-        updateNodeCount(newNodeCount);
+        updateNodeCount(newNodeCount, currentNodes);
         return;
       }
     }
     final Duration samplingDuration = getSamplingDuration();
     int newNodeCount = cpuStrategy(samplingDuration, currentNodes);
-    newNodeCount = storageConstraints(samplingDuration, newNodeCount);
-    newNodeCount = frequencyConstraints(newNodeCount);
+    newNodeCount = storageConstraints(samplingDuration, newNodeCount, currentNodes);
+    newNodeCount = frequencyConstraints(newNodeCount, currentNodes);
     newNodeCount = sizeConstraints(newNodeCount);
-    updateNodeCount(newNodeCount);
+    updateNodeCount(newNodeCount, currentNodes);
   }
 
-  void updateNodeCount(int desiredNodes) {
+  void updateNodeCount(int desiredNodes, int currentNodes) {
     if (desiredNodes != currentNodes) {
       setSize(desiredNodes);
       db.setLastChange(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSource.get());

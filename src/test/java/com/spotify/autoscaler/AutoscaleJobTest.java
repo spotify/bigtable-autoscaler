@@ -35,6 +35,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
@@ -67,7 +68,7 @@ public class AutoscaleJobTest {
 
   BigtableCluster cluster = new BigtableClusterBuilder()
       .projectId("project").instanceId("instance").clusterId("cluster")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).build();
+      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).errorCode(Optional.of(ErrorCode.OK)).build();
   Optional<Integer> newSize = Optional.empty();
   AutoscaleJob job;
 
@@ -93,35 +94,43 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testDiskConstraintOverridesCpuTargetedNodeCount(){
+  public void testDiskConstraintOverridesCpuTargetedNodeCount() throws IOException {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.8d);
-    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 50);
-    assertEquals(115, desiredNodes);
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.4d);
+    job.run();
+    assertEquals(Optional.of(115), newSize);
   }
 
   @Test
-  public void testDiskConstraintOverridesIfNotLoaded(){
+  public void testDiskConstraintOverridesIfNotLoaded() throws IOException {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.6d);
-    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 50);
-    assertEquals(86, desiredNodes);
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.4d);
+    job.run();
+    assertEquals(Optional.of(86), newSize);
   }
 
   @Test
-  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnoughIfNotLoaded(){
+  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnoughIfNotLoaded() throws IOException {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.6d);
-    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 90);
-    assertEquals(90, desiredNodes);
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.72d);
+    job.run();
+    assertEquals(Optional.of(90), newSize);
   }
 
   @Test
-  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnough(){
+  public void testDiskConstraintDoesNotOverrideIfDesiredNodesAlreadyEnough() throws IOException {
+    cluster = BigtableClusterBuilder.from(this.cluster)
+        .overloadStep(Optional.empty())
+        .build();
+    job = new AutoscaleJob(bigtableSession, stackdriverClient, this.cluster, db, registry, clusterStats, () -> Instant.now());
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.8d);
-    int desiredNodes = job.storageConstraints(Duration.ofHours(1), 120);
-    assertEquals(120, desiredNodes);
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.96d);
+    job.run();
+    assertEquals(Optional.of(120), newSize);
   }
 
   @Test
-  public void testResize() {
+  public void testResize() throws IOException {
     // Test that we resize to correct target size
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.6);
     job.run();
@@ -129,7 +138,7 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testUpperBound() {
+  public void testUpperBound() throws IOException {
     // Test that we don't go over maximum size
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 480);
     job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
@@ -139,7 +148,7 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testLowerBound() {
+  public void testLowerBound() throws IOException {
     // Test that we don't go under minimum size
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 6);
     job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
@@ -149,7 +158,7 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testHugeResizeOnOverload() {
+  public void testHugeResizeOnOverload() throws IOException {
     // To give the cluster a chance to settle in, don't resize too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.95);
     job.run();
@@ -157,7 +166,7 @@ public class AutoscaleJobTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void testJobCantRunTwice() {
+  public void testJobCantRunTwice() throws IOException {
     job.run();
     job.run();
   }
@@ -191,7 +200,7 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testThatWeDontReduceClusterSizeTooFast() {
+  public void testThatWeDontReduceClusterSizeTooFast() throws IOException {
     // Even if we're very over-provisioned, only reduce by 30 %
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.3);
     job.run();
@@ -208,7 +217,7 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testWeResizeIfSizeConstraintsAreNotMet() {
+  public void testWeResizeIfSizeConstraintsAreNotMet() throws IOException {
     BigtableCluster cluster = BigtableClusterBuilder.from(this.cluster)
         .loadDelta(10)
         .lastChange(Instant.now())
@@ -221,7 +230,7 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testWeResizeIfStorageConstraintsAreNotMet() {
+  public void testWeResizeIfStorageConstraintsAreNotMet() throws IOException {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.90);
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 5);
     job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
@@ -231,7 +240,7 @@ public class AutoscaleJobTest {
   }
 
   @Test
-  public void testWeDontResizeTooSoonEvenIfStorageConstraintsAreNotMet() {
+  public void testWeDontResizeTooSoonEvenIfStorageConstraintsAreNotMet() throws IOException {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.90);
     BigtableCluster cluster = BigtableClusterBuilder.from(this.cluster)
         .lastChange(Instant.now())

@@ -20,6 +20,7 @@
 
 package com.spotify.autoscaler.db;
 
+import com.spotify.autoscaler.util.ErrorCode;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
@@ -52,12 +53,13 @@ public interface Database extends AutoCloseable {
   boolean clearFailureCount(String projectId, String instanceId, String clusterId);
 
   boolean increaseFailureCount(String projectId, String instanceId, String clusterId, Instant lastFailure,
-                               String lastFailureMessage);
+                               String lastFailureMessage, ErrorCode errorCode);
 
   default Set<String> getActiveClusterKeys() {
     return getBigtableClusters()
         .stream()
         .filter(BigtableCluster::enabled)
+        .filter(BigtableCluster::exists)
         .map(BigtableCluster::clusterName)
         .collect(Collectors.toSet());
   }
