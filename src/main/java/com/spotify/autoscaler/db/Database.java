@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -36,7 +36,8 @@ public interface Database extends AutoCloseable {
 
   List<BigtableCluster> getBigtableClusters(String projectId, String instanceId, String clusterId);
 
-  Optional<BigtableCluster> getBigtableCluster(String projectId, String instanceId, String clusterId);
+  Optional<BigtableCluster> getBigtableCluster(
+      String projectId, String instanceId, String clusterId);
 
   boolean insertBigtableCluster(BigtableCluster cluster);
 
@@ -52,8 +53,13 @@ public interface Database extends AutoCloseable {
 
   boolean clearFailureCount(String projectId, String instanceId, String clusterId);
 
-  boolean increaseFailureCount(String projectId, String instanceId, String clusterId, Instant lastFailure,
-                               String lastFailureMessage, ErrorCode errorCode);
+  boolean increaseFailureCount(
+      String projectId,
+      String instanceId,
+      String clusterId,
+      Instant lastFailure,
+      String lastFailureMessage,
+      ErrorCode errorCode);
 
   default Set<String> getActiveClusterKeys() {
     return getBigtableClusters()
@@ -70,7 +76,8 @@ public interface Database extends AutoCloseable {
 
   void healthCheck();
 
-  Collection<ClusterResizeLog> getLatestResizeEvents(String projectId, String instanceId, String clusterId);
+  Collection<ClusterResizeLog> getLatestResizeEvents(
+      String projectId, String instanceId, String clusterId);
 
   boolean updateLoadDelta(String projectId, String instanceId, String clusterId, Integer loadDelta);
 }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -52,9 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-/**
- * Application entry point.
- */
+/** Application entry point. */
 public final class Main {
 
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
@@ -90,13 +88,13 @@ public final class Main {
 
     if (!ffwdHost.isEmpty()) {
       logger.info("Connecting to ffwd at {}:{}", ffwdHost, ffwdPort);
-      reporter = FastForwardReporter
-          .forRegistry(registry)
-          .prefix(APP_PREFIX)
-          .host(ffwdHost)
-          .port(ffwdPort)
-          .schedule(TimeUnit.SECONDS, 5)
-          .build();
+      reporter =
+          FastForwardReporter.forRegistry(registry)
+              .prefix(APP_PREFIX)
+              .host(ffwdHost)
+              .port(ffwdPort)
+              .schedule(TimeUnit.SECONDS, 5)
+              .build();
       reporter.start();
     } else {
       reporter = null;
@@ -106,7 +104,8 @@ public final class Main {
     db = new PostgresDatabase(config.getConfig("database"), registry);
     URI uri = new URI("http://0.0.0.0:" + port);
     ResourceConfig resourceConfig =
-        new AutoscaleResourceConfig(SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
+        new AutoscaleResourceConfig(
+            SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
     ClusterFilter clusterFilter = new AllowAllClusterFilter();
@@ -119,51 +118,62 @@ public final class Main {
       }
     }
 
-    autoscaler = new Autoscaler(
-        new AutoscaleJobFactory(),
-        Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
-        registry,
-        db,
-        cluster -> BigtableUtil
-            .createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
-        new ClusterStats(registry, db),
-        clusterFilter);
+    autoscaler =
+        new Autoscaler(
+            new AutoscaleJobFactory(),
+            Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
+            registry,
+            db,
+            cluster ->
+                BigtableUtil.createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
+            new ClusterStats(registry, db),
+            clusterFilter);
 
-    executor.scheduleWithFixedDelay(autoscaler,
-        RUN_INTERVAL.toMillis(),
-        RUN_INTERVAL.toMillis(),
-        TimeUnit.MILLISECONDS);
+    executor.scheduleWithFixedDelay(
+        autoscaler, RUN_INTERVAL.toMillis(), RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
 
-    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      try {
-        onShutdown();
-      } catch (IOException | InterruptedException | ExecutionException e) {
-        throw new RuntimeException(e);
-      }
-    }));
+    Runtime.getRuntime()
+        .addShutdownHook(
+            new Thread(
+                () -> {
+                  try {
+                    onShutdown();
+                  } catch (IOException | InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                  }
+                }));
 
-    registry.register(APP_PREFIX.tagged("what", "enabled-clusters"),
+    registry.register(
+        APP_PREFIX.tagged("what", "enabled-clusters"),
         (Gauge<Long>) () -> db.getBigtableClusters().stream().filter(p -> p.enabled()).count());
 
-    registry.register(APP_PREFIX.tagged("what", "disabled-clusters"),
+    registry.register(
+        APP_PREFIX.tagged("what", "disabled-clusters"),
         (Gauge<Long>) () -> db.getBigtableClusters().stream().filter(p -> !p.enabled()).count());
 
-    registry.register(APP_PREFIX.tagged("what", "open-file-descriptors"),
-        (Gauge<Long>) () -> ((UnixOperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean())
-            .getOpenFileDescriptorCount());
+    registry.register(
+        APP_PREFIX.tagged("what", "open-file-descriptors"),
+        (Gauge<Long>)
+            () ->
+                ((UnixOperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean())
+                    .getOpenFileDescriptorCount());
 
-    registry.register(APP_PREFIX.tagged("what", "daily-resize-count"),
+    registry.register(
+        APP_PREFIX.tagged("what", "daily-resize-count"),
         (Gauge<Long>) () -> db.getDailyResizeCount());
 
-      for (ErrorCode code : ErrorCode.values()) {
-        registry.register(APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
-            (Gauge<Long>) () -> db.getBigtableClusters()
-                .stream()
-                .filter(p -> p.enabled())
-                .filter(p -> p.errorCode().orElse(ErrorCode.OK) == code)
-                .filter(p -> p.consecutiveFailureCount() > 0)
-                .count());
-      }
+    for (ErrorCode code : ErrorCode.values()) {
+      registry.register(
+          APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
+          (Gauge<Long>)
+              () ->
+                  db.getBigtableClusters()
+                      .stream()
+                      .filter(p -> p.enabled())
+                      .filter(p -> p.errorCode().orElse(ErrorCode.OK) == code)
+                      .filter(p -> p.consecutiveFailureCount() > 0)
+                      .count());
+    }
 
     server.start();
   }

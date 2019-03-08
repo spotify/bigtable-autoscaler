@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -33,18 +33,21 @@ import org.mockito.internal.matchers.LessOrEqual;
 
 public abstract class AutoscaleJobTestMocks {
 
-  public static void setCurrentSize(BigtableInstanceClient client, int size) {
-    Cluster cluster = Cluster.newBuilder().setServeNodes(size).build();
+  public static void setCurrentSize(final BigtableInstanceClient client, final int size) {
+    final Cluster cluster = Cluster.newBuilder().setServeNodes(size).build();
     when(client.getCluster(any())).thenReturn(cluster);
   }
 
-  public static void setCurrentLoad(StackdriverClient client, double load) {
+  public static void setCurrentLoad(final StackdriverClient client, final double load) {
     when(client.getCpuLoad(argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(load);
-    when(client.getCpuLoad(argThat(new LessOrEqual<>(Duration.ZERO)))).thenThrow(new RuntimeException("Negative duration!!!"));
+    when(client.getCpuLoad(argThat(new LessOrEqual<>(Duration.ZERO))))
+        .thenThrow(new RuntimeException("Negative duration!!!"));
   }
 
-  public static void setCurrentDiskUtilization(StackdriverClient client, double diskUtil) {
+  public static void setCurrentDiskUtilization(
+      final StackdriverClient client, final double diskUtil) {
     when(client.getDiskUtilization(argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(diskUtil);
-    when(client.getDiskUtilization(argThat(new LessOrEqual<>(Duration.ZERO)))).thenThrow(new RuntimeException("Negative duration!!!"));
+    when(client.getDiskUtilization(argThat(new LessOrEqual<>(Duration.ZERO))))
+        .thenThrow(new RuntimeException("Negative duration!!!"));
   }
 }

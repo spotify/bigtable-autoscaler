@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,23 +41,23 @@ public interface ApiTestResources {
   String HEALTH = "/health";
   String SERVICE_NAME = "test-service";
 
-  BigtableCluster CLUSTER = new BigtableClusterBuilder()
-      .clusterId("c")
-      .projectId("p")
-      .instanceId("i")
-      .cpuTarget(0.5)
-      .minNodes(3)
-      .maxNodes(5)
-      .enabled(true)
-      .loadDelta(10)
-      .errorCode(Optional.of(ErrorCode.OK))
-      .build();
+  BigtableCluster CLUSTER =
+      new BigtableClusterBuilder()
+          .clusterId("c")
+          .projectId("p")
+          .instanceId("i")
+          .cpuTarget(0.5)
+          .minNodes(3)
+          .maxNodes(5)
+          .enabled(true)
+          .loadDelta(10)
+          .errorCode(Optional.of(ErrorCode.OK))
+          .build();
 
-  ObjectMapper MAPPER = new ObjectMapper()
-      .registerModule(new AutoMatterModule())
-      .registerModule(new Jdk8Module());
+  ObjectMapper MAPPER =
+      new ObjectMapper().registerModule(new AutoMatterModule()).registerModule(new Jdk8Module());
 
-  default Invocation.Builder request(WebTarget target, BigtableCluster cluster) {
+  default Invocation.Builder request(final WebTarget target, final BigtableCluster cluster) {
     return target
         .queryParam("projectId", cluster.projectId())
         .queryParam("instanceId", cluster.instanceId())
@@ -70,10 +70,9 @@ public interface ApiTestResources {
         .request();
   }
 
-  default List<BigtableCluster> deserialize(Response response) throws IOException {
-    CollectionType type = TypeFactory
-        .defaultInstance()
-        .constructCollectionType(List.class, BigtableCluster.class);
+  default List<BigtableCluster> deserialize(final Response response) throws IOException {
+    final CollectionType type =
+        TypeFactory.defaultInstance().constructCollectionType(List.class, BigtableCluster.class);
     return MAPPER.readValue(response.readEntity(String.class), type);
   }
 }

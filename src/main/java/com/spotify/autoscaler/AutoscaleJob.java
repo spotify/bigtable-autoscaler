@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,6 +22,7 @@ package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
 import static com.spotify.autoscaler.Main.APP_PREFIX;
+
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
@@ -56,8 +57,8 @@ public class AutoscaleJob implements Closeable {
 
   public static final Duration CHECK_INTERVAL = Duration.ofSeconds(30);
   private boolean hasRun = false;
-  private ClusterResizeLogBuilder log;
-  private StringBuilder resizeReason = new StringBuilder();
+  private final ClusterResizeLogBuilder log;
+  private final StringBuilder resizeReason = new StringBuilder();
 
   // CPU related constants
   private static final double MAX_REDUCTION_RATIO = 0.7;
@@ -65,13 +66,15 @@ public class AutoscaleJob implements Closeable {
   private static final Duration MAX_SAMPLE_INTERVAL = Duration.ofHours(1);
 
   // Google recommends keeping the disk utilization around 70% to accomodate sudden spikes
-  // see <<Storage utilization per node>> section for details, https://cloud.google.com/bigtable/quotas
+  // see <<Storage utilization per node>> section for details,
+  // https://cloud.google.com/bigtable/quotas
   private static final double MAX_DISK_UTILIZATION_PERCENTAGE = 0.7d;
 
   // Time related constants
   private static final Duration AFTER_CHANGE_SAMPLE_BUFFER_TIME = Duration.ofMinutes(5);
   public static final Duration RESIZE_SETTLE_TIME = Duration.ofMinutes(5);
-  public static final Duration MINIMUM_CHANGE_INTERVAL = RESIZE_SETTLE_TIME.plus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
+  public static final Duration MINIMUM_CHANGE_INTERVAL =
+      RESIZE_SETTLE_TIME.plus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
   public static final Duration MAX_FAILURE_BACKOFF_INTERVAL = Duration.ofHours(4);
   // This means that a 2 % capacity increase can only happen every second hour,
   // but a twenty percent change can happen as often as every twelve minutes.
@@ -82,13 +85,14 @@ public class AutoscaleJob implements Closeable {
 
   // Storage related constants
 
-  public AutoscaleJob(final BigtableSession bigtableSession,
-                      final StackdriverClient stackdriverClient,
-                      final BigtableCluster cluster,
-                      final Database db,
-                      final SemanticMetricRegistry registry,
-                      final ClusterStats clusterStats,
-                      final Supplier<Instant> timeSource) {
+  public AutoscaleJob(
+      final BigtableSession bigtableSession,
+      final StackdriverClient stackdriverClient,
+      final BigtableCluster cluster,
+      final Database db,
+      final SemanticMetricRegistry registry,
+      final ClusterStats clusterStats,
+      final Supplier<Instant> timeSource) {
     this.bigtableSession = checkNotNull(bigtableSession);
     this.stackdriverClient = checkNotNull(stackdriverClient);
     this.cluster = checkNotNull(cluster);
@@ -96,54 +100,52 @@ public class AutoscaleJob implements Closeable {
     this.clusterStats = checkNotNull(clusterStats);
     this.timeSource = checkNotNull(timeSource);
     this.db = checkNotNull(db);
-    log = new ClusterResizeLogBuilder()
-        .timestamp(new Date())
-        .projectId(cluster.projectId())
-        .instanceId(cluster.instanceId())
-        .clusterId(cluster.clusterId())
-        .minNodes(cluster.minNodes())
-        .maxNodes(cluster.maxNodes())
-        .cpuTarget(cluster.cpuTarget())
-        .overloadStep(cluster.overloadStep())
-        .loadDelta(cluster.loadDelta());
+    log =
+        new ClusterResizeLogBuilder()
+            .timestamp(new Date())
+            .projectId(cluster.projectId())
+            .instanceId(cluster.instanceId())
+            .clusterId(cluster.clusterId())
+            .minNodes(cluster.minNodes())
+            .maxNodes(cluster.maxNodes())
+            .cpuTarget(cluster.cpuTarget())
+            .overloadStep(cluster.overloadStep())
+            .loadDelta(cluster.loadDelta());
   }
 
-  int getSize(Cluster clusterInfo) {
+  int getSize(final Cluster clusterInfo) {
     registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
-    int currentNodes = clusterInfo.getServeNodes();
+    final int currentNodes = clusterInfo.getServeNodes();
     log.currentNodes(currentNodes);
     return currentNodes;
   }
 
-  Cluster getClusterInfo() throws IOException{
-    BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
+  Cluster getClusterInfo() throws IOException {
+    final BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
     return adminClient.getCluster(
-          GetClusterRequest.newBuilder()
-              .setName(this.cluster.clusterName())
-              .build());
+        GetClusterRequest.newBuilder().setName(this.cluster.clusterName()).build());
   }
 
-  void setSize(int newSize) {
-    final Cluster cluster = Cluster.newBuilder()
-        .setName(this.cluster.clusterName())
-        .setServeNodes(newSize)
-        .build();
+  void setSize(final int newSize) {
+    final Cluster cluster =
+        Cluster.newBuilder().setName(this.cluster.clusterName()).setServeNodes(newSize).build();
 
     // two separate metrics here;
     // clusters-changed would only reflect the ones that are successfully changed, while
-    // call-to-set-size would reflect the number of API calls, to monitor if we are reaching the daily limit
+    // call-to-set-size would reflect the number of API calls, to monitor if we are reaching the
+    // daily limit
     registry.meter(APP_PREFIX.tagged("what", "call-to-set-size")).mark();
     try {
       log.targetNodes(newSize);
       bigtableSession.getInstanceAdminClient().updateCluster(cluster);
       log.success(true);
       registry.meter(APP_PREFIX.tagged("what", "clusters-changed")).mark();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       logger.error("Failed to set cluster size", e);
       log.errorMessage(Optional.of(e.toString()));
       log.success(false);
       registry.meter(APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       log.errorMessage(Optional.of(t.toString()));
       log.success(false);
       throw t;
@@ -157,21 +159,22 @@ public class AutoscaleJob implements Closeable {
     // the database always stores UTC time
     // so remember to use UTC time as well when comparing with the database
     // for example Instant.now() returns UTC time
-    Instant now = timeSource.get();
-    Instant lastChange = cluster.lastChange().orElse(Instant.EPOCH);
+    final Instant now = timeSource.get();
+    final Instant lastChange = cluster.lastChange().orElse(Instant.EPOCH);
     return Duration.between(lastChange, now);
   }
 
   Duration getSamplingDuration() {
-    Duration timeSinceLastChange = getDurationSinceLastChange();
+    final Duration timeSinceLastChange = getDurationSinceLastChange();
     return computeSamplingDuration(timeSinceLastChange);
   }
 
   Duration computeSamplingDuration(final Duration timeSinceLastChange) {
-    final Duration reducedTimeSinceLastChange = timeSinceLastChange.minus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
+    final Duration reducedTimeSinceLastChange =
+        timeSinceLastChange.minus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
     return reducedTimeSinceLastChange.compareTo(MAX_SAMPLE_INTERVAL) <= 0
-           ? reducedTimeSinceLastChange
-           : MAX_SAMPLE_INTERVAL;
+        ? reducedTimeSinceLastChange
+        : MAX_SAMPLE_INTERVAL;
   }
 
   /*
@@ -185,7 +188,7 @@ public class AutoscaleJob implements Closeable {
     return stackdriverClient.getCpuLoad(samplingDuration);
   }
 
-  int cpuStrategy(final Duration samplingDuration, int nodes) {
+  int cpuStrategy(final Duration samplingDuration, final int nodes) {
     double currentCpu = 0d;
 
     try {
@@ -196,13 +199,17 @@ public class AutoscaleJob implements Closeable {
 
     logger.info(
         "Running autoscale job. Nodes: {} (min={}, max={}, loadDelta={}), CPU: {} (target={})",
-        nodes, cluster.minNodes(), cluster.maxNodes(), cluster.loadDelta(),
-        currentCpu, cluster.cpuTarget());
+        nodes,
+        cluster.minNodes(),
+        cluster.maxNodes(),
+        cluster.loadDelta(),
+        currentCpu,
+        cluster.cpuTarget());
 
-    double initialDesiredNodes = currentCpu * nodes / cluster.cpuTarget();
+    final double initialDesiredNodes = currentCpu * nodes / cluster.cpuTarget();
 
     final double desiredNodes;
-    boolean scaleDown = (initialDesiredNodes < nodes);
+    final boolean scaleDown = (initialDesiredNodes < nodes);
     final String path;
     if ((currentCpu > CPU_OVERLOAD_THRESHOLD) && cluster.overloadStep().isPresent()) {
       // If cluster is overloaded and the overloadStep is set, bump by that amount
@@ -217,33 +224,41 @@ public class AutoscaleJob implements Closeable {
       desiredNodes = initialDesiredNodes;
     }
 
-    int roundedDesiredNodes = (int) Math.ceil(desiredNodes);
-    logger.info("Ideal node count: {}. Revised nodes: {}. Reason: {}.", initialDesiredNodes, desiredNodes, path);
+    final int roundedDesiredNodes = (int) Math.ceil(desiredNodes);
+    logger.info(
+        "Ideal node count: {}. Revised nodes: {}. Reason: {}.",
+        initialDesiredNodes,
+        desiredNodes,
+        path);
     log.cpuUtilization(currentCpu);
     addResizeReason("CPU strategy: " + path);
     return roundedDesiredNodes;
   }
 
   boolean shouldExponentialBackoff() {
-    Instant now = timeSource.get();
+    final Instant now = timeSource.get();
 
     if (cluster.lastFailure().isPresent() && cluster.consecutiveFailureCount() > 0) {
       // Last try resulted in a failure. Exponential backoff further tries.
-      // After the first failure, the next attempt will be 1 minute after the failure, then 2, 4, 8 etc minutes
+      // After the first failure, the next attempt will be 1 minute after the failure, then 2, 4, 8
+      // etc minutes
       // But never more than 4 hours.
       Duration nextTryDuration = MAX_FAILURE_BACKOFF_INTERVAL;
       if (cluster.consecutiveFailureCount() < 10) {
         // 9 consecutive failures would result in a duration ~4.3 hours,
         // so no need to calculate the exponential duration for anything >9
-        nextTryDuration = CHECK_INTERVAL.multipliedBy((long) Math.pow(2, cluster.consecutiveFailureCount()));
+        nextTryDuration =
+            CHECK_INTERVAL.multipliedBy((long) Math.pow(2, cluster.consecutiveFailureCount()));
         if (nextTryDuration.compareTo(MAX_FAILURE_BACKOFF_INTERVAL) > 0) {
           nextTryDuration = MAX_FAILURE_BACKOFF_INTERVAL;
         }
       }
 
-      Instant nextTry = cluster.lastFailure().get().plus(nextTryDuration);
+      final Instant nextTry = cluster.lastFailure().get().plus(nextTryDuration);
       if (nextTry.isAfter(now)) {
-        logger.info("Skipping autoscale check due to earlier failures; exponential backoff - next try at {}", nextTry);
+        logger.info(
+            "Skipping autoscale check due to earlier failures; exponential backoff - next try at {}",
+            nextTry);
         return true;
       }
     }
@@ -251,7 +266,8 @@ public class AutoscaleJob implements Closeable {
     return false;
   }
 
-  int storageConstraints(final Duration samplingDuration, int desiredNodes, int currentNodes) {
+  int storageConstraints(
+      final Duration samplingDuration, final int desiredNodes, final int currentNodes) {
 
     Double storageUtilization = 0.0;
     try {
@@ -262,41 +278,52 @@ public class AutoscaleJob implements Closeable {
     if (storageUtilization <= 0.0) {
       return Math.max(currentNodes, desiredNodes);
     }
-    int minNodesRequiredForStorage =
+    final int minNodesRequiredForStorage =
         (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
-    logger.info("Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
-        minNodesRequiredForStorage, storageUtilization.toString(), currentNodes);
+    logger.info(
+        "Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
+        minNodesRequiredForStorage,
+        storageUtilization.toString(),
+        currentNodes);
     log.storageUtilization(storageUtilization);
     if (minNodesRequiredForStorage > desiredNodes) {
-      addResizeReason(String.format("Storage strategy: Target node count overriden(%d -> %d).", desiredNodes,
-          minNodesRequiredForStorage));
+      addResizeReason(
+          String.format(
+              "Storage strategy: Target node count overriden(%d -> %d).",
+              desiredNodes, minNodesRequiredForStorage));
     }
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
-  int sizeConstraints(int desiredNodes) {
+  int sizeConstraints(final int desiredNodes) {
 
     // the desired size should be inside the autoscale boundaries
-    int finalNodes = Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
+    final int finalNodes =
+        Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
     if (desiredNodes != finalNodes) {
-      addResizeReason(String.format("Size strategy: Target count overriden(%d -> %d)", desiredNodes, finalNodes));
+      addResizeReason(
+          String.format(
+              "Size strategy: Target count overriden(%d -> %d)", desiredNodes, finalNodes));
     }
     return finalNodes;
   }
 
   boolean isTooEarlyToFetchMetrics() {
-    Duration timeSinceLastChange = getDurationSinceLastChange();
+    final Duration timeSinceLastChange = getDurationSinceLastChange();
     return timeSinceLastChange.minus(MINIMUM_CHANGE_INTERVAL).isNegative();
   }
 
   // Implements a stretegy to avoid autoscaling too often
-  int frequencyConstraints(int nodes, int currentNodes) {
-    Duration timeSinceLastChange = getDurationSinceLastChange();
+  int frequencyConstraints(final int nodes, final int currentNodes) {
+    final Duration timeSinceLastChange = getDurationSinceLastChange();
     int desiredNodes = nodes;
-    // It's OK to do large changes often if needed, but only do small changes very rarely to avoid too much oscillation
-    double changeWeight =
-        100.0 * Math.abs(1.0 - (double) desiredNodes / currentNodes) * timeSinceLastChange.getSeconds();
-    boolean scaleDown = (desiredNodes < currentNodes);
+    // It's OK to do large changes often if needed, but only do small changes very rarely to avoid
+    // too much oscillation
+    final double changeWeight =
+        100.0
+            * Math.abs(1.0 - (double) desiredNodes / currentNodes)
+            * timeSinceLastChange.getSeconds();
+    final boolean scaleDown = (desiredNodes < currentNodes);
     String path = "normal";
 
     if (scaleDown && (changeWeight < MINIMUM_DOWNSACLE_WEIGHT)) {
@@ -317,7 +344,7 @@ public class AutoscaleJob implements Closeable {
 
     final Cluster clusterInfo = getClusterInfo();
 
-    int currentNodes = getSize(clusterInfo);
+    final int currentNodes = getSize(clusterInfo);
     clusterStats.setStats(this.cluster, currentNodes);
 
     if (shouldExponentialBackoff()) {
@@ -333,7 +360,7 @@ public class AutoscaleJob implements Closeable {
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
     if (isTooEarlyToFetchMetrics()) {
-      int newNodeCount = sizeConstraints(currentNodes);
+      final int newNodeCount = sizeConstraints(currentNodes);
       if (newNodeCount == currentNodes) {
         logger.info("Too early to autoscale");
         return;
@@ -350,10 +377,11 @@ public class AutoscaleJob implements Closeable {
     updateNodeCount(newNodeCount, currentNodes);
   }
 
-  void updateNodeCount(int desiredNodes, int currentNodes) {
+  void updateNodeCount(final int desiredNodes, final int currentNodes) {
     if (desiredNodes != currentNodes) {
       setSize(desiredNodes);
-      db.setLastChange(cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSource.get());
+      db.setLastChange(
+          cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSource.get());
       logger.info("Changing nodes from {} to {}", currentNodes, desiredNodes);
     } else {
       logger.info("No need to resize");
@@ -362,11 +390,12 @@ public class AutoscaleJob implements Closeable {
     db.clearFailureCount(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
   }
 
-  private void addResizeReason(String reason) {
+  private void addResizeReason(final String reason) {
     resizeReason.insert(0, reason);
     resizeReason.insert(0, " >>");
   }
 
+  @Override
   public void close() throws IOException {
     bigtableSession.close();
     stackdriverClient.close();
