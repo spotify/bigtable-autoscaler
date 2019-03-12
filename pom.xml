@@ -240,9 +240,11 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
         <configuration>
           <source>${java.version}</source>
           <target>${java.version}</target>
+          <verbose>true</verbose>
         </configuration>
       </plugin>
       <plugin>
