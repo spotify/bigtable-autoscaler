@@ -315,21 +315,21 @@ public class AutoscaleJob implements Closeable {
 
   void run() throws IOException {
 
-    final Cluster clusterInfo = getClusterInfo();
+    if (hasRun) {
+      throw new RuntimeException("An autoscale job should only be run once!");
+    }
 
-    int currentNodes = getSize(clusterInfo);
-    clusterStats.setStats(this.cluster, currentNodes);
+    hasRun = true;
 
     if (shouldExponentialBackoff()) {
       logger.info("Exponential backoff");
       return;
     }
 
-    if (hasRun) {
-      throw new RuntimeException("An autoscale job should only be run once!");
-    }
+    final Cluster clusterInfo = getClusterInfo();
+    int currentNodes = getSize(clusterInfo);
+    clusterStats.setStats(this.cluster, currentNodes);
 
-    hasRun = true;
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 
     if (isTooEarlyToFetchMetrics()) {
