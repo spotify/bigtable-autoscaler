@@ -49,6 +49,7 @@ public class Autoscaler implements Runnable {
   private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
 
   private final SemanticMetricRegistry registry;
+  private final StackdriverClient stackDriverClient;
   private final Database db;
   private final ClusterStats clusterStats;
   private final ClusterFilter filter;
@@ -60,6 +61,7 @@ public class Autoscaler implements Runnable {
   public Autoscaler(AutoscaleJobFactory autoscaleJobFactory,
                     ExecutorService executorService,
                     SemanticMetricRegistry registry,
+                    StackdriverClient stackDriverClient,
                     Database db,
                     SessionProvider sessionProvider,
                     ClusterStats clusterStats,
@@ -67,6 +69,7 @@ public class Autoscaler implements Runnable {
     this.autoscaleJobFactory = checkNotNull(autoscaleJobFactory);
     this.executorService = checkNotNull(executorService);
     this.registry = checkNotNull(registry);
+    this.stackDriverClient = stackDriverClient;
     this.db = checkNotNull(db);
     this.sessionProvider = checkNotNull(sessionProvider);
     this.clusterStats = checkNotNull(clusterStats);
@@ -106,7 +109,7 @@ public class Autoscaler implements Runnable {
     logger.info("Autoscaling cluster!");
     try (BigtableSession session = sessionProvider.apply(cluster);
          final AutoscaleJob job = autoscaleJobFactory.createAutoscaleJob(
-             session, () -> new StackdriverClient(cluster), cluster, db, registry,
+             session, () -> stackDriverClient, cluster, db, registry,
              clusterStats, Instant::now)) {
       job.run();
     } catch (Exception e) {

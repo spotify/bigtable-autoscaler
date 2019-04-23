@@ -182,7 +182,7 @@ public class AutoscaleJob implements Closeable {
    */
   @VisibleForTesting
   double getCurrentCpu(final Duration samplingDuration) {
-    return stackdriverClient.getCpuLoad(samplingDuration);
+    return stackdriverClient.getCpuLoad(cluster, samplingDuration);
   }
 
   int cpuStrategy(final Duration samplingDuration, int nodes) {
@@ -255,7 +255,7 @@ public class AutoscaleJob implements Closeable {
 
     Double storageUtilization = 0.0;
     try {
-      storageUtilization = stackdriverClient.getDiskUtilization(samplingDuration);
+      storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
     } finally {
       clusterStats.setLoad(cluster, storageUtilization, ClusterStats.MetricType.STORAGE);
     }

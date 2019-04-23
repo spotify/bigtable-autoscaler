@@ -23,6 +23,7 @@ package com.spotify.autoscaler;
 import com.codahale.metrics.Gauge;
 import com.spotify.autoscaler.api.ClusterResources;
 import com.spotify.autoscaler.api.HealthCheck;
+import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
@@ -123,6 +124,7 @@ public final class Main {
         new AutoscaleJobFactory(),
         Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
         registry,
+        new StackdriverClient(),
         db,
         cluster -> BigtableUtil
             .createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),

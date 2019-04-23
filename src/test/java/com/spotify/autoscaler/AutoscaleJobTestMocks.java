@@ -39,12 +39,14 @@ public abstract class AutoscaleJobTestMocks {
   }
 
   public static void setCurrentLoad(StackdriverClient client, double load) {
-    when(client.getCpuLoad(argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(load);
-    when(client.getCpuLoad(argThat(new LessOrEqual<>(Duration.ZERO)))).thenThrow(new RuntimeException("Negative duration!!!"));
+    when(client.getCpuLoad(any(), argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(load);
+    when(client.getCpuLoad(any(), argThat(new LessOrEqual<>(Duration.ZERO))))
+        .thenThrow(new RuntimeException("Negative duration!!!"));
   }
 
   public static void setCurrentDiskUtilization(StackdriverClient client, double diskUtil) {
-    when(client.getDiskUtilization(argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(diskUtil);
-    when(client.getDiskUtilization(argThat(new LessOrEqual<>(Duration.ZERO)))).thenThrow(new RuntimeException("Negative duration!!!"));
+    when(client.getDiskUtilization(any(), argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(diskUtil);
+    when(client.getDiskUtilization(any(), argThat(new LessOrEqual<>(Duration.ZERO))))
+        .thenThrow(new RuntimeException("Negative duration!!!"));
   }
 }
