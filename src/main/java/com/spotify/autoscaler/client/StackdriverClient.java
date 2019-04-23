@@ -45,14 +45,12 @@ public class StackdriverClient implements Closeable {
                                            + " AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
 
   private final MetricServiceClient metricServiceClient;
-  private final BigtableCluster bigtableCluster;
 
-  public StackdriverClient(final BigtableCluster bigtableCluster) throws IOException {
-    this.bigtableCluster = bigtableCluster;
+  public StackdriverClient() throws IOException {
     metricServiceClient = MetricServiceClient.create();
   }
 
-  public Double getDiskUtilization(final Duration duration) {
+  public Double getDiskUtilization(final BigtableCluster bigtableCluster, final Duration duration) {
 
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
@@ -63,7 +61,7 @@ public class StackdriverClient implements Closeable {
     return maxValueFromPagedResponse(response, 0.0, TypedValue::getDoubleValue);
   }
 
-  public Double getCpuLoad(final Duration duration) {
+  public Double getCpuLoad(final BigtableCluster bigtableCluster, final Duration duration) {
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(bigtableCluster.projectId()),

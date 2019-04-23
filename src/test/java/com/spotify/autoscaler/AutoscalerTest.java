@@ -24,6 +24,7 @@ import com.codahale.metrics.Meter;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
@@ -49,6 +50,9 @@ public class AutoscalerTest {
 
   @Mock
   private SemanticMetricRegistry registry;
+
+  @Mock
+  private StackdriverClient stackDriverClient;
 
   @Mock
   private BigtableSession bigtableSession;
@@ -106,8 +110,8 @@ public class AutoscalerTest {
         .thenReturn(false);
 
     Autoscaler autoscaler = new Autoscaler(
-        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
-        new AllowAllClusterFilter());
+        autoscaleJobFactory, executorService, registry, stackDriverClient, database,
+        sessionProvider, clusterStats, new AllowAllClusterFilter());
 
     autoscaler.run();
 
@@ -145,8 +149,8 @@ public class AutoscalerTest {
         .thenReturn(false);
 
     Autoscaler autoscaler = new Autoscaler(
-        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
-        new AllowAllClusterFilter());
+        autoscaleJobFactory, executorService, registry, stackDriverClient, database,
+        sessionProvider, clusterStats, new AllowAllClusterFilter());
 
     autoscaler.run();
 
@@ -168,8 +172,8 @@ public class AutoscalerTest {
         .thenReturn(false);
 
     Autoscaler autoscaler = new Autoscaler(
-        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
-        cluster -> cluster.clusterId().equals("cluster2"));
+        autoscaleJobFactory, executorService, registry, stackDriverClient, database,
+        sessionProvider, clusterStats, cluster -> cluster.clusterId().equals("cluster2"));
 
     autoscaler.run();
 
@@ -201,8 +205,8 @@ public class AutoscalerTest {
         any(), any(), eq(cluster1), any(), any(), any(), any())).thenThrow(new RuntimeException("cluster1"));
 
     Autoscaler autoscaler = new Autoscaler(
-        autoscaleJobFactory, executorService, registry, database, sessionProvider, clusterStats,
-        new AllowAllClusterFilter());
+        autoscaleJobFactory, executorService, registry, stackDriverClient, database,
+        sessionProvider, clusterStats, new AllowAllClusterFilter());
 
     autoscaler.run();
 
