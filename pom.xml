@@ -28,7 +28,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>20.0</version>
+                <version>27.1-jre</version>
             </dependency>
             <dependency>
                 <groupId>com.google.api.grpc</groupId>
@@ -173,7 +173,7 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.11.v20180605</version>
+            <version>9.4.17.v20190418</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
