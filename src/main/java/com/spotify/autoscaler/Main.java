@@ -70,6 +70,7 @@ public final class Main {
   private final Database db;
   private final HttpServer server;
   private final FastForwardReporter reporter;
+  private final StackdriverClient stackdriverClient = new StackdriverClient();
 
   /**
    * Runs the application.
@@ -124,7 +125,7 @@ public final class Main {
         new AutoscaleJobFactory(),
         Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
         registry,
-        new StackdriverClient(),
+        stackdriverClient,
         db,
         cluster -> BigtableUtil
             .createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
@@ -171,6 +172,11 @@ public final class Main {
   }
 
   private void onShutdown() throws IOException, ExecutionException, InterruptedException {
+    try {
+      stackdriverClient.close();
+    } catch (Exception e) {
+      logger.error("Exception while closing stackdriverClient", e);
+    }
     server.shutdown(10, TimeUnit.SECONDS).get();
     if (reporter != null) {
       reporter.stop();
