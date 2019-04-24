@@ -369,6 +369,5 @@ public class AutoscaleJob implements Closeable {
 
   public void close() throws IOException {
     bigtableSession.close();
-    stackdriverClient.close();
   }
 }
