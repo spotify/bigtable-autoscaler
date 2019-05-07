@@ -26,6 +26,7 @@ import com.codahale.metrics.Gauge;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.util.BigtableUtil;
+import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.util.Arrays;
@@ -108,6 +109,7 @@ public class ClusterStats {
     private double cpuUtil;
     private int consecutiveFailureCount;
     private double storageUtil;
+    private Optional<ErrorCode> lastErrorCode;
 
     int getNodeCount() {
       return nodeCount;
@@ -121,12 +123,20 @@ public class ClusterStats {
       return cpuUtil;
     }
 
+    Optional<ErrorCode> getLastErrorCode() {
+      return lastErrorCode;
+    }
+
     void setNodeCount(final int nodeCount) {
       this.nodeCount = nodeCount;
     }
 
     void setConsecutiveFailureCount(final int consecutiveFailureCount) {
       this.consecutiveFailureCount = consecutiveFailureCount;
+    }
+
+    void setLastErrorCode(final Optional<ErrorCode> lastErrorCode) {
+      this.lastErrorCode = lastErrorCode;
     }
 
     double getStorageUtil() {
@@ -145,16 +155,18 @@ public class ClusterStats {
       return cluster;
     }
 
-    private ClusterData(final BigtableCluster cluster, final int nodeCount, final int consecutiveFailureCount) {
+    private ClusterData(final BigtableCluster cluster, final int nodeCount,
+                        final int consecutiveFailureCount, final Optional<ErrorCode> lastErrorCode) {
       this.nodeCount = nodeCount;
       this.cluster = cluster;
       this.consecutiveFailureCount = consecutiveFailureCount;
+      this.lastErrorCode = lastErrorCode;
     }
   }
 
   public void setStats(BigtableCluster cluster, int count) {
     final ClusterData clusterData = registeredClusters.putIfAbsent(cluster.clusterName(),
-        new ClusterData(cluster, count, cluster.consecutiveFailureCount()));
+        new ClusterData(cluster, count, cluster.consecutiveFailureCount(), cluster.errorCode()));
 
     if (clusterData == null) {
       // First time we saw this cluster, register a gauge
@@ -169,9 +181,15 @@ public class ClusterStats {
               .flatMap(p -> Optional.of(Duration.between(p.lastCheck().orElse(Instant.EPOCH), Instant.now())))
               .get()
               .getSeconds());
-      this.registry.register(APP_PREFIX.tagged("what", "consecutive-failure-count").tagged("project-id", cluster.projectId()).tagged
-              ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getConsecutiveFailureCount());
+
+      for (ErrorCode code : ErrorCode.values()) {
+        this.registry.register(APP_PREFIX.tagged("what", "consecutive-failure-count").tagged("project-id", cluster.projectId()).tagged
+                ("cluster-id", cluster.clusterId()).tagged("instance-id", cluster.instanceId()).tagged("latest-error-code", code.name()),
+            (Gauge<Integer>) () -> {
+                                      ClusterData c = registeredClusters.get(cluster.clusterName());
+                                      return c.getLastErrorCode().orElse(ErrorCode.OK) == code ? c.getConsecutiveFailureCount() : 0;
+        });
+      }
 
       this.registry.register(APP_PREFIX.tagged("what", "cpu-target-ratio").tagged("project-id", cluster.projectId())
               .tagged
@@ -183,6 +201,7 @@ public class ClusterStats {
     } else {
       clusterData.setNodeCount(count);
       clusterData.setConsecutiveFailureCount(cluster.consecutiveFailureCount());
+      clusterData.setLastErrorCode(cluster.errorCode());
     }
   }
 
