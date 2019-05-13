@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<FindBugsFilter>
+    <!-- Learn about findbugs filters: http://findbugs.sourceforge.net/manual/filter.html -->
+    <Match>
+        <!-- Reason: Protobuf auto-generated code. -->
+        <Bug pattern="UCF_USELESS_CONTROL_FLOW"/>
+        <Method name="maybeForceBuilderInitialization"/>
+    </Match>
+    <Match>
+        <!-- Reason: Protobuf auto-generated code. -->
+        <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
+        <Method name="buildPartial"/>
+    </Match>
+    <Match>
+        <!-- Reason: Protobuf auto-generated code. -->
+        <Bug pattern="UC_USELESS_CONDITION"/>
+        <Method name="equals"/>
+    </Match>
+    <Match>
+        <!-- Reason: Code that will be added here from the golden-path-examples. -->
+        <Bug pattern="SIC_INNER_SHOULD_BE_STATIC_ANON"/>
+        <Method name="track"/>
+    </Match>
+</FindBugsFilter>
