@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -61,36 +61,39 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobIT {
-  @ClassRule
-  public static PostgreSQLContainer pg = new PostgreSQLContainer();
+  @ClassRule public static PostgreSQLContainer pg = new PostgreSQLContainer();
 
-  @Mock
-  BigtableSession bigtableSession;
+  @Mock BigtableSession bigtableSession;
 
-  @Mock
-  BigtableInstanceClient bigtableInstanceClient;
+  @Mock BigtableInstanceClient bigtableInstanceClient;
 
-  @Mock
-  StackdriverClient stackdriverClient;
+  @Mock StackdriverClient stackdriverClient;
 
-  @Mock
-  SemanticMetricRegistry registry;
+  @Mock SemanticMetricRegistry registry;
 
-  @Mock
-  ClusterStats clusterStats;
+  @Mock ClusterStats clusterStats;
 
   Database db;
   AutoscaleJob job;
-  BigtableCluster cluster = new BigtableClusterBuilder()
-      .projectId("project").instanceId("instance").clusterId("cluster")
-      .cpuTarget(0.8).maxNodes(500).minNodes(5).overloadStep(100).enabled(true).errorCode(Optional.of(ErrorCode.OK)).build();
+  BigtableCluster cluster =
+      new BigtableClusterBuilder()
+          .projectId("project")
+          .instanceId("instance")
+          .clusterId("cluster")
+          .cpuTarget(0.8)
+          .maxNodes(500)
+          .minNodes(5)
+          .overloadStep(100)
+          .enabled(true)
+          .errorCode(Optional.of(ErrorCode.OK))
+          .build();
   int newSize;
 
   @BeforeClass
   public static void createDB() throws SQLException, IOException {
     // create the tables in the database
-    Connection connection = DriverManager
-        .getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+    Connection connection =
+        DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
     String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
     PreparedStatement createTable = connection.prepareStatement(table);
     createTable.executeUpdate();
@@ -104,7 +107,15 @@ public class AutoscaleJobIT {
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
-    job = new AutoscaleJob(bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> Instant.now());
+    job =
+        new AutoscaleJob(
+            bigtableSession,
+            stackdriverClient,
+            cluster,
+            db,
+            registry,
+            clusterStats,
+            () -> Instant.now());
     when(bigtableInstanceClient.updateCluster(any()))
         .thenAnswer(
             invocationOnMock -> {
@@ -114,11 +125,13 @@ public class AutoscaleJobIT {
             });
   }
 
-  private static Database initDatabase(BigtableCluster cluster, SemanticMetricRegistry registry) throws SQLException, IOException {
-    Config config = ConfigFactory.empty()
-        .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))
-        .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
-        .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
+  private static Database initDatabase(BigtableCluster cluster, SemanticMetricRegistry registry)
+      throws SQLException, IOException {
+    Config config =
+        ConfigFactory.empty()
+            .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))
+            .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
+            .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
 
     Database db = new PostgresDatabase(config, registry);
     db.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
@@ -137,10 +150,17 @@ public class AutoscaleJobIT {
     assertEquals(88, newSize);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.5);
-    BigtableCluster updatedCluster = db.getBigtableCluster(cluster.projectId(),
-        cluster.instanceId(), cluster.clusterId()).get();
-    job = new AutoscaleJob(bigtableSession, stackdriverClient, updatedCluster, db, registry, clusterStats,
-        () -> Instant.now().plus(Duration.ofMinutes(8)));
+    BigtableCluster updatedCluster =
+        db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
+    job =
+        new AutoscaleJob(
+            bigtableSession,
+            stackdriverClient,
+            updatedCluster,
+            db,
+            registry,
+            clusterStats,
+            () -> Instant.now().plus(Duration.ofMinutes(8)));
     job.run();
     assertEquals(88, newSize);
   }
@@ -153,10 +173,17 @@ public class AutoscaleJobIT {
     assertEquals(88, newSize);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.78);
-    BigtableCluster updatedCluster = db.getBigtableCluster(cluster.projectId(),
-        cluster.instanceId(), cluster.clusterId()).get();
-    job = new AutoscaleJob(bigtableSession, stackdriverClient, updatedCluster, db, registry, clusterStats,
-        () -> Instant.now().plus(Duration.ofMinutes(100)));
+    BigtableCluster updatedCluster =
+        db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
+    job =
+        new AutoscaleJob(
+            bigtableSession,
+            stackdriverClient,
+            updatedCluster,
+            db,
+            registry,
+            clusterStats,
+            () -> Instant.now().plus(Duration.ofMinutes(100)));
     job.run();
     assertEquals(88, newSize);
   }
@@ -169,10 +196,17 @@ public class AutoscaleJobIT {
     assertEquals(88, newSize);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.78);
-    BigtableCluster updatedCluster = db.getBigtableCluster(cluster.projectId(),
-        cluster.instanceId(), cluster.clusterId()).get();
-    job = new AutoscaleJob(bigtableSession, stackdriverClient, updatedCluster, db, registry, clusterStats,
-        () -> Instant.now().plus(Duration.ofMinutes(480)));
+    BigtableCluster updatedCluster =
+        db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
+    job =
+        new AutoscaleJob(
+            bigtableSession,
+            stackdriverClient,
+            updatedCluster,
+            db,
+            registry,
+            clusterStats,
+            () -> Instant.now().plus(Duration.ofMinutes(480)));
     job.run();
     assertEquals(86, newSize);
   }
@@ -191,14 +225,9 @@ public class AutoscaleJobIT {
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, random.nextDouble());
       final Instant now = start.plus(Duration.ofSeconds(300));
 
-      job = new AutoscaleJob(
-          bigtableSession,
-          stackdriverClient,
-          cluster,
-          db,
-          registry,
-          clusterStats,
-          () -> now);
+      job =
+          new AutoscaleJob(
+              bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> now);
       job.run();
     }
   }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,18 +37,23 @@ public class BigtableUtil {
   private static final boolean USE_TIMEOUT = true;
 
   public static BigtableSession createSession(
-      final String instanceId, final String userAgent, final String projectId)
-      throws IOException {
-    final BigtableInstanceName bigtableInstanceName = new BigtableInstanceName(projectId, instanceId);
+      final String instanceId, final String userAgent, final String projectId) throws IOException {
+    final BigtableInstanceName bigtableInstanceName =
+        new BigtableInstanceName(projectId, instanceId);
 
-    final BigtableOptions options = new BigtableOptions.Builder()
-        .setDataChannelCount(64)
-        .setProjectId(projectId)
-        .setInstanceId(bigtableInstanceName.getInstanceId())
-        .setUserAgent(userAgent)
-        .setCallOptionsConfig(new CallOptionsConfig(USE_TIMEOUT, SHORT_TIMEOUT, LONG_TIMEOUT))
-        .setBulkOptions(new BulkOptions.Builder().setMaxInflightRpcs(1000000).setMaxMemory(Long.MAX_VALUE).build())
-        .build();
+    final BigtableOptions options =
+        new BigtableOptions.Builder()
+            .setDataChannelCount(64)
+            .setProjectId(projectId)
+            .setInstanceId(bigtableInstanceName.getInstanceId())
+            .setUserAgent(userAgent)
+            .setCallOptionsConfig(new CallOptionsConfig(USE_TIMEOUT, SHORT_TIMEOUT, LONG_TIMEOUT))
+            .setBulkOptions(
+                new BulkOptions.Builder()
+                    .setMaxInflightRpcs(1000000)
+                    .setMaxMemory(Long.MAX_VALUE)
+                    .build())
+            .build();
 
     return new BigtableSession(options);
   }

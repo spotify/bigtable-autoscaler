@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,11 +50,14 @@ public interface BigtableCluster {
 
   Optional<Instant> lastFailure();
 
-  Optional<String> lastFailureMessage(); // Old failure messages will still be kept even if the last attempt worked
+  Optional<String>
+      lastFailureMessage(); // Old failure messages will still be kept even if the last attempt
+  // worked
 
   int consecutiveFailureCount(); // 0 means last autoscale attempt succeeded
 
-  int loadDelta(); //0 means no extra load to consider, gt 0 means minNodes is effectively minNodes+loadDelta
+  int loadDelta(); // 0 means no extra load to consider, gt 0 means minNodes is effectively
+  // minNodes+loadDelta
 
   Optional<ErrorCode> errorCode();
 
@@ -66,13 +69,12 @@ public interface BigtableCluster {
     return String.format("%s/%s/%s", projectId(), instanceId(), clusterId());
   }
 
-  default int effectiveMinNodes(){
-    return Math.min(minNodes() + loadDelta() , maxNodes());
+  default int effectiveMinNodes() {
+    return Math.min(minNodes() + loadDelta(), maxNodes());
   }
 
   default boolean exists() {
     final ErrorCode errorCode = errorCode().orElse(ErrorCode.OK);
     return errorCode != ErrorCode.GRPC_NOT_FOUND && errorCode != ErrorCode.PROJECT_NOT_FOUND;
   }
-
 }
