@@ -289,8 +289,29 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- the license plugin is included from the root pom, but the new version has less problems
+                with fmt-maven-plugin, i.e. trailing spaces in comments -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.19</version>
+            </plugin>
+            <plugin>
                 <groupId>com.github.spotbugs</groupId>
                 <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.11</version>
             </plugin>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>

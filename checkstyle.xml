@@ -60,6 +60,10 @@ page at http://checkstyle.sourceforge.net/config.html -->
             <property name="severity" value="error"/>
         </module>
 
+        <module name="AvoidStarImport">
+            <property name="severity" value="error"/>
+        </module>
+
         <!--
         Intellij googlestyle doesn't automatically order imports. Let's not care about this for now
         -->
