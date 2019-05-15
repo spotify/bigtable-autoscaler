@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,22 +54,23 @@ public enum ErrorCode {
 
   public static ErrorCode fromException(Optional<Exception> e) {
 
-    return e
-        .map(ex -> {
-          if (ex instanceof StatusRuntimeException) {
-            StatusRuntimeException sre = (StatusRuntimeException) ex;
-            final Status.Code code = sre.getStatus().getCode();
+    return e.map(
+            ex -> {
+              if (ex instanceof StatusRuntimeException) {
+                StatusRuntimeException sre = (StatusRuntimeException) ex;
+                final Status.Code code = sre.getStatus().getCode();
 
-            if (code == Status.Code.INVALID_ARGUMENT
-               && sre.getStatus().getDescription().matches("Error resolving project (\\S+) : Invalid Id")) {
-              return PROJECT_NOT_FOUND;
-            }
-            return valueOf(GRPC_PREFIX + code);
-          }
+                if (code == Status.Code.INVALID_ARGUMENT
+                    && sre.getStatus()
+                        .getDescription()
+                        .matches("Error resolving project (\\S+) : Invalid Id")) {
+                  return PROJECT_NOT_FOUND;
+                }
+                return valueOf(GRPC_PREFIX + code);
+              }
 
-          return AUTOSCALER_INTERNAL;
-        })
+              return AUTOSCALER_INTERNAL;
+            })
         .orElse(OK);
   }
-
 }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -43,7 +43,6 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -53,8 +52,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class PostgresDatabaseIT {
-  @ClassRule
-  public static PostgreSQLContainer pg = new PostgreSQLContainer();
+  @ClassRule public static PostgreSQLContainer pg = new PostgreSQLContainer();
 
   SemanticMetricRegistry registry;
   PostgresDatabase db;
@@ -92,7 +90,8 @@ public class PostgresDatabaseIT {
 
   @BeforeClass
   public static void createDB() throws SQLException, IOException {
-    Connection connection = DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
+    Connection connection =
+        DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
     // create the table
     String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
     PreparedStatement createTable = connection.prepareStatement(table);
@@ -102,10 +101,11 @@ public class PostgresDatabaseIT {
   @Before
   public void setup() throws SQLException, IOException {
     // insert a test cluster
-    Config config = ConfigFactory.empty()
-        .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))
-        .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
-        .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
+    Config config =
+        ConfigFactory.empty()
+            .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))
+            .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
+            .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
     registry = mock(SemanticMetricRegistry.class);
     db = new PostgresDatabase(config, registry);
   }
@@ -114,7 +114,10 @@ public class PostgresDatabaseIT {
   public void tearDown() {
     db.getBigtableClusters()
         .stream()
-        .forEach(cluster -> db.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()));
+        .forEach(
+            cluster ->
+                db.deleteBigtableCluster(
+                    cluster.projectId(), cluster.instanceId(), cluster.clusterId()));
     db.close();
   }
 
@@ -168,22 +171,34 @@ public class PostgresDatabaseIT {
 
   @Test
   public void getCandidateClusters() {
-    BigtableCluster c1 = BigtableClusterBuilder.from(testCluster())
-        .clusterId("c1").lastCheck(Instant.ofEpochSecond(1000)).build();
-    BigtableCluster c2 = BigtableClusterBuilder.from(testCluster())
-        .clusterId("c2").build();
-    BigtableCluster c3 = BigtableClusterBuilder.from(testCluster())
-        .clusterId("c3").lastCheck(Instant.now().minus(Duration.ofSeconds(3))).build();
-    BigtableCluster c4 = BigtableClusterBuilder.from(testCluster())
-        .clusterId("c4").lastCheck(Instant.ofEpochSecond(500)).build();
-    BigtableCluster c5 = BigtableClusterBuilder.from(testCluster())
-        .clusterId("c5").enabled(false).build();
+    BigtableCluster c1 =
+        BigtableClusterBuilder.from(testCluster())
+            .clusterId("c1")
+            .lastCheck(Instant.ofEpochSecond(1000))
+            .build();
+    BigtableCluster c2 = BigtableClusterBuilder.from(testCluster()).clusterId("c2").build();
+    BigtableCluster c3 =
+        BigtableClusterBuilder.from(testCluster())
+            .clusterId("c3")
+            .lastCheck(Instant.now().minus(Duration.ofSeconds(3)))
+            .build();
+    BigtableCluster c4 =
+        BigtableClusterBuilder.from(testCluster())
+            .clusterId("c4")
+            .lastCheck(Instant.ofEpochSecond(500))
+            .build();
+    BigtableCluster c5 =
+        BigtableClusterBuilder.from(testCluster()).clusterId("c5").enabled(false).build();
 
     for (BigtableCluster cluster : Arrays.asList(c1, c2, c3, c4, c5)) {
       db.insertBigtableCluster(cluster);
 
-      cluster.lastCheck().ifPresent(lastCheck -> db.setLastCheck(
-          cluster.projectId(), cluster.instanceId(), cluster.clusterId(), lastCheck));
+      cluster
+          .lastCheck()
+          .ifPresent(
+              lastCheck ->
+                  db.setLastCheck(
+                      cluster.projectId(), cluster.instanceId(), cluster.clusterId(), lastCheck));
     }
 
     // Verify that the order is as expected
@@ -211,8 +226,7 @@ public class PostgresDatabaseIT {
 
   @Test
   public void updateLastCheckedSetIfFirstTime() {
-    BigtableCluster c1 =
-        BigtableClusterBuilder.from(testCluster()).build();
+    BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
 
     // Slight sanity check here
@@ -245,8 +259,7 @@ public class PostgresDatabaseIT {
 
   @Test
   public void updateLastCheckedNoSetIfFirstTimeButNoMatch() {
-    BigtableCluster c1 =
-        BigtableClusterBuilder.from(testCluster()).build();
+    BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
     db.setLastCheck(c1.projectId(), c1.instanceId(), c1.clusterId(), Instant.ofEpochSecond(2000));
 
@@ -261,17 +274,16 @@ public class PostgresDatabaseIT {
   @Test
   public void testInsertedAndRetrievedClustersAreEquivalent() throws Exception {
 
-    BigtableCluster cluster = BigtableClusterBuilder.from(testCluster())
-        .overloadStep(Optional.ofNullable(null))
-        .build();
+    BigtableCluster cluster =
+        BigtableClusterBuilder.from(testCluster()).overloadStep(Optional.ofNullable(null)).build();
 
     db.insertBigtableCluster(cluster);
     db.insertBigtableCluster(anotherTestCluster());
 
-    BigtableCluster retrievedCluster = db.getBigtableCluster(cluster.projectId(), cluster.instanceId(),
-        cluster.clusterId()).orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(cluster, retrievedCluster);
-
   }
 }

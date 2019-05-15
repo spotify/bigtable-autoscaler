@@ -7,7 +7,7 @@
     <name>bigtable-autoscaler</name>
     <artifactId>bigtable-autoscaler</artifactId>
 
-    <version>0.0.22-SNAPSHOT</version>
+    <version>0.0.23-SNAPSHOT</version>
 
     <parent>
         <groupId>com.spotify</groupId>
@@ -17,8 +17,9 @@
 
     <properties>
         <service.mainClass>com.spotify.autoscaler.Main</service.mainClass>
-        <findbugs.excludeFilterFile>findbugsexclude.xml</findbugs.excludeFilterFile>
         <maven.install.skip>true</maven.install.skip>
+
+        <spotbugs.excludeFilterFile>spotbugsexclude.xml</spotbugs.excludeFilterFile>
         <checkstyle.violationSeverity>warning</checkstyle.violationSeverity>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
@@ -142,12 +143,6 @@
             <groupId>com.google.cloud.bigtable</groupId>
             <artifactId>bigtable-client-core</artifactId>
             <version>1.1.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.google.code.findbugs</groupId>
-                    <artifactId>jsr305</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
@@ -199,18 +194,18 @@
             <artifactId>spring-jdbc</artifactId>
             <version>5.0.7.RELEASE</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>3.1.3</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- test scope -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>2.23.0</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -302,15 +297,35 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>com.coveo</groupId>
+                <artifactId>fmt-maven-plugin</artifactId>
+                <version>2.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- the license plugin is included from the root pom, but the new version has less problems
+                with fmt-maven-plugin, i.e. trailing spaces in comments -->
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.19</version>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>3.1.11</version>
+            </plugin>
+            <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.2</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
