@@ -27,6 +27,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.spotify.autoscaler.AutoscaleJob;
 import com.spotify.autoscaler.util.ErrorCode;
+import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.typesafe.config.Config;
 import com.zaxxer.hikari.HikariDataSource;
@@ -89,9 +90,12 @@ public class PostgresDatabase implements Database {
   }
 
   private void registerMetricActiveConnections(final SemanticMetricRegistry registry) {
-    registry.register(
-        APP_PREFIX.tagged("what", "open-db-connections"),
-        (Gauge<Integer>) () -> this.dataSource.getHikariPoolMXBean().getTotalConnections());
+    MetricId metricId = APP_PREFIX.tagged("what", "open-db-connections");
+    if (!registry.getGauges().containsKey(metricId)) {
+      registry.register(
+              metricId,
+              (Gauge<Integer>) () -> this.dataSource.getHikariPoolMXBean().getTotalConnections());
+    }
   }
 
   private HikariDataSource dataSource(final Config config) {
