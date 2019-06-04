@@ -93,8 +93,8 @@ public class PostgresDatabase implements Database {
     MetricId metricId = APP_PREFIX.tagged("what", "open-db-connections");
     if (!registry.getGauges().containsKey(metricId)) {
       registry.register(
-              metricId,
-              (Gauge<Integer>) () -> this.dataSource.getHikariPoolMXBean().getTotalConnections());
+          metricId,
+          (Gauge<Integer>) () -> this.dataSource.getHikariPoolMXBean().getTotalConnections());
     }
   }
 
