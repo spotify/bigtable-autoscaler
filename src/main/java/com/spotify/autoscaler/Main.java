@@ -38,6 +38,7 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
@@ -114,8 +115,14 @@ public final class Main {
     String clusterFilterClass = config.getString("clusterFilter");
     if (clusterFilterClass != null && !clusterFilterClass.isEmpty()) {
       try {
-        clusterFilter = (ClusterFilter) Class.forName(clusterFilterClass).newInstance();
-      } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+        clusterFilter =
+            (ClusterFilter)
+                Class.forName(clusterFilterClass).getDeclaredConstructor().newInstance();
+      } catch (ClassNotFoundException
+          | InstantiationException
+          | IllegalAccessException
+          | NoSuchMethodException
+          | InvocationTargetException e) {
         logger.error("Failed to create new instance of cluster filter " + clusterFilterClass, e);
       }
     }
