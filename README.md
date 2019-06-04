@@ -1,5 +1,7 @@
 # bigtable-autoscaler
 
+[![CircleCI](https://circleci.com/gh/spotify/bigtable-autoscaler.svg?style=svg)](https://circleci.com/gh/spotify/bigtable-autoscaler)
+
 You have a Bigtable cluster and you would like to optimize its cost by using the
 right number of nodes at any given time. Then you should consider using the Bigtable
 autoscaler service!
