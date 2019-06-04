@@ -23,7 +23,8 @@
         <checkstyle.violationSeverity>warning</checkstyle.violationSeverity>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
-        <jersey-version>2.28</jersey-version>
+        <jersey-version>2.27</jersey-version>
+        <jackson-version>2.9.9</jackson-version>
     </properties>
 
     <dependencyManagement>
@@ -62,27 +63,27 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.9.8</version>
+                <version>${jackson-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.9.8</version>
+                <version>${jackson-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jdk8</artifactId>
-                <version>2.9.8</version>
+                <version>${jackson-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-json-provider</artifactId>
-                <version>2.6.0</version>
+                <version>${jackson-version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
                 <artifactId>jackson-jaxrs-base</artifactId>
-                <version>2.6.0</version>
+                <version>${jackson-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
