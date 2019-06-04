@@ -89,7 +89,7 @@ IF must_check THEN
 -- prevent concurrent inserts from multiple transactions
 LOCK TABLE autoscale IN EXCLUSIVE MODE;
 
-SELECT INTO cluster_count COUNT(*)
+SELECT COUNT(*) INTO cluster_count
 FROM autoscale
 WHERE enabled = true;
 
