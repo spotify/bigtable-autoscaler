@@ -32,7 +32,6 @@ import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValueFactory;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -54,6 +53,7 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 public class PostgresDatabaseIT {
   @ClassRule public static PostgreSQLContainer pg = new PostgreSQLContainer();
 
+  private static final String SERVICE_NAME = "bigtable-autoscaler";
   SemanticMetricRegistry registry;
   PostgresDatabase db;
   String projectId = "test-project";
@@ -101,13 +101,10 @@ public class PostgresDatabaseIT {
   @Before
   public void setup() throws SQLException, IOException {
     // insert a test cluster
-    Config config =
-        ConfigFactory.empty()
-            .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))
-            .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
-            .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
+    Config config = ConfigFactory.load(SERVICE_NAME);
+
     registry = mock(SemanticMetricRegistry.class);
-    db = new PostgresDatabase(config, registry);
+    db = new PostgresDatabase(config.getConfig("database"), registry);
   }
 
   @After
@@ -259,7 +256,7 @@ public class PostgresDatabaseIT {
 
   @Test
   public void updateLastCheckedNoSetIfFirstTimeButNoMatch() {
-    BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
+    BigtableCluster c1 = testCluster();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
     db.setLastCheck(c1.projectId(), c1.instanceId(), c1.clusterId(), Instant.ofEpochSecond(2000));
 

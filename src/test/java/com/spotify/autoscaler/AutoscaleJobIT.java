@@ -40,7 +40,6 @@ import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import com.typesafe.config.ConfigValueFactory;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -61,6 +60,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobIT {
+  private static final String SERVICE_NAME = "bigtable-autoscaler";
+
   @ClassRule public static PostgreSQLContainer pg = new PostgreSQLContainer();
 
   @Mock BigtableSession bigtableSession;
@@ -127,13 +128,9 @@ public class AutoscaleJobIT {
 
   private static Database initDatabase(BigtableCluster cluster, SemanticMetricRegistry registry)
       throws SQLException, IOException {
-    Config config =
-        ConfigFactory.empty()
-            .withValue("jdbcUrl", ConfigValueFactory.fromAnyRef(pg.getJdbcUrl()))
-            .withValue("username", ConfigValueFactory.fromAnyRef(pg.getUsername()))
-            .withValue("password", ConfigValueFactory.fromAnyRef(pg.getPassword()));
+    Config config = ConfigFactory.load(SERVICE_NAME);
 
-    Database db = new PostgresDatabase(config, registry);
+    Database db = new PostgresDatabase(config.getConfig("database"), registry);
     db.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
     db.insertBigtableCluster(cluster);
     return db;

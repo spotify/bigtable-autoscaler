@@ -114,7 +114,7 @@ public class AutoscalerTest {
     when(database.updateLastChecked(cluster1)).thenReturn(true).thenReturn(false);
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
 
-    final Autoscaler autoscaler =
+    Autoscaler autoscaler =
         new Autoscaler(
             autoscaleJobFactory,
             executorService,
@@ -136,7 +136,7 @@ public class AutoscalerTest {
     verify(database).updateLastChecked(cluster2);
 
     // Clusters should be checked in order since the unit test uses DirectExecutor executorservice
-    final InOrder inOrder = inOrder(autoscaleJobFactory);
+    InOrder inOrder = inOrder(autoscaleJobFactory);
     inOrder
         .verify(autoscaleJobFactory)
         .createAutoscaleJob(any(), any(), eq(cluster1), any(), any(), any(), any());
@@ -159,7 +159,7 @@ public class AutoscalerTest {
         .thenReturn(false); // Simulate this cluster was "taken" by another host
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
 
-    final Autoscaler autoscaler =
+    Autoscaler autoscaler =
         new Autoscaler(
             autoscaleJobFactory,
             executorService,
@@ -186,7 +186,7 @@ public class AutoscalerTest {
     when(database.getCandidateClusters()).thenReturn(Arrays.asList(cluster1, cluster2));
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
 
-    final Autoscaler autoscaler =
+    Autoscaler autoscaler =
         new Autoscaler(
             autoscaleJobFactory,
             executorService,
@@ -222,7 +222,7 @@ public class AutoscalerTest {
             any(), any(), eq(cluster1), any(), any(), any(), any()))
         .thenThrow(new RuntimeException("cluster1"));
 
-    final Autoscaler autoscaler =
+    Autoscaler autoscaler =
         new Autoscaler(
             autoscaleJobFactory,
             executorService,
