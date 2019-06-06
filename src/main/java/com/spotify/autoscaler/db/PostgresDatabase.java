@@ -53,8 +53,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class PostgresDatabase implements Database {
 
-  private static final int MAX_POOL_SIZE = 16;
-
   private static final String[] COLUMNS =
       new String[] {
         "project_id",
@@ -103,7 +101,7 @@ public class PostgresDatabase implements Database {
     ds.setJdbcUrl(config.getString("jdbcUrl"));
     ds.setUsername(config.getString("username"));
     ds.setPassword(config.getString("password"));
-    ds.setMaximumPoolSize(MAX_POOL_SIZE);
+    ds.setMaximumPoolSize(config.getInt("maxConnectionPool"));
     ds.setInitializationFailTimeout(-1);
     return ds;
   }

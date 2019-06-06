@@ -24,18 +24,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
@@ -44,16 +36,10 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class PostgresDatabaseIT {
-  @ClassRule public static PostgreSQLContainer pg = new PostgreSQLContainer();
-
-  private static final String SERVICE_NAME = "bigtable-autoscaler";
   SemanticMetricRegistry registry;
   PostgresDatabase db;
   String projectId = "test-project";
@@ -88,23 +74,10 @@ public class PostgresDatabaseIT {
         .build();
   }
 
-  @BeforeClass
-  public static void createDB() throws SQLException, IOException {
-    Connection connection =
-        DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-    // create the table
-    String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
-    PreparedStatement createTable = connection.prepareStatement(table);
-    createTable.executeUpdate();
-  }
-
   @Before
   public void setup() throws SQLException, IOException {
     // insert a test cluster
-    Config config = ConfigFactory.load(SERVICE_NAME);
-
-    registry = mock(SemanticMetricRegistry.class);
-    db = new PostgresDatabase(config.getConfig("database"), registry);
+    db = PostgresDatabaseTest.getPostgresDatabase();
   }
 
   @After
@@ -256,7 +229,7 @@ public class PostgresDatabaseIT {
 
   @Test
   public void updateLastCheckedNoSetIfFirstTimeButNoMatch() {
-    BigtableCluster c1 = testCluster();
+    BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
     db.setLastCheck(c1.projectId(), c1.instanceId(), c1.clusterId(), Instant.ofEpochSecond(2000));
 

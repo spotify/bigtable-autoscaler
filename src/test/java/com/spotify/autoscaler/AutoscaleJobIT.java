@@ -29,41 +29,28 @@ import com.codahale.metrics.Meter;
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
-import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
+import com.spotify.autoscaler.db.PostgresDatabaseTest;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.Random;
+import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.testcontainers.containers.PostgreSQLContainer;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobIT {
-  private static final String SERVICE_NAME = "bigtable-autoscaler";
-
-  @ClassRule public static PostgreSQLContainer pg = new PostgreSQLContainer();
-
   @Mock BigtableSession bigtableSession;
 
   @Mock BigtableInstanceClient bigtableInstanceClient;
@@ -74,7 +61,7 @@ public class AutoscaleJobIT {
 
   @Mock ClusterStats clusterStats;
 
-  Database db;
+  PostgresDatabase db;
   AutoscaleJob job;
   BigtableCluster cluster =
       new BigtableClusterBuilder()
@@ -89,16 +76,6 @@ public class AutoscaleJobIT {
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
   int newSize;
-
-  @BeforeClass
-  public static void createDB() throws SQLException, IOException {
-    // create the tables in the database
-    Connection connection =
-        DriverManager.getConnection(pg.getJdbcUrl(), pg.getUsername(), pg.getPassword());
-    String table = Resources.toString(Resources.getResource("schema.sql"), Charsets.UTF_8);
-    PreparedStatement createTable = connection.prepareStatement(table);
-    createTable.executeUpdate();
-  }
 
   @Before
   public void setUp() throws IOException, SQLException {
@@ -126,14 +103,23 @@ public class AutoscaleJobIT {
             });
   }
 
-  private static Database initDatabase(BigtableCluster cluster, SemanticMetricRegistry registry)
-      throws SQLException, IOException {
-    Config config = ConfigFactory.load(SERVICE_NAME);
+  @After
+  public void tearDown() {
+    db.getBigtableClusters()
+        .stream()
+        .forEach(
+            cluster ->
+                db.deleteBigtableCluster(
+                    cluster.projectId(), cluster.instanceId(), cluster.clusterId()));
+    db.close();
+  }
 
-    Database db = new PostgresDatabase(config.getConfig("database"), registry);
-    db.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
-    db.insertBigtableCluster(cluster);
-    return db;
+  private static PostgresDatabase initDatabase(
+      BigtableCluster cluster, SemanticMetricRegistry registry) {
+    PostgresDatabase database = PostgresDatabaseTest.getPostgresDatabase();
+    database.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
+    database.insertBigtableCluster(cluster);
+    return database;
   }
 
   @Test
