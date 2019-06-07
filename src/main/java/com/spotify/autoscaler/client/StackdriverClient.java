@@ -21,7 +21,6 @@
 package com.spotify.autoscaler.client;
 
 import com.google.cloud.monitoring.v3.MetricServiceClient;
-import com.google.cloud.monitoring.v3.PagedResponseWrappers;
 import com.google.monitoring.v3.ListTimeSeriesRequest;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.ProjectName;
@@ -54,7 +53,7 @@ public class StackdriverClient implements Closeable {
 
   public Double getDiskUtilization(final BigtableCluster bigtableCluster, final Duration duration) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final MetricServiceClient.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(bigtableCluster.projectId()),
             String.format(
@@ -65,7 +64,7 @@ public class StackdriverClient implements Closeable {
   }
 
   public Double getCpuLoad(final BigtableCluster bigtableCluster, final Duration duration) {
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    MetricServiceClient.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(bigtableCluster.projectId()),
             String.format(CPU_METRIC, bigtableCluster.instanceId(), bigtableCluster.clusterId()),
@@ -75,11 +74,11 @@ public class StackdriverClient implements Closeable {
   }
 
   private <T extends Comparable<T>> T maxValueFromPagedResponse(
-      final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
+      final MetricServiceClient.ListTimeSeriesPagedResponse response,
       final T initialMax,
       final Function<TypedValue, T> converter) {
     T max = initialMax;
-    for (PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
+    for (MetricServiceClient.ListTimeSeriesPage page : response.iteratePages()) {
       for (TimeSeries ts : page.getValues()) {
         for (Point p : ts.getPointsList()) {
           T value = converter.apply(p.getValue());
