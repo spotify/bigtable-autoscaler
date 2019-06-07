@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.google.common.collect.ImmutableList;
 import com.spotify.autoscaler.AutoscaleResourceConfig;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
@@ -72,7 +71,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
 
   @Test
   public void getEmptyAllInstances() {
-    getBigtableClustersResult = ImmutableList.of();
+    getBigtableClustersResult = List.of();
     Response response = target(INSTANCES).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo("[]"));
@@ -80,7 +79,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
 
   @Test
   public void getNonEmptyAllInstances() throws IOException {
-    getBigtableClustersResult = ImmutableList.of(CLUSTER);
+    getBigtableClustersResult = List.of(CLUSTER);
     Response response = target(INSTANCES).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     List<BigtableCluster> parsed = deserialize(response);

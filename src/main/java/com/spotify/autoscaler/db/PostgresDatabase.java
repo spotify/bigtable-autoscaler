@@ -23,8 +23,6 @@ package com.spotify.autoscaler.db;
 import static com.spotify.autoscaler.Main.APP_PREFIX;
 
 import com.codahale.metrics.Gauge;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
 import com.spotify.autoscaler.AutoscaleJob;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
@@ -231,7 +229,6 @@ public class PostgresDatabase implements Database {
     return numRowsUpdated == 1;
   }
 
-  @VisibleForTesting
   boolean setLastCheck(
       final String projectId,
       final String instanceId,
@@ -267,8 +264,7 @@ public class PostgresDatabase implements Database {
     final List<BigtableCluster> list =
         jdbc.query(
             sql,
-            ImmutableMap.of(
-                "check_interval", AutoscaleJob.CHECK_INTERVAL.getSeconds() + " seconds"),
+            Map.of("check_interval", AutoscaleJob.CHECK_INTERVAL.getSeconds() + " seconds"),
             (rs, rowNum) -> buildClusterFromResultSet(rs));
     return list;
   }
@@ -366,7 +362,7 @@ public class PostgresDatabase implements Database {
   @Override
   public long getDailyResizeCount() {
     final String sql = "SELECT COUNT(*) FROM RESIZE_LOG WHERE TIMESTAMP >= :midnight";
-    return jdbc.queryForObject(sql, ImmutableMap.of("midnight", midnight()), Long.class);
+    return jdbc.queryForObject(sql, Map.of("midnight", midnight()), Long.class);
   }
 
   private LocalDateTime midnight() {

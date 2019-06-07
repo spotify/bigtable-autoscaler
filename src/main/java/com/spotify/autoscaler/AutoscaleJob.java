@@ -27,7 +27,6 @@ import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.google.common.annotations.VisibleForTesting;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
@@ -183,7 +182,6 @@ public class AutoscaleJob implements Closeable {
    * quickly scaling up on load increases. Basically, we want to scale up optimistically
    * but scale down pessimistically.
    */
-  @VisibleForTesting
   double getCurrentCpu(final Duration samplingDuration) {
     return stackdriverClient.getCpuLoad(cluster, samplingDuration);
   }

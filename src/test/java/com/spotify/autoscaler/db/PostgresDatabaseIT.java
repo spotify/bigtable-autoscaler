@@ -37,7 +37,6 @@ import java.util.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class PostgresDatabaseIT {
   SemanticMetricRegistry registry;
@@ -112,23 +111,23 @@ public class PostgresDatabaseIT {
   @Test
   public void insert() {
     db.insertBigtableCluster(testCluster());
-    assertEquals(ImmutableList.of(testCluster()), db.getBigtableClusters());
+    assertEquals(List.of(testCluster()), db.getBigtableClusters());
   }
 
   @Test
   public void update() {
     db.insertBigtableCluster(BigtableClusterBuilder.from(testCluster()).minNodes(5).build());
-    assertNotEquals(ImmutableList.of(testCluster()), db.getBigtableClusters());
+    assertNotEquals(List.of(testCluster()), db.getBigtableClusters());
     db.updateBigtableCluster(testCluster());
-    assertEquals(ImmutableList.of(testCluster()), db.getBigtableClusters());
+    assertEquals(List.of(testCluster()), db.getBigtableClusters());
   }
 
   @Test
   public void enable() {
     db.insertBigtableCluster(BigtableClusterBuilder.from(testCluster()).enabled(false).build());
-    assertNotEquals(ImmutableList.of(testCluster()), db.getBigtableClusters());
+    assertNotEquals(List.of(testCluster()), db.getBigtableClusters());
     db.updateBigtableCluster(testCluster());
-    assertEquals(ImmutableList.of(testCluster()), db.getBigtableClusters());
+    assertEquals(List.of(testCluster()), db.getBigtableClusters());
   }
 
   @Test

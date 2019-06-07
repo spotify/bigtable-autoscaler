@@ -32,7 +32,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import com.codahale.metrics.Meter;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -45,6 +44,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -70,7 +70,7 @@ public class AutoscalerTest {
 
   @Mock private AutoscaleJob autoscaleJob;
 
-  ExecutorService executorService = MoreExecutors.newDirectExecutorService();
+  ExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
   BigtableCluster cluster1 =
       new BigtableClusterBuilder()
