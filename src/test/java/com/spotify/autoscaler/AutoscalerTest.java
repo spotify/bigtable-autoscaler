@@ -38,6 +38,7 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
+import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
@@ -95,6 +96,18 @@ public class AutoscalerTest {
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 
+  private Autoscaler getAutoscaler(final ClusterFilter cluster) {
+    return new Autoscaler(
+        autoscaleJobFactory,
+        executorService,
+        registry,
+        stackDriverClient,
+        database,
+        sessionProvider,
+        clusterStats,
+        cluster);
+  }
+
   @Before
   public void setUp() throws IOException {
     initMocks(this);
@@ -114,16 +127,7 @@ public class AutoscalerTest {
     when(database.updateLastChecked(cluster1)).thenReturn(true).thenReturn(false);
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
 
-    final Autoscaler autoscaler =
-        new Autoscaler(
-            autoscaleJobFactory,
-            executorService,
-            registry,
-            stackDriverClient,
-            database,
-            sessionProvider,
-            clusterStats,
-            new AllowAllClusterFilter());
+    final Autoscaler autoscaler = getAutoscaler(new AllowAllClusterFilter());
 
     autoscaler.run();
 
@@ -159,16 +163,7 @@ public class AutoscalerTest {
         .thenReturn(false); // Simulate this cluster was "taken" by another host
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
 
-    final Autoscaler autoscaler =
-        new Autoscaler(
-            autoscaleJobFactory,
-            executorService,
-            registry,
-            stackDriverClient,
-            database,
-            sessionProvider,
-            clusterStats,
-            new AllowAllClusterFilter());
+    final Autoscaler autoscaler = getAutoscaler(new AllowAllClusterFilter());
 
     autoscaler.run();
 
@@ -186,16 +181,7 @@ public class AutoscalerTest {
     when(database.getCandidateClusters()).thenReturn(Arrays.asList(cluster1, cluster2));
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
 
-    final Autoscaler autoscaler =
-        new Autoscaler(
-            autoscaleJobFactory,
-            executorService,
-            registry,
-            stackDriverClient,
-            database,
-            sessionProvider,
-            clusterStats,
-            cluster -> cluster.clusterId().equals("cluster2"));
+    final Autoscaler autoscaler = getAutoscaler(cluster -> cluster.clusterId().equals("cluster2"));
 
     autoscaler.run();
 
@@ -222,16 +208,7 @@ public class AutoscalerTest {
             any(), any(), eq(cluster1), any(), any(), any(), any()))
         .thenThrow(new RuntimeException("cluster1"));
 
-    final Autoscaler autoscaler =
-        new Autoscaler(
-            autoscaleJobFactory,
-            executorService,
-            registry,
-            stackDriverClient,
-            database,
-            sessionProvider,
-            clusterStats,
-            new AllowAllClusterFilter());
+    final Autoscaler autoscaler = getAutoscaler(new AllowAllClusterFilter());
 
     autoscaler.run();
 

@@ -69,17 +69,18 @@ CREATE TABLE IF NOT EXISTS resize_log (
 CREATE INDEX ON resize_log(timestamp);
 
 --cluster count limit trigger
-CREATE OR REPLACE FUNCTION enforce_cluster_count_limit() RETURNS trigger AS $$
+CREATE OR REPLACE FUNCTION enforce_cluster_count_limit() RETURNS trigger AS 
+'
 DECLARE
 max_cluster_count INTEGER := 200;
 cluster_count INTEGER := 0;
 must_check BOOLEAN := false;
 BEGIN
-IF TG_OP = 'INSERT' THEN
+IF TG_OP = ''INSERT'' THEN
 must_check := true;
 END IF;
 
-IF TG_OP = 'UPDATE' THEN
+IF TG_OP = ''UPDATE'' THEN
 IF (NEW.enabled = true AND OLD.enabled = false) THEN
 must_check := true;
 END IF;
@@ -94,13 +95,14 @@ FROM autoscale
 WHERE enabled = true;
 
 IF cluster_count >= max_cluster_count THEN
-RAISE EXCEPTION 'Cannot insert more than % clusters.', max_cluster_count;
+RAISE EXCEPTION ''Cannot insert more than % clusters.'', max_cluster_count;
 END IF;
 END IF;
 
 RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+'
+LANGUAGE plpgsql;
 
 DROP TRIGGER IF EXISTS enforce_cluster_count_limit on autoscale;
 CREATE TRIGGER enforce_cluster_count_limit
