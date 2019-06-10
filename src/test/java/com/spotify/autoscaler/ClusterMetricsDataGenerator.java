@@ -20,6 +20,7 @@
 
 package com.spotify.autoscaler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.monitoring.v3.MetricServiceClient;
 import com.google.cloud.monitoring.v3.PagedResponseWrappers;
 import com.google.monitoring.v3.ListTimeSeriesRequest;
@@ -31,7 +32,9 @@ import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.Timestamp;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -42,6 +45,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class ClusterMetricsDataGenerator {
+
+  private static final String PROJECT_ID = "test-project-id";
+  public static final String INSTANCE_ID = "test-instance-id";
+  public static final String CLUSTER_ID = "test-cluster-id";
+  public static final String PATH_METRICS = "src/test/resources";
 
   private static final String NODE_COUNT =
       "metric.type=\"bigtable.googleapis.com/cluster/node_count\""
@@ -62,14 +70,14 @@ public class ClusterMetricsDataGenerator {
   public static void main(String[] args) throws IOException {
     final BigtableCluster cluster =
         new BigtableClusterBuilder()
-            .projectId("test-project")
-            .instanceId("test-instance")
-            .clusterId("test-cluster")
+            .projectId(PROJECT_ID)
+            .instanceId(INSTANCE_ID)
+            .clusterId(CLUSTER_ID)
             .build();
 
     final TimeInterval interval = interval(Duration.ofHours(24));
 
-    Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440);  // Resolution: minutes
+    Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440); // Resolution: minutes
     populateIntervalWithValue(interval, metrics, p -> new ClusterMetricsData());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
@@ -78,9 +86,18 @@ public class ClusterMetricsDataGenerator {
     populateReceivedBytes(metricServiceClient, metrics, cluster, interval);
     populateSentBytes(metricServiceClient, metrics, cluster, interval);
 
-    metrics.forEach((k,v) -> System.out.println(k + " - " + v ));
     // save metrics as json
-
+    try (FileWriter file =
+        new FileWriter(
+            Paths.get(
+                    PATH_METRICS,
+                    String.format("%s_%s_%s.json", PROJECT_ID, INSTANCE_ID, CLUSTER_ID))
+                .toString())) {
+      file.write(new ObjectMapper().writeValueAsString(metrics));
+      file.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
   }
 
   private static void populateSentBytes(
@@ -201,10 +218,11 @@ public class ClusterMetricsDataGenerator {
                 existing.sentBytes));
   }
 
-  private static void aggregate(final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
-                                final Map<Instant, ClusterMetricsData> metrics,
-                                final Function<TypedValue, Double> converter,
-                                final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator) {
+  private static void aggregate(
+      final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final Function<TypedValue, Double> converter,
+      final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator) {
 
     for (PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
       for (TimeSeries ts : page.getValues()) {
