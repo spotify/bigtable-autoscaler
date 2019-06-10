@@ -214,7 +214,13 @@ public class AutoscaleJobIT {
 
       job =
           new AutoscaleJob(
-              bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, timeSupplier);
+              bigtableSession,
+              stackdriverClient,
+              cluster,
+              db,
+              registry,
+              clusterStats,
+              timeSupplier);
       job.run();
     }
   }
@@ -245,11 +251,18 @@ public class AutoscaleJobIT {
       now = now.plus(Duration.ofSeconds(300));
       timeSupplier.setTime(now);
       AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, fakeBTCluster.getCPU());
-      AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, fakeBTCluster.getStorage());
+      AutoscaleJobTestMocks.setCurrentDiskUtilization(
+          stackdriverClient, fakeBTCluster.getStorage());
 
       job =
           new AutoscaleJob(
-              bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, timeSupplier);
+              bigtableSession,
+              stackdriverClient,
+              cluster,
+              db,
+              registry,
+              clusterStats,
+              timeSupplier);
       job.run();
     }
   }
