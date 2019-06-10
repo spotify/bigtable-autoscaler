@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 public class TimeSupplier implements Supplier<Instant> {
 
-  Instant time;
+  private Instant time;
 
   public void setTime(final Instant time) {
     this.time = time;
