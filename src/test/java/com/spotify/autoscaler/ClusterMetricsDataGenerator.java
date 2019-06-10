@@ -1,3 +1,23 @@
+/*-
+ * -\-\-
+ * bigtable-autoscaler
+ * --
+ * Copyright (C) 2018 Spotify AB
+ * --
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -/-/-
+ */
+
 package com.spotify.autoscaler;
 
 import com.google.cloud.monitoring.v3.MetricServiceClient;
@@ -24,29 +44,31 @@ public class ClusterMetricsDataGenerator {
 
   private static final String NODE_COUNT =
       "metric.type=\"bigtable.googleapis.com/cluster/node_count\""
-      + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
 
   private static final String DISK_USAGE_METRIC =
       "metric.type=\"bigtable.googleapis.com/cluster/storage_utilization\""
-      + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
 
   private static final String RECEIVED_BYTES_METRIC =
       "metric.type=\"bigtable.googleapis.com/server/received_bytes_count\""
-      + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
 
   private static final String SENT_BYTES_METRIC =
       "metric.type=\"bigtable.googleapis.com/server/sent_bytes_count\""
-      + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
 
-
-  public static void main(String [] args) throws IOException {
+  public static void main(String[] args) throws IOException {
     final BigtableCluster cluster =
-        new BigtableClusterBuilder().projectId("test-project").instanceId("test-instance").clusterId(
-            "test-cluster").build();
+        new BigtableClusterBuilder()
+            .projectId("test-project")
+            .instanceId("test-instance")
+            .clusterId("test-cluster")
+            .build();
 
     final TimeInterval interval = interval(Duration.ofHours(24));
 
-    Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440);  // Resolution: minutes
+    Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440); // Resolution: minutes
     populateIntervalWithValue(interval, metrics, (p) -> new ClusterMetricsData());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
@@ -59,78 +81,120 @@ public class ClusterMetricsDataGenerator {
 
   }
 
-  private static void populateSentBytes(final MetricServiceClient metricServiceClient, final Map<Instant, ClusterMetricsData> metrics, final BigtableCluster cluster, final TimeInterval interval) {
+  private static void populateSentBytes(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
 
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
-                SENT_BYTES_METRIC, cluster.projectId(), cluster.instanceId(),
-                cluster.clusterId()),
+                SENT_BYTES_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
-        (existing, newValue) -> new ClusterMetricsData(existing.diskUtilization,existing.nodeCount,
-            existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes, existing.sentBytes + newValue));
-
+    aggregate(
+        response,
+        metrics,
+        (existing, newValue) ->
+            new ClusterMetricsData(
+                existing.diskUtilization,
+                existing.nodeCount,
+                existing.writeOpsCount,
+                existing.readOpsCount,
+                existing.receivedBytes,
+                existing.sentBytes + newValue));
   }
 
-  private static void populateReceivedBytes(final MetricServiceClient metricServiceClient,
-                                            final Map<Instant, ClusterMetricsData> metrics,
-                                            final BigtableCluster cluster, final TimeInterval interval) {
+  private static void populateReceivedBytes(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
 
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
-                RECEIVED_BYTES_METRIC, cluster.projectId(), cluster.instanceId(),
+                RECEIVED_BYTES_METRIC,
+                cluster.projectId(),
+                cluster.instanceId(),
                 cluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
-        (existing, newValue) -> new ClusterMetricsData(existing.diskUtilization,existing.nodeCount,
-            existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes + newValue, existing.sentBytes));
-
+    aggregate(
+        response,
+        metrics,
+        (existing, newValue) ->
+            new ClusterMetricsData(
+                existing.diskUtilization,
+                existing.nodeCount,
+                existing.writeOpsCount,
+                existing.readOpsCount,
+                existing.receivedBytes + newValue,
+                existing.sentBytes));
   }
 
-  private static void populateNodeCount(final MetricServiceClient metricServiceClient, final Map<Instant, ClusterMetricsData> metrics, final BigtableCluster cluster, final TimeInterval interval) {
+  private static void populateNodeCount(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
 
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
-                NODE_COUNT, cluster.projectId(), cluster.instanceId(),
-                cluster.clusterId()),
+                NODE_COUNT, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
-        (existing, newValue) -> new ClusterMetricsData(existing.diskUtilization, Math.max(existing.nodeCount, newValue),
-                existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes, existing.sentBytes));
+    aggregate(
+        response,
+        metrics,
+        (existing, newValue) ->
+            new ClusterMetricsData(
+                existing.diskUtilization,
+                Math.max(existing.nodeCount, newValue),
+                existing.writeOpsCount,
+                existing.readOpsCount,
+                existing.receivedBytes,
+                existing.sentBytes));
   }
 
-
-  private static void populateDiskUtilization(final MetricServiceClient metricServiceClient,
-                                                        final Map<Instant, ClusterMetricsData> metrics,
-                                                        final BigtableCluster bigtableCluster,
-                                                        final TimeInterval interval) {
+  private static void populateDiskUtilization(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster bigtableCluster,
+      final TimeInterval interval) {
 
     PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(bigtableCluster.projectId()),
             String.format(
-                DISK_USAGE_METRIC, bigtableCluster.projectId(), bigtableCluster.instanceId(),
+                DISK_USAGE_METRIC,
+                bigtableCluster.projectId(),
+                bigtableCluster.instanceId(),
                 bigtableCluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
-        (existing, newValue) -> new ClusterMetricsData(Math.max(existing.diskUtilization,
-        newValue), existing.nodeCount, existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes,
-        existing.sentBytes));
+    aggregate(
+        response,
+        metrics,
+        (existing, newValue) ->
+            new ClusterMetricsData(
+                Math.max(existing.diskUtilization, newValue),
+                existing.nodeCount,
+                existing.writeOpsCount,
+                existing.readOpsCount,
+                existing.receivedBytes,
+                existing.sentBytes));
   }
 
-  private static void aggregate(final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
-                                                final Map<Instant, ClusterMetricsData> metrics,
-                                                final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator) {
+  private static void aggregate(
+      final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator) {
 
     for (PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
       for (TimeSeries ts : page.getValues()) {
@@ -142,16 +206,17 @@ public class ClusterMetricsDataGenerator {
     }
   }
 
-  private static void populateIntervalWithValue(final TimeInterval interval,
-                                                final Map<Instant, ClusterMetricsData> result,
-                                                final Function<ClusterMetricsData, ClusterMetricsData> valueCalculator) {
+  private static void populateIntervalWithValue(
+      final TimeInterval interval,
+      final Map<Instant, ClusterMetricsData> result,
+      final Function<ClusterMetricsData, ClusterMetricsData> valueCalculator) {
 
     final Instant startInstant = Instant.ofEpochSecond(interval.getStartTime().getSeconds());
     final Instant startMinute = startInstant.truncatedTo(ChronoUnit.MINUTES);
     final Instant endInstant = Instant.ofEpochSecond(interval.getEndTime().getSeconds());
     final Instant endMinute = endInstant.truncatedTo(ChronoUnit.MINUTES);
 
-    for(Instant i = startMinute; !i.isAfter(endMinute); i = i.plus(1, ChronoUnit.MINUTES)) {
+    for (Instant i = startMinute; !i.isAfter(endMinute); i = i.plus(1, ChronoUnit.MINUTES)) {
       result.put(i, valueCalculator.apply(result.get(i)));
     }
   }
@@ -177,8 +242,13 @@ public class ClusterMetricsDataGenerator {
     public Double receivedBytes = 0.0d;
     public Double sentBytes = 0.0d;
 
-    private ClusterMetricsData(final Double diskUtilization, final Double nodeCount, final Double writeOpsCount,
-                               final Double readOpsCount, final Double receivedBytes, final Double sentBytes) {
+    private ClusterMetricsData(
+        final Double diskUtilization,
+        final Double nodeCount,
+        final Double writeOpsCount,
+        final Double readOpsCount,
+        final Double receivedBytes,
+        final Double sentBytes) {
       this.diskUtilization = diskUtilization;
       this.nodeCount = nodeCount;
       this.writeOpsCount = writeOpsCount;
@@ -187,7 +257,6 @@ public class ClusterMetricsDataGenerator {
       this.sentBytes = sentBytes;
     }
 
-    private ClusterMetricsData() {
-    }
+    private ClusterMetricsData() {}
   }
 }
