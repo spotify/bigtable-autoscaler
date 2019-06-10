@@ -21,16 +21,20 @@
 package com.spotify.autoscaler;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.function.Supplier;
 
 public class FakeBTCluster {
 
   private final Supplier<Instant> timeSource;
   private int nodes;
+  private Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics;
 
-  public FakeBTCluster(final Supplier<Instant> timeSource) {
+  public FakeBTCluster(final Supplier<Instant> timeSource, Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics) {
 
     this.timeSource = timeSource;
+    this.metrics = metrics;
   }
 
   void setNumberOfNodes(final int nodes) {
@@ -38,10 +42,17 @@ public class FakeBTCluster {
   }
 
   public double getCPU() {
+    final ClusterMetricsDataGenerator.ClusterMetricsData currentMetrics = getMetricsForNow();
     return 0.5;
   }
 
   public double getStorage() {
-    return 0.5;
+    return getMetricsForNow().diskUtilization;
+  }
+
+  private ClusterMetricsDataGenerator.ClusterMetricsData getMetricsForNow() {
+    final Instant now = timeSource.get();
+    final Instant nowMinute = now.truncatedTo(ChronoUnit.MINUTES);
+    return metrics.get(nowMinute);
   }
 }

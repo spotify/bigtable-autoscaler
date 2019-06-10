@@ -47,8 +47,8 @@ import java.util.function.Function;
 public class ClusterMetricsDataGenerator {
 
   private static final String PROJECT_ID = "test-project-id";
-  public static final String INSTANCE_ID = "test-instance-id";
-  public static final String CLUSTER_ID = "test-cluster-id";
+  private static final String INSTANCE_ID = "test-instance-id";
+  private static final String CLUSTER_ID = "test-cluster-id";
   public static final String PATH_METRICS = "src/test/resources";
 
   private static final String NODE_COUNT =
@@ -86,6 +86,9 @@ public class ClusterMetricsDataGenerator {
     populateReceivedBytes(metricServiceClient, metrics, cluster, interval);
     populateSentBytes(metricServiceClient, metrics, cluster, interval);
 
+    Map<String, ClusterMetricsData> data = new HashMap<>();
+    metrics.forEach((k, v) -> data.put(k.toString(), v));
+
     // save metrics as json
     try (FileWriter file =
         new FileWriter(
@@ -93,7 +96,7 @@ public class ClusterMetricsDataGenerator {
                     PATH_METRICS,
                     String.format("%s_%s_%s.json", PROJECT_ID, INSTANCE_ID, CLUSTER_ID))
                 .toString())) {
-      file.write(new ObjectMapper().writeValueAsString(metrics));
+      file.write(new ObjectMapper().writeValueAsString(data));
       file.flush();
     } catch (IOException e) {
       e.printStackTrace();
