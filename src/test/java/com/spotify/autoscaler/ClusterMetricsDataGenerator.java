@@ -7,6 +7,7 @@ import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.ProjectName;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
+import com.google.monitoring.v3.TypedValue;
 import com.google.protobuf.Timestamp;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -47,7 +48,7 @@ public class ClusterMetricsDataGenerator {
     final TimeInterval interval = interval(Duration.ofHours(24));
 
     Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440);  // Resolution: minutes
-    populateIntervalWithValue(interval, metrics, (p) -> new ClusterMetricsData());
+    populateIntervalWithValue(interval, metrics, p -> new ClusterMetricsData());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
     populateDiskUtilization(metricServiceClient, metrics, cluster, interval);
@@ -55,6 +56,7 @@ public class ClusterMetricsDataGenerator {
     populateReceivedBytes(metricServiceClient, metrics, cluster, interval);
     populateSentBytes(metricServiceClient, metrics, cluster, interval);
 
+    metrics.forEach((k,v) -> System.out.println(k + " - " + v ));
     // save metrics as json
 
   }
@@ -69,7 +71,7 @@ public class ClusterMetricsDataGenerator {
                 cluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
+    aggregate(response, metrics, v -> (double) v.getInt64Value(),
         (existing, newValue) -> new ClusterMetricsData(existing.diskUtilization,existing.nodeCount,
             existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes, existing.sentBytes + newValue));
 
@@ -87,7 +89,7 @@ public class ClusterMetricsDataGenerator {
                 cluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
+    aggregate(response, metrics, v -> (double) v.getInt64Value(),
         (existing, newValue) -> new ClusterMetricsData(existing.diskUtilization,existing.nodeCount,
             existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes + newValue, existing.sentBytes));
 
@@ -103,7 +105,7 @@ public class ClusterMetricsDataGenerator {
                 cluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
+    aggregate(response, metrics,v -> (double) v.getInt64Value(),
         (existing, newValue) -> new ClusterMetricsData(existing.diskUtilization, Math.max(existing.nodeCount, newValue),
                 existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes, existing.sentBytes));
   }
@@ -122,7 +124,7 @@ public class ClusterMetricsDataGenerator {
                 bigtableCluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
-    aggregate(response, metrics,
+    aggregate(response, metrics,TypedValue::getDoubleValue,
         (existing, newValue) -> new ClusterMetricsData(Math.max(existing.diskUtilization,
         newValue), existing.nodeCount, existing.writeOpsCount, existing.readOpsCount, existing.receivedBytes,
         existing.sentBytes));
@@ -130,12 +132,13 @@ public class ClusterMetricsDataGenerator {
 
   private static void aggregate(final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
                                                 final Map<Instant, ClusterMetricsData> metrics,
+                                                final Function<TypedValue, Double> converter,
                                                 final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator) {
 
     for (PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
       for (TimeSeries ts : page.getValues()) {
         for (Point p : ts.getPointsList()) {
-          Double value = p.getValue().getDoubleValue();
+          Double value = converter.apply(p.getValue());
           populateIntervalWithValue(p.getInterval(), metrics, q -> valueCalculator.apply(q, value));
         }
       }
@@ -188,6 +191,12 @@ public class ClusterMetricsDataGenerator {
     }
 
     private ClusterMetricsData() {
+    }
+
+    @Override
+    public String toString() {
+      return "disk: " + diskUtilization + " ,nodes: " + nodeCount + " ,receivedBytes: " + receivedBytes + " ,"
+             + "sentBytes: " + sentBytes;
     }
   }
 }
