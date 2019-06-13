@@ -31,7 +31,9 @@ public class FakeBTCluster {
   private int nodes;
   private Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics;
 
-  public FakeBTCluster(final Supplier<Instant> timeSource, Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics) {
+  public FakeBTCluster(
+      final Supplier<Instant> timeSource,
+      Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics) {
 
     this.timeSource = timeSource;
     this.metrics = metrics;
@@ -43,11 +45,13 @@ public class FakeBTCluster {
 
   public double getCPU() {
     final ClusterMetricsDataGenerator.ClusterMetricsData currentMetrics = getMetricsForNow();
+    // calculate the simulated cpu from metrics + nodes
     return 0.5;
   }
 
   public double getStorage() {
-    return getMetricsForNow().diskUtilization;
+    final ClusterMetricsDataGenerator.ClusterMetricsData metricsForNow = getMetricsForNow();
+    return Math.ceil(metricsForNow.diskUtilization * metricsForNow.nodeCount / nodes);
   }
 
   private ClusterMetricsDataGenerator.ClusterMetricsData getMetricsForNow() {

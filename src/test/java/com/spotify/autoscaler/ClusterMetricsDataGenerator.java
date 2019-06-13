@@ -49,7 +49,7 @@ public class ClusterMetricsDataGenerator {
   private static final String PROJECT_ID = "test-project-id";
   private static final String INSTANCE_ID = "test-instance-id";
   private static final String CLUSTER_ID = "test-cluster-id";
-  public static final String PATH_METRICS = "src/test/resources";
+  public static final String PATH_METRICS = "src/test/resources/simulated_clusters";
 
   private static final String NODE_COUNT =
       "metric.type=\"bigtable.googleapis.com/cluster/node_count\""

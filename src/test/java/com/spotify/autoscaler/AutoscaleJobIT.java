@@ -21,6 +21,7 @@
 package com.spotify.autoscaler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -45,6 +46,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -83,6 +86,8 @@ public class AutoscaleJobIT {
           .build();
   int newSize;
 
+  private static Map<Cluster, FakeBTCluster> simulatedClusters = new HashMap<>();
+
   @Before
   public void setUp() throws IOException, SQLException {
     initMocks(this);
@@ -103,8 +108,13 @@ public class AutoscaleJobIT {
     when(bigtableInstanceClient.updateCluster(any()))
         .thenAnswer(
             invocationOnMock -> {
-              newSize = ((Cluster) invocationOnMock.getArgument(0)).getServeNodes();
+              final Cluster cluster = invocationOnMock.getArgument(0);
+              newSize = cluster.getServeNodes();
               AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, newSize);
+              final FakeBTCluster fakeBTCluster = simulatedClusters.get(cluster);
+              if (fakeBTCluster != null) {
+                fakeBTCluster.setNumberOfNodes(newSize);
+              }
               return null;
             });
   }
@@ -206,66 +216,69 @@ public class AutoscaleJobIT {
     // there is no Connection leak.
     final Random random = new Random();
     final Instant start = Instant.now();
+
     final TimeSupplier timeSupplier = new TimeSupplier();
     timeSupplier.setTime(start);
 
-    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
-
-    Instant now = start;
-    for (int i = 0; i < 512; ++i) {
-      now = now.plus(Duration.ofSeconds(300));
-      AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, random.nextDouble());
-      AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, random.nextDouble());
-
-      job =
-          new AutoscaleJob(
-              bigtableSession,
-              stackdriverClient,
-              cluster,
-              db,
-              registry,
-              clusterStats,
-              timeSupplier);
-      job.run();
-    }
+    testThroughTime(
+        timeSupplier,
+        Duration.ofSeconds(300),
+        512,
+        random::nextDouble,
+        random::nextDouble,
+        ignored -> assertTrue(true));
   }
 
   @Test
   public void simulateCluster() throws IOException {
-    // This test is useful to see that we don't get stuck at any point, for example
-    // there is no Connection leak.
-    final Instant start = Instant.now();
+    final Instant start = Instant.parse("2019-06-09T13:31:00Z");
     final TimeSupplier timeSupplier = new TimeSupplier();
     timeSupplier.setTime(start);
+
     final ObjectMapper jsonMapper = new ObjectMapper();
     final Map<String, ClusterMetricsDataGenerator.ClusterMetricsData> tmp =
-        jsonMapper.readValue(Paths.get(ClusterMetricsDataGenerator.PATH_METRICS, "test-cluster-metrics.json").toFile(),
+        jsonMapper.readValue(
+            Paths.get(ClusterMetricsDataGenerator.PATH_METRICS, "test-cluster-metrics.json")
+                .toFile(),
             new TypeReference<Map<String, ClusterMetricsDataGenerator.ClusterMetricsData>>() {});
 
     final Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics = new HashMap<>();
     tmp.forEach((k, v) -> metrics.put(Instant.parse(k), v));
 
-    final FakeBTCluster fakeBTCluster = new FakeBTCluster(timeSupplier, metrics);
-
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
+
+    final FakeBTCluster fakeBTCluster = new FakeBTCluster(timeSupplier, metrics);
     fakeBTCluster.setNumberOfNodes(100);
 
-    when(bigtableInstanceClient.updateCluster(any()))
-        .thenAnswer(
-            invocationOnMock -> {
-              newSize = ((Cluster) invocationOnMock.getArgument(0)).getServeNodes();
-              AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, newSize);
-              fakeBTCluster.setNumberOfNodes(newSize);
-              return null;
-            });
+    simulatedClusters.put(
+        Cluster.newBuilder().setName(cluster.clusterName()).build(), fakeBTCluster);
 
-    Instant now = start;
-    for (int i = 0; i < 512; ++i) {
-      now = now.plus(Duration.ofSeconds(300));
+    testThroughTime(
+        timeSupplier,
+        Duration.ofSeconds(300),
+        280,
+        fakeBTCluster::getCPU,
+        fakeBTCluster::getStorage,
+        ignored -> assertTrue(fakeBTCluster.getCPU() < 0.9d));
+  }
+
+  private void testThroughTime(
+      final TimeSupplier timeSupplier,
+      final Duration period,
+      final int repetition,
+      final Supplier<Double> cpuSupplier,
+      final Supplier<Double> diskUtilSupplier,
+      final Consumer<Void> assertion)
+      throws IOException {
+
+    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
+
+    Instant now = timeSupplier.get();
+    for (int i = 0; i < repetition; ++i) {
+      now = now.plus(period);
       timeSupplier.setTime(now);
-      AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, fakeBTCluster.getCPU());
-      AutoscaleJobTestMocks.setCurrentDiskUtilization(
-          stackdriverClient, fakeBTCluster.getStorage());
+      AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
+      AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
       job =
           new AutoscaleJob(
@@ -277,6 +290,7 @@ public class AutoscaleJobIT {
               clusterStats,
               timeSupplier);
       job.run();
+      assertion.accept(null);
     }
   }
 }
