@@ -62,6 +62,10 @@ public class ClusterMetricsDataGenerator {
           "metric.type=\"bigtable.googleapis.com/cluster/storage_utilization\" " + "AND %s",
           CLUSTER_FILTER);
 
+  private static final String CPU_LOAD_METRIC =
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" " + "AND %s", CLUSTER_FILTER);
+
   private static final String RECEIVED_BYTES_METRIC =
       String.format(
           "metric.type=\"bigtable.googleapis.com/server/received_bytes_count\" " + "AND %s",
@@ -71,6 +75,25 @@ public class ClusterMetricsDataGenerator {
       String.format(
           "metric.type=\"bigtable.googleapis.com/server/sent_bytes_count\" " + "AND %s",
           CLUSTER_FILTER);
+
+  private static final String REQUEST_COUNT_METRIC =
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/server/request_count\" " + "AND %s",
+          CLUSTER_FILTER);
+
+  private static final String MODIFIED_ROWS_METRIC =
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/server/modified_rows_count\" " + "AND %s",
+          CLUSTER_FILTER);
+
+  private static final String RETURNED_ROWS_METRIC =
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/server/returned_rows_count\" " + "AND %s",
+          CLUSTER_FILTER);
+
+  private static final String ERROR_COUNT_METRIC =
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/server/error_count\" " + "AND %s", CLUSTER_FILTER);
 
   public static void main(String[] args) throws IOException {
     final BigtableCluster cluster =
@@ -83,13 +106,18 @@ public class ClusterMetricsDataGenerator {
     final TimeInterval interval = interval(Duration.ofHours(24));
 
     Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440); // Resolution: minutes
-    populateIntervalWithValue(interval, metrics, p -> new ClusterMetricsData());
+    populateIntervalWithValue(interval, metrics, p -> ClusterMetricsData.builder().build());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
     populateDiskUtilization(metricServiceClient, metrics, cluster, interval);
     populateNodeCount(metricServiceClient, metrics, cluster, interval);
     populateReceivedBytes(metricServiceClient, metrics, cluster, interval);
     populateSentBytes(metricServiceClient, metrics, cluster, interval);
+    populateCPULoad(metricServiceClient, metrics, cluster, interval);
+    populateRequestCount(metricServiceClient, metrics, cluster, interval);
+    populateModifiedRows(metricServiceClient, metrics, cluster, interval);
+    populateReturnedRows(metricServiceClient, metrics, cluster, interval);
+    populateErrorCount(metricServiceClient, metrics, cluster, interval);
 
     Map<String, ClusterMetricsData> data = new HashMap<>();
     metrics.forEach((k, v) -> data.put(k.toString(), v));
@@ -102,6 +130,139 @@ public class ClusterMetricsDataGenerator {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private static void populateErrorCount(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
+
+    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+        metricServiceClient.listTimeSeries(
+            ProjectName.of(cluster.projectId()),
+            String.format(
+                ERROR_COUNT_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
+            interval,
+            ListTimeSeriesRequest.TimeSeriesView.FULL);
+
+    aggregate(
+        response,
+        metrics,
+        v -> (double) v.getInt64Value(),
+        (existing, newValue) ->
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .errorCount(Double.sum(existing.errorCount(), newValue))
+                .build(),
+        true);
+  }
+
+  private static void populateReturnedRows(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
+
+    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+        metricServiceClient.listTimeSeries(
+            ProjectName.of(cluster.projectId()),
+            String.format(
+                RETURNED_ROWS_METRIC,
+                cluster.projectId(),
+                cluster.instanceId(),
+                cluster.clusterId()),
+            interval,
+            ListTimeSeriesRequest.TimeSeriesView.FULL);
+
+    aggregate(
+        response,
+        metrics,
+        v -> (double) v.getInt64Value(),
+        (existing, newValue) ->
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .returnedRows(Double.sum(existing.returnedRows(), newValue))
+                .build(),
+        true);
+  }
+
+  private static void populateModifiedRows(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
+
+    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+        metricServiceClient.listTimeSeries(
+            ProjectName.of(cluster.projectId()),
+            String.format(
+                MODIFIED_ROWS_METRIC,
+                cluster.projectId(),
+                cluster.instanceId(),
+                cluster.clusterId()),
+            interval,
+            ListTimeSeriesRequest.TimeSeriesView.FULL);
+
+    aggregate(
+        response,
+        metrics,
+        v -> (double) v.getInt64Value(),
+        (existing, newValue) ->
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .modifiedRows(Double.sum(existing.modifiedRows(), newValue))
+                .build(),
+        true);
+  }
+
+  private static void populateRequestCount(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
+
+    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+        metricServiceClient.listTimeSeries(
+            ProjectName.of(cluster.projectId()),
+            String.format(
+                REQUEST_COUNT_METRIC,
+                cluster.projectId(),
+                cluster.instanceId(),
+                cluster.clusterId()),
+            interval,
+            ListTimeSeriesRequest.TimeSeriesView.FULL);
+
+    aggregate(
+        response,
+        metrics,
+        v -> (double) v.getInt64Value(),
+        (existing, newValue) ->
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .requestCount(Double.sum(existing.requestCount(), newValue))
+                .build(),
+        true);
+  }
+
+  private static void populateCPULoad(
+      final MetricServiceClient metricServiceClient,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final BigtableCluster cluster,
+      final TimeInterval interval) {
+
+    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+        metricServiceClient.listTimeSeries(
+            ProjectName.of(cluster.projectId()),
+            String.format(
+                CPU_LOAD_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
+            interval,
+            ListTimeSeriesRequest.TimeSeriesView.FULL);
+
+    aggregate(
+        response,
+        metrics,
+        TypedValue::getDoubleValue,
+        (existing, newValue) ->
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .cpuLoad(Math.max(existing.cpuLoad(), newValue))
+                .build());
   }
 
   private static void populateSentBytes(
@@ -123,13 +284,10 @@ public class ClusterMetricsDataGenerator {
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
-            new ClusterMetricsData(
-                existing.diskUtilization,
-                existing.nodeCount,
-                existing.writeOpsCount,
-                existing.readOpsCount,
-                existing.receivedBytes,
-                Double.sum(existing.sentBytes, newValue)));
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .sentBytes(Double.sum(existing.sentBytes(), newValue))
+                .build(),
+        true);
   }
 
   private static void populateReceivedBytes(
@@ -154,13 +312,10 @@ public class ClusterMetricsDataGenerator {
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
-            new ClusterMetricsData(
-                existing.diskUtilization,
-                existing.nodeCount,
-                existing.writeOpsCount,
-                existing.readOpsCount,
-                Double.sum(existing.receivedBytes, newValue),
-                existing.sentBytes));
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .receivedBytes(Double.sum(existing.receivedBytes(), newValue))
+                .build(),
+        true);
   }
 
   private static void populateNodeCount(
@@ -182,13 +337,9 @@ public class ClusterMetricsDataGenerator {
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
-            new ClusterMetricsData(
-                existing.diskUtilization,
-                Math.max(existing.nodeCount, newValue),
-                existing.writeOpsCount,
-                existing.readOpsCount,
-                existing.receivedBytes,
-                existing.sentBytes));
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .nodeCount(Math.max(existing.nodeCount(), newValue))
+                .build());
   }
 
   private static void populateDiskUtilization(
@@ -213,13 +364,9 @@ public class ClusterMetricsDataGenerator {
         metrics,
         TypedValue::getDoubleValue,
         (existing, newValue) ->
-            new ClusterMetricsData(
-                Math.max(existing.diskUtilization, newValue),
-                existing.nodeCount,
-                existing.writeOpsCount,
-                existing.readOpsCount,
-                existing.receivedBytes,
-                existing.sentBytes));
+            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .diskUtilization(Math.max(existing.diskUtilization(), newValue))
+                .build());
   }
 
   private static void aggregate(
@@ -227,12 +374,34 @@ public class ClusterMetricsDataGenerator {
       final Map<Instant, ClusterMetricsData> metrics,
       final Function<TypedValue, Double> converter,
       final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator) {
+    aggregate(response, metrics, converter, valueCalculator, false);
+  }
+
+  private static void aggregate(
+      final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
+      final Map<Instant, ClusterMetricsData> metrics,
+      final Function<TypedValue, Double> converter,
+      final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator,
+      final boolean distribute) {
 
     for (PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
       for (TimeSeries ts : page.getValues()) {
         for (Point p : ts.getPointsList()) {
           Double value = converter.apply(p.getValue());
-          populateIntervalWithValue(p.getInterval(), metrics, q -> valueCalculator.apply(q, value));
+          if (distribute) {
+            final Instant startInstant =
+                Instant.ofEpochSecond(p.getInterval().getStartTime().getSeconds());
+            final Instant endInstant =
+                Instant.ofEpochSecond(p.getInterval().getEndTime().getSeconds());
+            final long minutesBetween =
+                Duration.between(startInstant, endInstant).abs().toMinutes();
+            final double distributedValue = value / minutesBetween;
+            populateIntervalWithValue(
+                p.getInterval(), metrics, q -> valueCalculator.apply(q, distributedValue));
+          } else {
+            populateIntervalWithValue(
+                p.getInterval(), metrics, q -> valueCalculator.apply(q, value));
+          }
         }
       }
     }
@@ -248,7 +417,9 @@ public class ClusterMetricsDataGenerator {
     final Instant endInstant = Instant.ofEpochSecond(interval.getEndTime().getSeconds());
     final Instant endMinute = endInstant.truncatedTo(ChronoUnit.MINUTES);
 
-    for (Instant i = startMinute; !i.isAfter(endMinute); i = i.plus(1, ChronoUnit.MINUTES)) {
+    for (Instant i = startMinute;
+        i.isBefore(endMinute) || i.equals(startMinute);
+        i = i.plus(1, ChronoUnit.MINUTES)) {
       result.put(i, valueCalculator.apply(result.get(i)));
     }
   }
@@ -264,31 +435,5 @@ public class ClusterMetricsDataGenerator {
         .setStartTime(pastTimestamp)
         .setEndTime(currentTimestamp)
         .build();
-  }
-
-  public static class ClusterMetricsData {
-    public Double diskUtilization = 0.0d;
-    public Double nodeCount = 0.0d;
-    public Double writeOpsCount = 0.0d;
-    public Double readOpsCount = 0.0d;
-    public Double receivedBytes = 0.0d;
-    public Double sentBytes = 0.0d;
-
-    private ClusterMetricsData(
-        final Double diskUtilization,
-        final Double nodeCount,
-        final Double writeOpsCount,
-        final Double readOpsCount,
-        final Double receivedBytes,
-        final Double sentBytes) {
-      this.diskUtilization = diskUtilization;
-      this.nodeCount = nodeCount;
-      this.writeOpsCount = writeOpsCount;
-      this.readOpsCount = readOpsCount;
-      this.receivedBytes = receivedBytes;
-      this.sentBytes = sentBytes;
-    }
-
-    private ClusterMetricsData() {}
   }
 }

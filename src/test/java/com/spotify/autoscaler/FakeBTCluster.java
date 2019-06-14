@@ -37,7 +37,7 @@ public class FakeBTCluster {
   public static final String METRICS_PATH = "src/test/resources/simulated_clusters";
   private final Supplier<Instant> timeSource;
   private int nodes;
-  private Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics;
+  private Map<Instant, ClusterMetricsData> metrics;
 
   public FakeBTCluster(final Supplier<Instant> timeSource, final BigtableCluster cluster) {
 
@@ -45,21 +45,20 @@ public class FakeBTCluster {
     this.metrics = getMetrics(cluster);
   }
 
-  private Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> getMetrics(
-      final BigtableCluster cluster) {
+  private Map<Instant, ClusterMetricsData> getMetrics(final BigtableCluster cluster) {
 
     final ObjectMapper jsonMapper = new ObjectMapper();
-    final Map<String, ClusterMetricsDataGenerator.ClusterMetricsData> tmp;
+    final Map<String, ClusterMetricsData> tmp;
     try {
       tmp =
           jsonMapper.readValue(
               getFilePathForCluster(cluster).toFile(),
-              new TypeReference<Map<String, ClusterMetricsDataGenerator.ClusterMetricsData>>() {});
+              new TypeReference<Map<String, ClusterMetricsData>>() {});
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
 
-    final Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics = new HashMap<>();
+    final Map<Instant, ClusterMetricsData> metrics = new HashMap<>();
     tmp.forEach((k, v) -> metrics.put(Instant.parse(k), v));
     return metrics;
   }
@@ -76,17 +75,17 @@ public class FakeBTCluster {
   }
 
   public double getCPU() {
-    final ClusterMetricsDataGenerator.ClusterMetricsData currentMetrics = getMetricsForNow();
-    // calculate the simulated cpu from metrics + nodes
-    return 0.5;
+    final ClusterMetricsData currentMetrics = getMetricsForNow();
+    // TODO(gizem): calculate the simulated cpu from metrics + nodes
+    return currentMetrics.cpuLoad() * currentMetrics.nodeCount() / nodes;
   }
 
   public double getStorage() {
-    final ClusterMetricsDataGenerator.ClusterMetricsData metricsForNow = getMetricsForNow();
-    return Math.ceil(metricsForNow.diskUtilization * metricsForNow.nodeCount / nodes);
+    final ClusterMetricsData metricsForNow = getMetricsForNow();
+    return Math.ceil(metricsForNow.diskUtilization() * metricsForNow.nodeCount() / nodes);
   }
 
-  private ClusterMetricsDataGenerator.ClusterMetricsData getMetricsForNow() {
+  private ClusterMetricsData getMetricsForNow() {
     final Instant now = timeSource.get();
     final Instant nowMinute = now.truncatedTo(ChronoUnit.MINUTES);
     return metrics.get(nowMinute);

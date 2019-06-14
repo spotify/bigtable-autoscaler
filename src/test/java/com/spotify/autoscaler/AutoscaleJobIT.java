@@ -228,7 +228,7 @@ public class AutoscaleJobIT {
 
   @Test
   public void simulateCluster() throws IOException {
-    final Instant start = Instant.parse("2019-06-09T13:31:00Z");
+    final Instant start = Instant.parse("2019-06-16T07:18:00Z");
     final TimeSupplier timeSupplier = new TimeSupplier();
     timeSupplier.setTime(start);
 
@@ -246,7 +246,7 @@ public class AutoscaleJobIT {
         280,
         fakeBTCluster::getCPU,
         fakeBTCluster::getStorage,
-        ignored -> assertTrue(fakeBTCluster.getCPU() < 0.9d));
+        ignored -> assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + 0.1d));
   }
 
   private void testThroughTime(
