@@ -49,21 +49,28 @@ public class ClusterMetricsDataGenerator {
   private static final String INSTANCE_ID = "instance";
   private static final String CLUSTER_ID = "cluster";
 
-  private static final String NODE_COUNT =
-      "metric.type=\"bigtable.googleapis.com/cluster/node_count\""
-          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+  private static final String CLUSTER_FILTER =
+      "resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\""
+          + " AND resource.labels.cluster=\"%s\"";
+
+  private static final String NODE_COUNT_METRIC =
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/cluster/node_count\" " + "AND %s", CLUSTER_FILTER);
 
   private static final String DISK_USAGE_METRIC =
-      "metric.type=\"bigtable.googleapis.com/cluster/storage_utilization\""
-          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/cluster/storage_utilization\" " + "AND %s",
+          CLUSTER_FILTER);
 
   private static final String RECEIVED_BYTES_METRIC =
-      "metric.type=\"bigtable.googleapis.com/server/received_bytes_count\""
-          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/server/received_bytes_count\" " + "AND %s",
+          CLUSTER_FILTER);
 
   private static final String SENT_BYTES_METRIC =
-      "metric.type=\"bigtable.googleapis.com/server/sent_bytes_count\""
-          + " AND resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\" AND resource.labels.cluster=\"%s\"";
+      String.format(
+          "metric.type=\"bigtable.googleapis.com/server/sent_bytes_count\" " + "AND %s",
+          CLUSTER_FILTER);
 
   public static void main(String[] args) throws IOException {
     final BigtableCluster cluster =
@@ -166,7 +173,7 @@ public class ClusterMetricsDataGenerator {
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
-                NODE_COUNT, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
+                NODE_COUNT_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
             interval,
             ListTimeSeriesRequest.TimeSeriesView.FULL);
 
