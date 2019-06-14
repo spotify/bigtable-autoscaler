@@ -38,7 +38,6 @@ import com.spotify.autoscaler.db.PostgresDatabaseTest;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
@@ -54,8 +53,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.type.TypeReference;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobIT {
@@ -235,19 +232,9 @@ public class AutoscaleJobIT {
     final TimeSupplier timeSupplier = new TimeSupplier();
     timeSupplier.setTime(start);
 
-    final ObjectMapper jsonMapper = new ObjectMapper();
-    final Map<String, ClusterMetricsDataGenerator.ClusterMetricsData> tmp =
-        jsonMapper.readValue(
-            Paths.get(ClusterMetricsDataGenerator.PATH_METRICS, "test-cluster-metrics.json")
-                .toFile(),
-            new TypeReference<Map<String, ClusterMetricsDataGenerator.ClusterMetricsData>>() {});
-
-    final Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics = new HashMap<>();
-    tmp.forEach((k, v) -> metrics.put(Instant.parse(k), v));
-
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
 
-    final FakeBTCluster fakeBTCluster = new FakeBTCluster(timeSupplier, metrics);
+    final FakeBTCluster fakeBTCluster = new FakeBTCluster(timeSupplier, cluster);
     fakeBTCluster.setNumberOfNodes(100);
 
     simulatedClusters.put(

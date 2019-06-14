@@ -20,23 +20,55 @@
 
 package com.spotify.autoscaler;
 
+import com.spotify.autoscaler.db.BigtableCluster;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.testcontainers.shaded.com.fasterxml.jackson.core.type.TypeReference;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 public class FakeBTCluster {
 
+  public static final String METRICS_PATH = "src/test/resources/simulated_clusters";
   private final Supplier<Instant> timeSource;
   private int nodes;
   private Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics;
 
-  public FakeBTCluster(
-      final Supplier<Instant> timeSource,
-      Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics) {
+  public FakeBTCluster(final Supplier<Instant> timeSource, final BigtableCluster cluster) {
 
     this.timeSource = timeSource;
-    this.metrics = metrics;
+    this.metrics = getMetrics(cluster);
+  }
+
+  private Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> getMetrics(
+      final BigtableCluster cluster) {
+
+    final ObjectMapper jsonMapper = new ObjectMapper();
+    final Map<String, ClusterMetricsDataGenerator.ClusterMetricsData> tmp;
+    try {
+      tmp =
+          jsonMapper.readValue(
+              getFilePathForCluster(cluster).toFile(),
+              new TypeReference<Map<String, ClusterMetricsDataGenerator.ClusterMetricsData>>() {});
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    final Map<Instant, ClusterMetricsDataGenerator.ClusterMetricsData> metrics = new HashMap<>();
+    tmp.forEach((k, v) -> metrics.put(Instant.parse(k), v));
+    return metrics;
+  }
+
+  public static Path getFilePathForCluster(final BigtableCluster cluster) {
+    return Paths.get(
+        METRICS_PATH,
+        String.format(
+            "%s_%s_%s.json", cluster.projectId(), cluster.instanceId(), cluster.clusterId()));
   }
 
   void setNumberOfNodes(final int nodes) {

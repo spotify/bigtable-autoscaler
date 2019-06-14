@@ -34,7 +34,6 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -46,10 +45,9 @@ import java.util.function.Function;
 
 public class ClusterMetricsDataGenerator {
 
-  private static final String PROJECT_ID = "test-project-id";
-  private static final String INSTANCE_ID = "test-instance-id";
-  private static final String CLUSTER_ID = "test-cluster-id";
-  public static final String PATH_METRICS = "src/test/resources/simulated_clusters";
+  private static final String PROJECT_ID = "project";
+  private static final String INSTANCE_ID = "instance";
+  private static final String CLUSTER_ID = "cluster";
 
   private static final String NODE_COUNT =
       "metric.type=\"bigtable.googleapis.com/cluster/node_count\""
@@ -91,11 +89,7 @@ public class ClusterMetricsDataGenerator {
 
     // save metrics as json
     try (FileWriter file =
-        new FileWriter(
-            Paths.get(
-                    PATH_METRICS,
-                    String.format("%s_%s_%s.json", PROJECT_ID, INSTANCE_ID, CLUSTER_ID))
-                .toString())) {
+        new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
       file.write(new ObjectMapper().writeValueAsString(data));
       file.flush();
     } catch (IOException e) {
