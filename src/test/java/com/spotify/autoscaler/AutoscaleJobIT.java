@@ -21,6 +21,7 @@
 package com.spotify.autoscaler;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -40,8 +41,12 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +56,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobIT {
+
   @Mock BigtableSession bigtableSession;
 
   @Mock BigtableInstanceClient bigtableInstanceClient;
@@ -77,6 +83,8 @@ public class AutoscaleJobIT {
           .build();
   int newSize;
 
+  private static Map<Cluster, FakeBTCluster> simulatedClusters = new HashMap<>();
+
   @Before
   public void setUp() throws IOException, SQLException {
     initMocks(this);
@@ -97,8 +105,13 @@ public class AutoscaleJobIT {
     when(bigtableInstanceClient.updateCluster(any()))
         .thenAnswer(
             invocationOnMock -> {
-              newSize = ((Cluster) invocationOnMock.getArgument(0)).getServeNodes();
+              final Cluster cluster = invocationOnMock.getArgument(0);
+              newSize = cluster.getServeNodes();
               AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, newSize);
+              final FakeBTCluster fakeBTCluster = simulatedClusters.get(cluster);
+              if (fakeBTCluster != null) {
+                fakeBTCluster.setNumberOfNodes(newSize);
+              }
               return null;
             });
   }
@@ -115,8 +128,8 @@ public class AutoscaleJobIT {
   }
 
   private static PostgresDatabase initDatabase(
-      BigtableCluster cluster, SemanticMetricRegistry registry) {
-    PostgresDatabase database = PostgresDatabaseTest.getPostgresDatabase();
+      final BigtableCluster cluster, final SemanticMetricRegistry registry) {
+    final PostgresDatabase database = PostgresDatabaseTest.getPostgresDatabase();
     database.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
     database.insertBigtableCluster(cluster);
     return database;
@@ -133,7 +146,7 @@ public class AutoscaleJobIT {
     assertEquals(88, newSize);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.5);
-    BigtableCluster updatedCluster =
+    final BigtableCluster updatedCluster =
         db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
     job =
         new AutoscaleJob(
@@ -156,7 +169,7 @@ public class AutoscaleJobIT {
     assertEquals(88, newSize);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.78);
-    BigtableCluster updatedCluster =
+    final BigtableCluster updatedCluster =
         db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
     job =
         new AutoscaleJob(
@@ -179,7 +192,7 @@ public class AutoscaleJobIT {
     assertEquals(88, newSize);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.78);
-    BigtableCluster updatedCluster =
+    final BigtableCluster updatedCluster =
         db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
     job =
         new AutoscaleJob(
@@ -195,23 +208,76 @@ public class AutoscaleJobIT {
   }
 
   @Test
-  public void stressTest() throws IOException {
+  public void randomDataTest() throws IOException {
     // This test is useful to see that we don't get stuck at any point, for example
     // there is no Connection leak.
-    Random random = new Random();
-    Instant start = Instant.now();
+    final Random random = new Random();
+    final Instant start = Instant.now();
+
+    final TimeSupplier timeSupplier = new TimeSupplier();
+    timeSupplier.setTime(start);
+
+    testThroughTime(
+        timeSupplier,
+        Duration.ofSeconds(300),
+        512,
+        random::nextDouble,
+        random::nextDouble,
+        ignored -> assertTrue(true));
+  }
+
+  @Test
+  public void simulateCluster() throws IOException {
+    final Instant start = Instant.parse("2019-06-16T07:18:00Z");
+    final TimeSupplier timeSupplier = new TimeSupplier();
+    timeSupplier.setTime(start);
 
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
 
-    for (int i = 0; i < 512; ++i) {
-      AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, random.nextDouble());
-      AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, random.nextDouble());
-      final Instant now = start.plus(Duration.ofSeconds(300));
+    final FakeBTCluster fakeBTCluster = new FakeBTCluster(timeSupplier, cluster);
+    fakeBTCluster.setNumberOfNodes(100);
+
+    simulatedClusters.put(
+        Cluster.newBuilder().setName(cluster.clusterName()).build(), fakeBTCluster);
+
+    testThroughTime(
+        timeSupplier,
+        Duration.ofSeconds(300),
+        280,
+        fakeBTCluster::getCPU,
+        fakeBTCluster::getStorage,
+        ignored -> assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + 0.1d));
+  }
+
+  private void testThroughTime(
+      final TimeSupplier timeSupplier,
+      final Duration period,
+      final int repetition,
+      final Supplier<Double> cpuSupplier,
+      final Supplier<Double> diskUtilSupplier,
+      final Consumer<Void> assertion)
+      throws IOException {
+
+    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
+
+    Instant now = timeSupplier.get();
+    for (int i = 0; i < repetition; ++i) {
+      now = now.plus(period);
+      timeSupplier.setTime(now);
+      AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
+      AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
       job =
           new AutoscaleJob(
-              bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, () -> now);
+              bigtableSession,
+              stackdriverClient,
+              cluster,
+              db,
+              registry,
+              clusterStats,
+              timeSupplier);
       job.run();
+      assertion.accept(null);
     }
   }
 }
