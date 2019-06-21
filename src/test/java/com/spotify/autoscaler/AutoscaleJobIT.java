@@ -250,11 +250,10 @@ public class AutoscaleJobIT {
 
   @Test
   public void simulateCluster() throws IOException {
-    final Instant start = Instant.parse("2019-06-16T07:19:00Z");
 
     final FakeBTCluster fakeBTCluster = getDefaultFakeBTCluster();
     final TimeSupplier timeSupplier = (TimeSupplier) fakeBTCluster.getTimeSource();
-    timeSupplier.setTime(start);
+    timeSupplier.setTime(fakeBTCluster.getFirstMetricsInstant());
 
     final BigtableCluster cluster = fakeBTCluster.getCluster();
     final int initialNodeCount = fakeBTCluster.getMetricsForNow().nodeCount().intValue();

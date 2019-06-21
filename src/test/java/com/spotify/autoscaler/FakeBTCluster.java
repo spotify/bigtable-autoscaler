@@ -27,6 +27,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -69,6 +70,18 @@ public class FakeBTCluster {
     final Map<Instant, ClusterMetricsData> metrics = new HashMap<>();
     tmp.forEach((k, v) -> metrics.put(Instant.parse(k), v));
     return metrics;
+  }
+
+  public Instant getFirstMetricsInstant() {
+    final Map.Entry<Instant, ClusterMetricsData> firstMetrics =
+        metrics
+            .entrySet()
+            .stream()
+            .sorted(Comparator.comparing(Map.Entry::getKey))
+            .filter(e -> e.getValue().nodeCount() > 0)
+            .findFirst()
+            .get();
+    return firstMetrics.getKey();
   }
 
   public static Path getFilePathForCluster(final BigtableCluster cluster) {
