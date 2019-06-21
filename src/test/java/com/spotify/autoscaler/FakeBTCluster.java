@@ -137,4 +137,10 @@ public class FakeBTCluster {
     final Instant nowMinute = now.truncatedTo(ChronoUnit.MINUTES);
     return metrics.get(nowMinute);
   }
+
+  @Override
+  public String toString() {
+    return String.format(
+        "%s/%s/%s", cluster.projectId(), cluster.instanceId(), cluster.clusterId());
+  }
 }
