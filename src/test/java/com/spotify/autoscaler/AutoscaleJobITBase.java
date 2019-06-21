@@ -128,6 +128,7 @@ public class AutoscaleJobITBase {
     for (int i = 0; i < repetition; ++i) {
       now = now.plus(period);
       timeSupplier.setTime(now);
+      assertion.accept(null);
       AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 

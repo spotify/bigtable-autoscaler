@@ -34,9 +34,13 @@ import java.util.stream.Stream;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RunWith(Parameterized.class)
 public class SimulationIT extends AutoscaleJobITBase {
+
+  private static final Logger logger = LoggerFactory.getLogger(SimulationIT.class);
 
   public SimulationIT(final FakeBTCluster fakeBTCluster) {
     super(fakeBTCluster);
@@ -54,7 +58,7 @@ public class SimulationIT extends AutoscaleJobITBase {
                 FakeBTCluster.getClusterBuilderForFilePath(path)
                     .minNodes(5)
                     .maxNodes(1000)
-                    .cpuTarget(0.8)
+                    .cpuTarget(0.1)
                     .build();
             data.add(new Object[] {new FakeBTCluster(new TimeSupplier(), cluster)});
           });
@@ -82,10 +86,20 @@ public class SimulationIT extends AutoscaleJobITBase {
 
     testThroughTime(
         timeSupplier,
-        Duration.ofSeconds(300),
-        280,
+        Duration.ofSeconds(60),
+        1400,
         fakeBTCluster::getCPU,
         fakeBTCluster::getStorage,
-        ignored -> assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + 0.05d));
+        ignored -> {
+          logger.warn(
+              "Instant: {}, cpu: {}, nodeCount: {}, status: {}",
+              timeSupplier.get().toString(),
+              fakeBTCluster.getCPU(),
+              fakeBTCluster.getNumberOfNodes(),
+              fakeBTCluster.getCPU() > cluster.cpuTarget() + 0.1d
+                  ? "CRITICAL"
+                  : fakeBTCluster.getCPU() > cluster.cpuTarget() ? "HIGH" : "NORMAL");
+          assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + 0.6d);
+        });
   }
 }

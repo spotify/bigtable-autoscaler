@@ -45,7 +45,7 @@ public class FakeBTCluster {
   private final Supplier<Instant> timeSource;
   private int nodes;
   private Map<Instant, ClusterMetricsData> metrics;
-  private final BigtableCluster cluster;
+  private BigtableCluster cluster;
 
   public FakeBTCluster(final Supplier<Instant> timeSource, final BigtableCluster cluster) {
 
@@ -118,6 +118,7 @@ public class FakeBTCluster {
   }
 
   void setNumberOfNodes(final int nodes) {
+    this.cluster = BigtableClusterBuilder.from(cluster).lastChange(timeSource.get()).build();
     this.nodes = nodes;
   }
 
