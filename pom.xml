@@ -344,8 +344,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration combine.self="override">
-                    <source>11</source>
-                    <target>11</target>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}}</target>
                     <compilerArgs>
                         <compilerArg>-Xlint:all</compilerArg>
                     </compilerArgs>
