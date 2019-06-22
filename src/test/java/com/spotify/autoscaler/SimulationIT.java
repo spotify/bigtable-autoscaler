@@ -27,6 +27,7 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,7 +52,7 @@ public class SimulationIT extends AutoscaleJobITBase {
 
     final Collection<Object[]> data = new ArrayList<>();
 
-    try (Stream<Path> list = Files.list(Path.of(FakeBTCluster.METRICS_PATH))) {
+    try (Stream<Path> list = Files.list(Paths.get(FakeBTCluster.METRICS_PATH))) {
       list.forEach(
           path -> {
             final BigtableCluster cluster =
