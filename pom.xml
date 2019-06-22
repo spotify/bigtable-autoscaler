@@ -22,7 +22,7 @@
         <spotbugs.excludeFilterFile>spotbugsexclude.xml</spotbugs.excludeFilterFile>
         <checkstyle.violationSeverity>warning</checkstyle.violationSeverity>
         <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.target>8</maven.compiler.target>
         <jersey-version>2.27</jersey-version>
         <jackson-version>2.9.9</jackson-version>
     </properties>
@@ -339,17 +339,6 @@
                         <version>2.12.4</version>
                     </dependency>
                 </dependencies>
-            </plugin>
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration combine.self="override">
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}}</target>
-                    <compilerArgs>
-                        <compilerArg>-Xlint:all</compilerArg>
-                    </compilerArgs>
-                </configuration>
             </plugin>
         </plugins>
     </build>
