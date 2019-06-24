@@ -72,7 +72,13 @@ public class FakeBTCluster {
     return metrics;
   }
 
-  public Instant getFirstMetricsInstant() {
+  public Instant getFirstValidMetricsInstant() {
+    // Sometimes Stackdriver returns empty metrics. Autoscaler should normally be able to handle
+    // them gracefully.
+    // However, to be able to correctly initialize the FakeBTCluster with an initial node count, we
+    // need the
+    // first metrics that will serve as the beginning instant for the test to have a valid node
+    // count.
     final Map.Entry<Instant, ClusterMetricsData> firstMetrics =
         metrics
             .entrySet()

@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public class SimulationIT extends AutoscaleJobITBase {
 
   private static final Logger logger = LoggerFactory.getLogger(SimulationIT.class);
+  private static final double CRITICAL_ADDITIONAL_CPU_THRESHOLD = 0.6d;
 
   public SimulationIT(final FakeBTCluster fakeBTCluster) {
     super(fakeBTCluster);
@@ -74,7 +75,7 @@ public class SimulationIT extends AutoscaleJobITBase {
   public void simulateCluster() throws IOException {
 
     final TimeSupplier timeSupplier = (TimeSupplier) fakeBTCluster.getTimeSource();
-    timeSupplier.setTime(fakeBTCluster.getFirstMetricsInstant());
+    timeSupplier.setTime(fakeBTCluster.getFirstValidMetricsInstant());
 
     final BigtableCluster cluster = fakeBTCluster.getCluster();
     final int initialNodeCount = fakeBTCluster.getMetricsForNow().nodeCount().intValue();
@@ -97,10 +98,12 @@ public class SimulationIT extends AutoscaleJobITBase {
               timeSupplier.get().toString(),
               fakeBTCluster.getCPU(),
               fakeBTCluster.getNumberOfNodes(),
-              fakeBTCluster.getCPU() > cluster.cpuTarget() + 0.1d
+              fakeBTCluster.getCPU() > cluster.cpuTarget() + CRITICAL_ADDITIONAL_CPU_THRESHOLD
                   ? "CRITICAL"
                   : fakeBTCluster.getCPU() > cluster.cpuTarget() ? "HIGH" : "NORMAL");
-          assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + 0.6d);
+
+          assertTrue(
+              fakeBTCluster.getCPU() < cluster.cpuTarget() + CRITICAL_ADDITIONAL_CPU_THRESHOLD);
         });
   }
 }
