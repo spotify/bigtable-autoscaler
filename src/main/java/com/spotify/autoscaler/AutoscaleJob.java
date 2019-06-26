@@ -274,9 +274,7 @@ public class AutoscaleJob implements Closeable {
     return false;
   }
 
-  private int storageConstraints(
-      final Duration samplingDuration, int desiredNodes, int currentNodes) {
-
+  private int storageConstraints(Duration samplingDuration, int desiredNodes, int currentNodes) {
     Double storageUtilization = 0.0;
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
@@ -322,7 +320,11 @@ public class AutoscaleJob implements Closeable {
           .meter(
               clusterMetricPrefix
                   .tagged("what", "overridden-desired-node-count")
-                  .tagged("reason", "range-constraint")
+                  .tagged(
+                      "reason",
+                      (finalNodes == cluster.maxNodes())
+                          ? "max-nodes-constraint"
+                          : "min-nodes-constraint")
                   .tagged("desired-nodes", String.valueOf(desiredNodes))
                   .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
                   .tagged("target-nodes", String.valueOf(finalNodes))

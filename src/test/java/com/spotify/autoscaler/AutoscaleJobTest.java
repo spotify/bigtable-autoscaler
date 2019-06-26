@@ -181,8 +181,8 @@ public class AutoscaleJobTest {
 
     assertEquals(1, metric.size());
     Map<String, String> tags = metric.get(0).getTags();
-    assertEquals("range-constraint", tags.get("reason"));
-    assertEquals("500", tags.get("target-nodes"));
+    assertEquals("max-nodes-constraint", tags.get("reason"));
+    assertEquals(String.valueOf(MAX_NODES), tags.get("target-nodes"));
     assertEquals("540", tags.get("desired-nodes"));
     assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
     assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
@@ -212,8 +212,8 @@ public class AutoscaleJobTest {
 
     assertEquals(1, metric.size());
     Map<String, String> tags = metric.get(0).getTags();
-    assertEquals("range-constraint", tags.get("reason"));
-    assertEquals("6", tags.get("target-nodes"));
+    assertEquals("min-nodes-constraint", tags.get("reason"));
+    assertEquals(String.valueOf(MIN_NODES), tags.get("target-nodes"));
     assertEquals("5", tags.get("desired-nodes"));
     assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
     assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
