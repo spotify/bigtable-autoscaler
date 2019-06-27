@@ -20,9 +20,7 @@
 
 package com.spotify.autoscaler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -63,8 +61,8 @@ public class AutoscaleJobTest {
 
   @Mock ClusterStats clusterStats;
 
-  private final int MIN_NODES = 6;
-  private final int MAX_NODES = 500;
+  private static final int MIN_NODES = 6;
+  private static final int MAX_NODES = 500;
   private BigtableCluster cluster;
   private String projectId = "project";
   private String instanceId = "instance";
@@ -202,7 +200,7 @@ public class AutoscaleJobTest {
             bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.0001);
     job.run();
-    List<MetricId> metric =
+    List<MetricId> overrideMetrics =
         registry
             .getMeters()
             .keySet()
@@ -210,16 +208,19 @@ public class AutoscaleJobTest {
             .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
             .collect(Collectors.toList());
 
-    assertEquals(1, metric.size());
-    Map<String, String> tags = metric.get(0).getTags();
-    assertEquals("min-nodes-constraint", tags.get("reason"));
-    assertEquals(String.valueOf(MIN_NODES), tags.get("target-nodes"));
-    assertEquals("5", tags.get("desired-nodes"));
-    assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
-    assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
-    assertEquals(projectId, tags.get("project-id"));
-    assertEquals(clusterId, tags.get("cluster-id"));
-    assertEquals(instanceId, tags.get("instance-id"));
+    assertEquals(2, overrideMetrics.size());
+    overrideMetrics.forEach(m -> {
+      Map<String, String> tags = m.getTags();
+      assertEquals(String.valueOf(MIN_NODES), tags.get("target-nodes"));
+      assertEquals("5", tags.get("desired-nodes"));
+      assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
+      assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
+      assertEquals(projectId, tags.get("project-id"));
+      assertEquals(clusterId, tags.get("cluster-id"));
+      assertEquals(instanceId, tags.get("instance-id"));
+    });
+    String[] reasons = overrideMetrics.stream().map(m -> m.getTags().get("reason")).toArray(String[]::new);
+    assertArrayEquals(new String[] {"min-nodes-constraint", "effective-min-nodes-constraint"}, reasons);
     assertEquals(Optional.of(MIN_NODES), newSize);
   }
 

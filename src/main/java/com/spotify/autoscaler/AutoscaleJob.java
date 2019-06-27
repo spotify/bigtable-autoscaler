@@ -316,20 +316,24 @@ public class AutoscaleJob implements Closeable {
     int finalNodes =
         Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
     if (desiredNodes != finalNodes) {
-      registry
-          .meter(
-              clusterMetricPrefix
-                  .tagged("what", "overridden-desired-node-count")
-                  .tagged(
-                      "reason",
-                      (finalNodes == cluster.maxNodes())
-                          ? "max-nodes-constraint"
-                          : "min-nodes-constraint")
-                  .tagged("desired-nodes", String.valueOf(desiredNodes))
-                  .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
-                  .tagged("target-nodes", String.valueOf(finalNodes))
-                  .tagged("max-nodes", String.valueOf(cluster.maxNodes())))
-          .mark();
+      MetricId metric = clusterMetricPrefix
+              .tagged("what", "overridden-desired-node-count")
+              .tagged("desired-nodes", String.valueOf(desiredNodes))
+              .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
+              .tagged("target-nodes", String.valueOf(finalNodes))
+              .tagged("max-nodes", String.valueOf(cluster.maxNodes()));
+
+      if (cluster.minNodes() > desiredNodes) {
+        registry.meter(metric.tagged("reason", "min-nodes-constraint")).mark();
+      }
+
+      if (cluster.effectiveMinNodes() > desiredNodes) {
+        registry.meter(metric.tagged("reason", "effective-min-nodes-constraint")).mark();
+      }
+
+      if (cluster.maxNodes() < desiredNodes) {
+        registry.meter(metric.tagged("reason", "max-nodes-constraint")).mark();
+      }
       addResizeReason(
           String.format(
               "Size strategy: Target count overridden(%d -> %d)", desiredNodes, finalNodes));
