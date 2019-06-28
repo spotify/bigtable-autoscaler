@@ -32,6 +32,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.Closeable;
 import java.io.IOException;
@@ -65,23 +66,24 @@ public class AutoscaleJob implements Closeable {
   private static final double CPU_OVERLOAD_THRESHOLD = 0.9;
   private static final Duration MAX_SAMPLE_INTERVAL = Duration.ofHours(1);
 
-  // Google recommends keeping the disk utilization around 70% to accomodate sudden spikes
+  // Google recommends keeping the disk utilization around 70% to accommodate sudden spikes
   // see <<Storage utilization per node>> section for details,
   // https://cloud.google.com/bigtable/quotas
   private static final double MAX_DISK_UTILIZATION_PERCENTAGE = 0.7d;
 
   // Time related constants
   private static final Duration AFTER_CHANGE_SAMPLE_BUFFER_TIME = Duration.ofMinutes(5);
-  public static final Duration RESIZE_SETTLE_TIME = Duration.ofMinutes(5);
-  public static final Duration MINIMUM_CHANGE_INTERVAL =
+  private static final Duration RESIZE_SETTLE_TIME = Duration.ofMinutes(5);
+  private static final Duration MINIMUM_CHANGE_INTERVAL =
       RESIZE_SETTLE_TIME.plus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
-  public static final Duration MAX_FAILURE_BACKOFF_INTERVAL = Duration.ofHours(4);
+  private static final Duration MAX_FAILURE_BACKOFF_INTERVAL = Duration.ofHours(4);
   // This means that a 2 % capacity increase can only happen every second hour,
   // but a twenty percent change can happen as often as every twelve minutes.
-  public static final double MINIMUM_UPSCALE_WEIGHT = 14400;
+  private static final double MINIMUM_UPSCALE_WEIGHT = 14400;
   // This means that a 2 % capacity decrease can only happen every eight hours,
   // but a twenty percent change can happen as often as every 48 minutes.
-  public static final double MINIMUM_DOWNSACLE_WEIGHT = 57600;
+  private static final double MINIMUM_DOWNSCALE_WEIGHT = 57600;
+  private final MetricId clusterMetricPrefix;
 
   // Storage related constants
 
@@ -100,7 +102,7 @@ public class AutoscaleJob implements Closeable {
     this.clusterStats = checkNotNull(clusterStats);
     this.timeSource = checkNotNull(timeSource);
     this.db = checkNotNull(db);
-    log =
+    this.log =
         new ClusterResizeLogBuilder()
             .timestamp(new Date())
             .projectId(cluster.projectId())
@@ -111,22 +113,28 @@ public class AutoscaleJob implements Closeable {
             .cpuTarget(cluster.cpuTarget())
             .overloadStep(cluster.overloadStep())
             .loadDelta(cluster.loadDelta());
+
+    this.clusterMetricPrefix =
+        APP_PREFIX
+            .tagged("project-id", cluster.projectId())
+            .tagged("instance-id", cluster.instanceId())
+            .tagged("cluster-id", cluster.clusterId());
   }
 
-  int getSize(Cluster clusterInfo) {
+  private int getSize(Cluster clusterInfo) {
     registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
     int currentNodes = clusterInfo.getServeNodes();
     log.currentNodes(currentNodes);
     return currentNodes;
   }
 
-  Cluster getClusterInfo() throws IOException {
+  private Cluster getClusterInfo() throws IOException {
     BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
     return adminClient.getCluster(
         GetClusterRequest.newBuilder().setName(this.cluster.clusterName()).build());
   }
 
-  void setSize(int newSize) {
+  private void setSize(int newSize) {
     final Cluster cluster =
         Cluster.newBuilder().setName(this.cluster.clusterName()).setServeNodes(newSize).build();
 
@@ -155,7 +163,7 @@ public class AutoscaleJob implements Closeable {
     }
   }
 
-  Duration getDurationSinceLastChange() {
+  private Duration getDurationSinceLastChange() {
     // the database always stores UTC time
     // so remember to use UTC time as well when comparing with the database
     // for example Instant.now() returns UTC time
@@ -164,7 +172,7 @@ public class AutoscaleJob implements Closeable {
     return Duration.between(lastChange, now);
   }
 
-  Duration getSamplingDuration() {
+  private Duration getSamplingDuration() {
     Duration timeSinceLastChange = getDurationSinceLastChange();
     return computeSamplingDuration(timeSinceLastChange);
   }
@@ -184,11 +192,11 @@ public class AutoscaleJob implements Closeable {
    * but scale down pessimistically.
    */
   @VisibleForTesting
-  double getCurrentCpu(final Duration samplingDuration) {
+  private double getCurrentCpu(final Duration samplingDuration) {
     return stackdriverClient.getCpuLoad(cluster, samplingDuration);
   }
 
-  int cpuStrategy(final Duration samplingDuration, int nodes) {
+  private int cpuStrategy(final Duration samplingDuration, int nodes) {
     double currentCpu = 0d;
 
     try {
@@ -266,8 +274,7 @@ public class AutoscaleJob implements Closeable {
     return false;
   }
 
-  int storageConstraints(final Duration samplingDuration, int desiredNodes, int currentNodes) {
-
+  private int storageConstraints(Duration samplingDuration, int desiredNodes, int currentNodes) {
     Double storageUtilization = 0.0;
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
@@ -286,34 +293,62 @@ public class AutoscaleJob implements Closeable {
         currentNodes);
     log.storageUtilization(storageUtilization);
     if (minNodesRequiredForStorage > desiredNodes) {
+      registry
+          .meter(
+              clusterMetricPrefix
+                  .tagged("what", "overridden-desired-node-count")
+                  .tagged("reason", "storage-constraint")
+                  .tagged("desired-nodes", String.valueOf(desiredNodes))
+                  .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
+                  .tagged("target-nodes", String.valueOf(minNodesRequiredForStorage))
+                  .tagged("max-nodes", String.valueOf(cluster.maxNodes())))
+          .mark();
       addResizeReason(
           String.format(
-              "Storage strategy: Target node count overriden(%d -> %d).",
+              "Storage strategy: Target node count overridden(%d -> %d).",
               desiredNodes, minNodesRequiredForStorage));
     }
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
-  int sizeConstraints(int desiredNodes) {
-
+  private int sizeConstraints(int desiredNodes) {
     // the desired size should be inside the autoscale boundaries
     int finalNodes =
         Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
     if (desiredNodes != finalNodes) {
+      MetricId metric =
+          clusterMetricPrefix
+              .tagged("what", "overridden-desired-node-count")
+              .tagged("desired-nodes", String.valueOf(desiredNodes))
+              .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
+              .tagged("target-nodes", String.valueOf(finalNodes))
+              .tagged("max-nodes", String.valueOf(cluster.maxNodes()));
+
+      if (cluster.minNodes() > desiredNodes) {
+        registry.meter(metric.tagged("reason", "min-nodes-constraint")).mark();
+      }
+
+      if (cluster.effectiveMinNodes() > desiredNodes) {
+        registry.meter(metric.tagged("reason", "effective-min-nodes-constraint")).mark();
+      }
+
+      if (cluster.maxNodes() < desiredNodes) {
+        registry.meter(metric.tagged("reason", "max-nodes-constraint")).mark();
+      }
       addResizeReason(
           String.format(
-              "Size strategy: Target count overriden(%d -> %d)", desiredNodes, finalNodes));
+              "Size strategy: Target count overridden(%d -> %d)", desiredNodes, finalNodes));
     }
     return finalNodes;
   }
 
-  boolean isTooEarlyToFetchMetrics() {
+  private boolean isTooEarlyToFetchMetrics() {
     Duration timeSinceLastChange = getDurationSinceLastChange();
     return timeSinceLastChange.minus(MINIMUM_CHANGE_INTERVAL).isNegative();
   }
 
-  // Implements a stretegy to avoid autoscaling too often
-  int frequencyConstraints(int nodes, int currentNodes) {
+  // Implements a strategy to avoid autoscaling too often
+  private int frequencyConstraints(int nodes, int currentNodes) {
     Duration timeSinceLastChange = getDurationSinceLastChange();
     int desiredNodes = nodes;
     // It's OK to do large changes often if needed, but only do small changes very rarely to avoid
@@ -325,7 +360,7 @@ public class AutoscaleJob implements Closeable {
     boolean scaleDown = (desiredNodes < currentNodes);
     String path = "normal";
 
-    if (scaleDown && (changeWeight < MINIMUM_DOWNSACLE_WEIGHT)) {
+    if (scaleDown && (changeWeight < MINIMUM_DOWNSCALE_WEIGHT)) {
       // Avoid downscaling too frequently
       path = "downscale too small/frequent";
       desiredNodes = currentNodes;
@@ -376,7 +411,7 @@ public class AutoscaleJob implements Closeable {
     updateNodeCount(newNodeCount, currentNodes);
   }
 
-  void updateNodeCount(int desiredNodes, int currentNodes) {
+  private void updateNodeCount(int desiredNodes, int currentNodes) {
     if (desiredNodes != currentNodes) {
       setSize(desiredNodes);
       db.setLastChange(
