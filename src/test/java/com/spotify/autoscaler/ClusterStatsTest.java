@@ -33,7 +33,8 @@ public class ClusterStatsTest {
     clusterStats.setStats(bigtableCluster, currentNodes);
     assertMetric(registry, "node-count", currentNodes);
     assertMetric(registry, "max-node-count", maxNodes);
-    assertMetric(registry, "min-node-count", minNodes + loadDelta);
+    assertMetric(registry, "min-node-count", minNodes);
+    assertMetric(registry, "effective-min-node-count", minNodes + loadDelta);
   }
 
   private void assertMetric(SemanticMetricRegistry registry, String what, int expected) {

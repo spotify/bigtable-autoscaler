@@ -110,6 +110,7 @@ public class ClusterStats {
     private int currentNodeCount;
     private int minNodeCount;
     private int maxNodeCount;
+    private int effectiveMinNodeCount;
     private double cpuUtil;
     private int consecutiveFailureCount;
     private double storageUtil;
@@ -165,8 +166,9 @@ public class ClusterStats {
         final int consecutiveFailureCount,
         final Optional<ErrorCode> lastErrorCode) {
       this.currentNodeCount = currentNodeCount;
-      this.minNodeCount = cluster.effectiveMinNodes();
+      this.minNodeCount = cluster.minNodes();
       this.maxNodeCount = cluster.maxNodes();
+      this.effectiveMinNodeCount = cluster.effectiveMinNodes();
       this.cluster = cluster;
       this.consecutiveFailureCount = consecutiveFailureCount;
       this.lastErrorCode = lastErrorCode;
@@ -186,6 +188,14 @@ public class ClusterStats {
 
     void setMinNodeCount(int minNodeCount) {
       this.minNodeCount = minNodeCount;
+    }
+
+    public int getEffectiveMinNodeCount() {
+      return effectiveMinNodeCount;
+    }
+
+    public void setEffectiveMinNodeCount(int effectiveMinNodeCount) {
+      this.effectiveMinNodeCount = effectiveMinNodeCount;
     }
   }
 
@@ -222,6 +232,15 @@ public class ClusterStats {
               .tagged("cluster-id", cluster.clusterId())
               .tagged("instance-id", cluster.instanceId()),
           (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getMaxNodeCount());
+
+      this.registry.register(
+          APP_PREFIX
+              .tagged("what", "effective-min-node-count")
+              .tagged("project-id", cluster.projectId())
+              .tagged("cluster-id", cluster.clusterId())
+              .tagged("instance-id", cluster.instanceId()),
+          (Gauge<Integer>)
+              () -> registeredClusters.get(cluster.clusterName()).getEffectiveMinNodeCount());
 
       this.registry.register(
           APP_PREFIX
@@ -273,8 +292,9 @@ public class ClusterStats {
       clusterData.setCurrentNodeCount(currentNodes);
       clusterData.setConsecutiveFailureCount(cluster.consecutiveFailureCount());
       clusterData.setLastErrorCode(cluster.errorCode());
-      clusterData.setMinNodeCount(cluster.effectiveMinNodes());
+      clusterData.setMinNodeCount(cluster.minNodes());
       clusterData.setMaxNodeCount(cluster.maxNodes());
+      clusterData.setEffectiveMinNodeCount(cluster.effectiveMinNodes());
     }
   }
 
