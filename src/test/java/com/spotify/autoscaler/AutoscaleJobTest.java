@@ -209,18 +209,21 @@ public class AutoscaleJobTest {
             .collect(Collectors.toList());
 
     assertEquals(2, overrideMetrics.size());
-    overrideMetrics.forEach(m -> {
-      Map<String, String> tags = m.getTags();
-      assertEquals(String.valueOf(MIN_NODES), tags.get("target-nodes"));
-      assertEquals("5", tags.get("desired-nodes"));
-      assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
-      assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
-      assertEquals(projectId, tags.get("project-id"));
-      assertEquals(clusterId, tags.get("cluster-id"));
-      assertEquals(instanceId, tags.get("instance-id"));
-    });
-    String[] reasons = overrideMetrics.stream().map(m -> m.getTags().get("reason")).toArray(String[]::new);
-    assertArrayEquals(new String[] {"min-nodes-constraint", "effective-min-nodes-constraint"}, reasons);
+    overrideMetrics.forEach(
+        m -> {
+          Map<String, String> tags = m.getTags();
+          assertEquals(String.valueOf(MIN_NODES), tags.get("target-nodes"));
+          assertEquals("5", tags.get("desired-nodes"));
+          assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
+          assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
+          assertEquals(projectId, tags.get("project-id"));
+          assertEquals(clusterId, tags.get("cluster-id"));
+          assertEquals(instanceId, tags.get("instance-id"));
+        });
+    String[] reasons =
+        overrideMetrics.stream().map(m -> m.getTags().get("reason")).toArray(String[]::new);
+    assertArrayEquals(
+        new String[] {"min-nodes-constraint", "effective-min-nodes-constraint"}, reasons);
     assertEquals(Optional.of(MIN_NODES), newSize);
   }
 

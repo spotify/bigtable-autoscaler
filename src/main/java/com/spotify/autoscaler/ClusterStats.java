@@ -40,7 +40,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,28 +55,18 @@ public class ClusterStats {
       new ConcurrentHashMap<String, ClusterData>();
   private static final List<String> METRICS =
       Arrays.asList(
-          new String[] {
-            "node-count",
-            "cpu-util",
-            "last-check-time",
-            "consecutive-failure-count",
-            "storage-util",
-            "cpu-target-ratio"
-          });
+          "node-count",
+          "cpu-util",
+          "last-check-time",
+          "consecutive-failure-count",
+          "storage-util",
+          "cpu-target-ratio");
 
-  private final ScheduledExecutorService cleanupExecutor =
-      new ScheduledThreadPoolExecutor(
-          1,
-          new ThreadFactory() {
-            @Override
-            public Thread newThread(final Runnable r) {
-              return new Thread(r, "Cluster-Metrics-Cleaner");
-            }
-          });
-
-  public ClusterStats(final SemanticMetricRegistry registry, final Database db) {
+  ClusterStats(final SemanticMetricRegistry registry, final Database db) {
     this.registry = registry;
     this.db = db;
+    ScheduledExecutorService cleanupExecutor =
+        new ScheduledThreadPoolExecutor(1, r -> new Thread(r, "Cluster-Metrics-Cleaner"));
     cleanupExecutor.scheduleAtFixedRate(
         () -> {
           try {
@@ -118,14 +107,16 @@ public class ClusterStats {
   private static class ClusterData {
 
     private BigtableCluster cluster;
-    private int nodeCount;
+    private int currentNodeCount;
+    private int minNodeCount;
+    private int maxNodeCount;
     private double cpuUtil;
     private int consecutiveFailureCount;
     private double storageUtil;
     private Optional<ErrorCode> lastErrorCode;
 
-    int getNodeCount() {
-      return nodeCount;
+    int getCurrentNodeCount() {
+      return currentNodeCount;
     }
 
     int getConsecutiveFailureCount() {
@@ -140,8 +131,8 @@ public class ClusterStats {
       return lastErrorCode;
     }
 
-    void setNodeCount(final int nodeCount) {
-      this.nodeCount = nodeCount;
+    void setCurrentNodeCount(final int currentNodeCount) {
+      this.currentNodeCount = currentNodeCount;
     }
 
     void setConsecutiveFailureCount(final int consecutiveFailureCount) {
@@ -170,22 +161,40 @@ public class ClusterStats {
 
     private ClusterData(
         final BigtableCluster cluster,
-        final int nodeCount,
+        final int currentNodeCount,
         final int consecutiveFailureCount,
         final Optional<ErrorCode> lastErrorCode) {
-      this.nodeCount = nodeCount;
+      this.currentNodeCount = currentNodeCount;
+      this.minNodeCount = cluster.effectiveMinNodes();
+      this.maxNodeCount = cluster.maxNodes();
       this.cluster = cluster;
       this.consecutiveFailureCount = consecutiveFailureCount;
       this.lastErrorCode = lastErrorCode;
     }
+
+    int getMaxNodeCount() {
+      return maxNodeCount;
+    }
+
+    void setMaxNodeCount(int maxNodeCount) {
+      this.maxNodeCount = maxNodeCount;
+    }
+
+    int getMinNodeCount() {
+      return minNodeCount;
+    }
+
+    void setMinNodeCount(int minNodeCount) {
+      this.minNodeCount = minNodeCount;
+    }
   }
 
-  public void setStats(BigtableCluster cluster, int count) {
+  void setStats(BigtableCluster cluster, int currentNodes) {
     final ClusterData clusterData =
         registeredClusters.putIfAbsent(
             cluster.clusterName(),
             new ClusterData(
-                cluster, count, cluster.consecutiveFailureCount(), cluster.errorCode()));
+                cluster, currentNodes, cluster.consecutiveFailureCount(), cluster.errorCode()));
 
     if (clusterData == null) {
       // First time we saw this cluster, register a gauge
@@ -195,7 +204,24 @@ public class ClusterStats {
               .tagged("project-id", cluster.projectId())
               .tagged("cluster-id", cluster.clusterId())
               .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getNodeCount());
+          (Gauge<Integer>)
+              () -> registeredClusters.get(cluster.clusterName()).getCurrentNodeCount());
+
+      this.registry.register(
+          APP_PREFIX
+              .tagged("what", "min-node-count")
+              .tagged("project-id", cluster.projectId())
+              .tagged("cluster-id", cluster.clusterId())
+              .tagged("instance-id", cluster.instanceId()),
+          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getMinNodeCount());
+
+      this.registry.register(
+          APP_PREFIX
+              .tagged("what", "max-node-count")
+              .tagged("project-id", cluster.projectId())
+              .tagged("cluster-id", cluster.clusterId())
+              .tagged("instance-id", cluster.instanceId()),
+          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getMaxNodeCount());
 
       this.registry.register(
           APP_PREFIX
@@ -244,13 +270,15 @@ public class ClusterStats {
                 return data.getCpuUtil() / cluster.cpuTarget();
               });
     } else {
-      clusterData.setNodeCount(count);
+      clusterData.setCurrentNodeCount(currentNodes);
       clusterData.setConsecutiveFailureCount(cluster.consecutiveFailureCount());
       clusterData.setLastErrorCode(cluster.errorCode());
+      clusterData.setMinNodeCount(cluster.effectiveMinNodes());
+      clusterData.setMaxNodeCount(cluster.maxNodes());
     }
   }
 
-  public void setLoad(BigtableCluster cluster, double load, MetricType type) {
+  void setLoad(BigtableCluster cluster, double load, MetricType type) {
     if (registeredClusters.get(cluster.clusterName()) == null) {
       return;
     }

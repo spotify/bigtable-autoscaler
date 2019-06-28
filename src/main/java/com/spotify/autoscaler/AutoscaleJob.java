@@ -316,7 +316,8 @@ public class AutoscaleJob implements Closeable {
     int finalNodes =
         Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
     if (desiredNodes != finalNodes) {
-      MetricId metric = clusterMetricPrefix
+      MetricId metric =
+          clusterMetricPrefix
               .tagged("what", "overridden-desired-node-count")
               .tagged("desired-nodes", String.valueOf(desiredNodes))
               .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
