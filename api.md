@@ -40,6 +40,12 @@
         * *clusterId*: The cluster's Cluster ID.
         * *loadDelta*: Extra nodes in addition to the configured `minNodes`. The autoscaler will not allow less than `minNodes + loadDelta` nodes.
     * Updates the `loadDelta` setting for a Bigtable cluster. Intended use is short-lived needs for a substantially higher node minimum than `minNodes`.
+* **GET /clusters/enabled**
+    * Expected query parameters:
+        * *projectId*: The cluster's Project ID.
+        * *instanceId*: The cluster's Instance ID.
+        * *clusterId*: The cluster's Cluster ID.
+    * Returns whether autoscaler is enabled for the given cluster.  
 * **DELETE /clusters**
     * Expected query parameters:
         * *projectId*: The cluster's Project ID.
