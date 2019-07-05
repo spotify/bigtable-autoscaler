@@ -56,6 +56,9 @@ public class ClusterStats {
   private static final List<String> METRICS =
       Arrays.asList(
           "node-count",
+          "min-node-count",
+          "max-node-count",
+          "effective-min-node-count",
           "cpu-util",
           "last-check-time",
           "consecutive-failure-count",
