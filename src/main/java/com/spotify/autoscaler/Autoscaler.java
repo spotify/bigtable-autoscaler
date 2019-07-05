@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 public class Autoscaler implements Runnable {
 
   public interface SessionProvider {
+
     BigtableSession apply(BigtableCluster in) throws IOException;
   }
 
@@ -58,14 +59,14 @@ public class Autoscaler implements Runnable {
   private final AutoscaleJobFactory autoscaleJobFactory;
 
   public Autoscaler(
-      AutoscaleJobFactory autoscaleJobFactory,
-      ExecutorService executorService,
-      SemanticMetricRegistry registry,
-      StackdriverClient stackDriverClient,
-      Database db,
-      SessionProvider sessionProvider,
-      ClusterStats clusterStats,
-      ClusterFilter filter) {
+      final AutoscaleJobFactory autoscaleJobFactory,
+      final ExecutorService executorService,
+      final SemanticMetricRegistry registry,
+      final StackdriverClient stackDriverClient,
+      final Database db,
+      final SessionProvider sessionProvider,
+      final ClusterStats clusterStats,
+      final ClusterFilter filter) {
     this.autoscaleJobFactory = checkNotNull(autoscaleJobFactory);
     this.executorService = checkNotNull(executorService);
     this.registry = checkNotNull(registry);
@@ -84,7 +85,7 @@ public class Autoscaler implements Runnable {
      */
     try {
       runUnsafe();
-    } catch (Exception t) {
+    } catch (final Exception t) {
       logger.error("Unexpected Exception!", t);
     }
   }
@@ -92,7 +93,7 @@ public class Autoscaler implements Runnable {
   private void runUnsafe() {
     registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
 
-    CompletableFuture[] futures =
+    final CompletableFuture[] futures =
         db.getCandidateClusters()
             .stream()
             // Order here is important - don't call updateLastChecked if a cluster is filtered.
@@ -107,10 +108,10 @@ public class Autoscaler implements Runnable {
     CompletableFuture.allOf(futures).join();
   }
 
-  private void runForCluster(BigtableCluster cluster) {
+  private void runForCluster(final BigtableCluster cluster) {
     BigtableUtil.pushContext(cluster);
     logger.info("Autoscaling cluster!");
-    try (BigtableSession session = sessionProvider.apply(cluster);
+    try (final BigtableSession session = sessionProvider.apply(cluster);
         final AutoscaleJob job =
             autoscaleJobFactory.createAutoscaleJob(
                 session,
@@ -121,8 +122,8 @@ public class Autoscaler implements Runnable {
                 clusterStats,
                 Instant::now)) {
       job.run();
-    } catch (Exception e) {
-      ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
+    } catch (final Exception e) {
+      final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
       logger.error("Failed to autoscale cluster!", e);
       db.increaseFailureCount(
           cluster.projectId(),

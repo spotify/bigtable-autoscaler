@@ -35,15 +35,15 @@ final class ClusterMetricsData {
   ClusterMetricsData() {}
 
   private ClusterMetricsData(
-      Double diskUtilization,
-      Double nodeCount,
-      Double receivedBytes,
-      Double sentBytes,
-      Double cpuLoad,
-      Double requestCount,
-      Double modifiedRows,
-      Double returnedRows,
-      Double errorCount) {
+      final Double diskUtilization,
+      final Double nodeCount,
+      final Double receivedBytes,
+      final Double sentBytes,
+      final Double cpuLoad,
+      final Double requestCount,
+      final Double modifiedRows,
+      final Double returnedRows,
+      final Double errorCount) {
     if (diskUtilization == null) {
       throw new NullPointerException("diskUtilization");
     } else if (nodeCount == null) {
@@ -129,7 +129,7 @@ final class ClusterMetricsData {
 
     public ClusterMetricsDataBuilder() {}
 
-    private ClusterMetricsDataBuilder(ClusterMetricsData v) {
+    private ClusterMetricsDataBuilder(final ClusterMetricsData v) {
       this.diskUtilization = v.diskUtilization();
       this.nodeCount = v.nodeCount();
       this.receivedBytes = v.receivedBytes();
@@ -141,7 +141,7 @@ final class ClusterMetricsData {
       this.errorCount = v.errorCount();
     }
 
-    private ClusterMetricsDataBuilder(ClusterMetricsDataBuilder v) {
+    private ClusterMetricsDataBuilder(final ClusterMetricsDataBuilder v) {
       this.diskUtilization = v.diskUtilization;
       this.nodeCount = v.nodeCount;
       this.receivedBytes = v.receivedBytes;
@@ -157,7 +157,7 @@ final class ClusterMetricsData {
       return this.diskUtilization;
     }
 
-    public ClusterMetricsDataBuilder diskUtilization(Double diskUtilization) {
+    public ClusterMetricsDataBuilder diskUtilization(final Double diskUtilization) {
       if (diskUtilization == null) {
         throw new NullPointerException("diskUtilization");
       } else {
@@ -170,7 +170,7 @@ final class ClusterMetricsData {
       return this.nodeCount;
     }
 
-    public ClusterMetricsDataBuilder nodeCount(Double nodeCount) {
+    public ClusterMetricsDataBuilder nodeCount(final Double nodeCount) {
       if (nodeCount == null) {
         throw new NullPointerException("nodeCount");
       } else {
@@ -183,7 +183,7 @@ final class ClusterMetricsData {
       return this.receivedBytes;
     }
 
-    public ClusterMetricsDataBuilder receivedBytes(Double receivedBytes) {
+    public ClusterMetricsDataBuilder receivedBytes(final Double receivedBytes) {
       if (receivedBytes == null) {
         throw new NullPointerException("receivedBytes");
       } else {
@@ -196,7 +196,7 @@ final class ClusterMetricsData {
       return this.sentBytes;
     }
 
-    public ClusterMetricsDataBuilder sentBytes(Double sentBytes) {
+    public ClusterMetricsDataBuilder sentBytes(final Double sentBytes) {
       if (sentBytes == null) {
         throw new NullPointerException("sentBytes");
       } else {
@@ -209,7 +209,7 @@ final class ClusterMetricsData {
       return this.cpuLoad;
     }
 
-    public ClusterMetricsDataBuilder cpuLoad(Double cpuLoad) {
+    public ClusterMetricsDataBuilder cpuLoad(final Double cpuLoad) {
       if (cpuLoad == null) {
         throw new NullPointerException("cpuLoad");
       } else {
@@ -222,7 +222,7 @@ final class ClusterMetricsData {
       return this.requestCount;
     }
 
-    public ClusterMetricsDataBuilder requestCount(Double requestCount) {
+    public ClusterMetricsDataBuilder requestCount(final Double requestCount) {
       if (requestCount == null) {
         throw new NullPointerException("requestCount");
       } else {
@@ -235,7 +235,7 @@ final class ClusterMetricsData {
       return this.modifiedRows;
     }
 
-    public ClusterMetricsDataBuilder modifiedRows(Double modifiedRows) {
+    public ClusterMetricsDataBuilder modifiedRows(final Double modifiedRows) {
       if (modifiedRows == null) {
         throw new NullPointerException("modifiedRows");
       } else {
@@ -248,7 +248,7 @@ final class ClusterMetricsData {
       return this.returnedRows;
     }
 
-    public ClusterMetricsDataBuilder returnedRows(Double returnedRows) {
+    public ClusterMetricsDataBuilder returnedRows(final Double returnedRows) {
       if (returnedRows == null) {
         throw new NullPointerException("returnedRows");
       } else {
@@ -261,7 +261,7 @@ final class ClusterMetricsData {
       return this.errorCount;
     }
 
-    public ClusterMetricsDataBuilder errorCount(Double errorCount) {
+    public ClusterMetricsDataBuilder errorCount(final Double errorCount) {
       if (errorCount == null) {
         throw new NullPointerException("errorCount");
       } else {
@@ -283,11 +283,11 @@ final class ClusterMetricsData {
           this.errorCount);
     }
 
-    public static ClusterMetricsDataBuilder from(ClusterMetricsData v) {
+    public static ClusterMetricsDataBuilder from(final ClusterMetricsData v) {
       return new ClusterMetricsDataBuilder(v);
     }
 
-    public static ClusterMetricsDataBuilder from(ClusterMetricsDataBuilder v) {
+    public static ClusterMetricsDataBuilder from(final ClusterMetricsDataBuilder v) {
       return new ClusterMetricsDataBuilder(v);
     }
   }

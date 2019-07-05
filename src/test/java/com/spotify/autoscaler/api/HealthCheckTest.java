@@ -53,17 +53,17 @@ public class HealthCheckTest extends JerseyTest implements ApiTestResources {
         .when(db)
         .healthCheck();
 
-    Config config = ConfigFactory.load(SERVICE_NAME);
-    ResourceConfig resourceConfig =
+    final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
+    final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
-            SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
+            ApiTestResources.SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
     return resourceConfig;
   }
 
   @Test
   public void getOk() {
     healthCheck = () -> {};
-    Response response = target(HEALTH).request().get();
+    final Response response = target(ApiTestResources.HEALTH).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
   }
@@ -74,7 +74,7 @@ public class HealthCheckTest extends JerseyTest implements ApiTestResources {
         () -> {
           throw new RuntimeException("Some db error");
         };
-    Response response = target(HEALTH).request().get();
+    final Response response = target(ApiTestResources.HEALTH).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.INTERNAL_SERVER_ERROR));
     assertThat(
         response.readEntity(String.class), equalTo("java.lang.RuntimeException: Some db error"));

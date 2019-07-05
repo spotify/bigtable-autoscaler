@@ -56,20 +56,20 @@ public class ClusterResources {
   private static final ObjectMapper mapper =
       new ObjectMapper().registerModule(new AutoMatterModule()).registerModule(new Jdk8Module());
 
-  public ClusterResources(Database db) {
+  public ClusterResources(final Database db) {
     this.db = checkNotNull(db);
   }
 
   @GET
   public Response getAllClusters(
-      @QueryParam("projectId") @Size(min = 1) String projectId,
-      @QueryParam("instanceId") @Size(min = 1) String instanceId,
-      @QueryParam("clusterId") @Size(min = 1) String clusterId) {
+      @QueryParam("projectId") @Size(min = 1) final String projectId,
+      @QueryParam("instanceId") @Size(min = 1) final String instanceId,
+      @QueryParam("clusterId") @Size(min = 1) final String clusterId) {
     try {
       return Response.ok(
               mapper.writeValueAsString(db.getBigtableClusters(projectId, instanceId, clusterId)))
           .build();
-    } catch (JsonProcessingException e) {
+    } catch (final JsonProcessingException e) {
       return Response.serverError().build();
     }
   }
@@ -77,9 +77,9 @@ public class ClusterResources {
   @GET
   @Path("enabled")
   public Response enabled(
-      @QueryParam("projectId") @Size(min = 1) String projectId,
-      @QueryParam("instanceId") @Size(min = 1) String instanceId,
-      @QueryParam("clusterId") @Size(min = 1) String clusterId) {
+      @QueryParam("projectId") @Size(min = 1) final String projectId,
+      @QueryParam("instanceId") @Size(min = 1) final String instanceId,
+      @QueryParam("clusterId") @Size(min = 1) final String clusterId) {
     final Optional<BigtableCluster> cluster =
         db.getBigtableCluster(projectId, instanceId, clusterId);
     try {
@@ -88,7 +88,7 @@ public class ClusterResources {
       } else {
         return Response.status(Response.Status.NOT_FOUND).build();
       }
-    } catch (JsonProcessingException e) {
+    } catch (final JsonProcessingException e) {
       return Response.serverError().build();
     }
   }
@@ -96,30 +96,30 @@ public class ClusterResources {
   @GET
   @Path("logs")
   public Response getLogs(
-      @QueryParam("projectId") @Size(min = 1) String projectId,
-      @QueryParam("instanceId") @Size(min = 1) String instanceId,
-      @QueryParam("clusterId") @Size(min = 1) String clusterId) {
+      @QueryParam("projectId") @Size(min = 1) final String projectId,
+      @QueryParam("instanceId") @Size(min = 1) final String instanceId,
+      @QueryParam("clusterId") @Size(min = 1) final String clusterId) {
     try {
       return Response.ok(
               mapper.writeValueAsString(db.getLatestResizeEvents(projectId, instanceId, clusterId)))
           .build();
-    } catch (JsonProcessingException e) {
+    } catch (final JsonProcessingException e) {
       return Response.serverError().build();
     }
   }
 
   @POST
   public Response createCluster(
-      @QueryParam("projectId") @Size(min = 1) String projectId,
-      @QueryParam("instanceId") @Size(min = 1) String instanceId,
-      @QueryParam("clusterId") @Size(min = 1) String clusterId,
-      @QueryParam("minNodes") Integer minNodes,
-      @QueryParam("maxNodes") Integer maxNodes,
-      @QueryParam("cpuTarget") Double cpuTarget,
-      @QueryParam("overloadStep") Integer overloadStep,
-      @QueryParam("enabled") @DefaultValue("true") Boolean enabled,
-      @QueryParam("loadDelta") @DefaultValue("0") Integer loadDelta) {
-    BigtableCluster cluster =
+      @QueryParam("projectId") @Size(min = 1) final String projectId,
+      @QueryParam("instanceId") @Size(min = 1) final String instanceId,
+      @QueryParam("clusterId") @Size(min = 1) final String clusterId,
+      @QueryParam("minNodes") final Integer minNodes,
+      @QueryParam("maxNodes") final Integer maxNodes,
+      @QueryParam("cpuTarget") final Double cpuTarget,
+      @QueryParam("overloadStep") final Integer overloadStep,
+      @QueryParam("enabled") @DefaultValue("true") final Boolean enabled,
+      @QueryParam("loadDelta") @DefaultValue("0") final Integer loadDelta) {
+    final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
             .instanceId(instanceId)
@@ -146,15 +146,15 @@ public class ClusterResources {
 
   @PUT
   public Response updateCluster(
-      @QueryParam("projectId") @Size(min = 1) String projectId,
-      @QueryParam("instanceId") @Size(min = 1) String instanceId,
-      @QueryParam("clusterId") @Size(min = 1) String clusterId,
-      @QueryParam("minNodes") Integer minNodes,
-      @QueryParam("maxNodes") Integer maxNodes,
-      @QueryParam("cpuTarget") Double cpuTarget,
-      @QueryParam("overloadStep") Integer overloadStep,
-      @QueryParam("enabled") @DefaultValue("true") Boolean enabled) {
-    BigtableCluster cluster =
+      @QueryParam("projectId") @Size(min = 1) final String projectId,
+      @QueryParam("instanceId") @Size(min = 1) final String instanceId,
+      @QueryParam("clusterId") @Size(min = 1) final String clusterId,
+      @QueryParam("minNodes") final Integer minNodes,
+      @QueryParam("maxNodes") final Integer maxNodes,
+      @QueryParam("cpuTarget") final Double cpuTarget,
+      @QueryParam("overloadStep") final Integer overloadStep,
+      @QueryParam("enabled") @DefaultValue("true") final Boolean enabled) {
+    final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
             .instanceId(instanceId)
@@ -180,10 +180,10 @@ public class ClusterResources {
 
   @DELETE
   public Response deleteCluster(
-      @QueryParam("projectId") @Size(min = 1) String projectId,
-      @QueryParam("instanceId") @Size(min = 1) String instanceId,
-      @QueryParam("clusterId") @Size(min = 1) String clusterId) {
-    BigtableCluster cluster =
+      @QueryParam("projectId") @Size(min = 1) final String projectId,
+      @QueryParam("instanceId") @Size(min = 1) final String instanceId,
+      @QueryParam("clusterId") @Size(min = 1) final String clusterId) {
+    final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
             .instanceId(instanceId)
@@ -211,11 +211,11 @@ public class ClusterResources {
   @PUT
   @Path("load")
   public Response setExtraLoad(
-      @QueryParam("projectId") @Size(min = 1) String projectId,
-      @QueryParam("instanceId") @Size(min = 1) String instanceId,
-      @QueryParam("clusterId") @Size(min = 1) String clusterId,
-      @QueryParam("loadDelta") Integer loadDelta) {
-    BigtableCluster cluster =
+      @QueryParam("projectId") @Size(min = 1) final String projectId,
+      @QueryParam("instanceId") @Size(min = 1) final String instanceId,
+      @QueryParam("clusterId") @Size(min = 1) final String clusterId,
+      @QueryParam("loadDelta") final Integer loadDelta) {
+    final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
             .instanceId(instanceId)

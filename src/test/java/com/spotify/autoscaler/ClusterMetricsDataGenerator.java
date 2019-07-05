@@ -95,7 +95,7 @@ public class ClusterMetricsDataGenerator {
       String.format(
           "metric.type=\"bigtable.googleapis.com/server/error_count\" " + "AND %s", CLUSTER_FILTER);
 
-  public static void main(String[] args) throws IOException {
+  public static void main(final String[] args) throws IOException {
     final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(PROJECT_ID)
@@ -105,7 +105,7 @@ public class ClusterMetricsDataGenerator {
 
     final TimeInterval interval = interval(Duration.ofHours(24));
 
-    Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440); // Resolution: minutes
+    final Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440); // Resolution: minutes
     populateIntervalWithValue(interval, metrics, p -> ClusterMetricsData.builder().build());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
@@ -119,15 +119,15 @@ public class ClusterMetricsDataGenerator {
     populateReturnedRows(metricServiceClient, metrics, cluster, interval);
     populateErrorCount(metricServiceClient, metrics, cluster, interval);
 
-    Map<String, ClusterMetricsData> data = new HashMap<>();
+    final Map<String, ClusterMetricsData> data = new HashMap<>();
     metrics.forEach((k, v) -> data.put(k.toString(), v));
 
     // save metrics as json
-    try (FileWriter file =
+    try (final FileWriter file =
         new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
       file.write(new ObjectMapper().writeValueAsString(data));
       file.flush();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
   }
@@ -138,7 +138,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -163,7 +163,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -191,7 +191,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -219,7 +219,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -247,7 +247,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -271,7 +271,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -296,7 +296,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -324,7 +324,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(cluster.projectId()),
             String.format(
@@ -348,7 +348,7 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster bigtableCluster,
       final TimeInterval interval) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(bigtableCluster.projectId()),
             String.format(
@@ -384,10 +384,10 @@ public class ClusterMetricsDataGenerator {
       final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator,
       final boolean distribute) {
 
-    for (PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
-      for (TimeSeries ts : page.getValues()) {
-        for (Point p : ts.getPointsList()) {
-          Double value = converter.apply(p.getValue());
+    for (final PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
+      for (final TimeSeries ts : page.getValues()) {
+        for (final Point p : ts.getPointsList()) {
+          final Double value = converter.apply(p.getValue());
           if (distribute) {
             final Instant startInstant =
                 Instant.ofEpochSecond(p.getInterval().getStartTime().getSeconds());
@@ -425,7 +425,7 @@ public class ClusterMetricsDataGenerator {
   }
 
   private static TimeInterval interval(final Duration duration) {
-    long currentTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+    final long currentTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
 
     final Timestamp pastTimestamp =
         Timestamp.newBuilder().setSeconds(currentTimeSeconds - duration.getSeconds()).build();

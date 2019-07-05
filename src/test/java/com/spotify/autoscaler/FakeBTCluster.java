@@ -44,7 +44,7 @@ public class FakeBTCluster {
       Pattern.compile(FILE_PATTERN.replace("%s", "([A-Za-z0-9-]+)"));
   private final Supplier<Instant> timeSource;
   private int nodes;
-  private Map<Instant, ClusterMetricsData> metrics;
+  private final Map<Instant, ClusterMetricsData> metrics;
   private BigtableCluster cluster;
 
   public FakeBTCluster(final Supplier<Instant> timeSource, final BigtableCluster cluster) {
@@ -63,7 +63,7 @@ public class FakeBTCluster {
           jsonMapper.readValue(
               getFilePathForCluster(cluster).toFile(),
               new TypeReference<Map<String, ClusterMetricsData>>() {});
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
 

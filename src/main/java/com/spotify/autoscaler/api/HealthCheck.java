@@ -27,9 +27,10 @@ import javax.ws.rs.core.Response;
 
 @Path("/health")
 public class HealthCheck {
+
   private final Database db;
 
-  public HealthCheck(Database db) {
+  public HealthCheck(final Database db) {
     this.db = db;
   }
 

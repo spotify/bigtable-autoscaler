@@ -49,9 +49,9 @@ public class ClusterStats {
   private static final Logger logger = LoggerFactory.getLogger(ClusterStats.class);
 
   private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
-  private SemanticMetricRegistry registry;
-  private Database db;
-  private Map<String, ClusterData> registeredClusters =
+  private final SemanticMetricRegistry registry;
+  private final Database db;
+  private final Map<String, ClusterData> registeredClusters =
       new ConcurrentHashMap<String, ClusterData>();
   private static final List<String> METRICS =
       Arrays.asList(
@@ -65,14 +65,14 @@ public class ClusterStats {
   ClusterStats(final SemanticMetricRegistry registry, final Database db) {
     this.registry = registry;
     this.db = db;
-    ScheduledExecutorService cleanupExecutor =
+    final ScheduledExecutorService cleanupExecutor =
         new ScheduledThreadPoolExecutor(1, r -> new Thread(r, "Cluster-Metrics-Cleaner"));
     cleanupExecutor.scheduleAtFixedRate(
         () -> {
           try {
             logger.info("Cleanup running");
             unregisterInactiveClustersMetrics(registry, db);
-          } catch (Throwable t) {
+          } catch (final Throwable t) {
             logger.error("Cleanup task failed", t);
           }
         },
@@ -83,11 +83,11 @@ public class ClusterStats {
 
   private void unregisterInactiveClustersMetrics(
       final SemanticMetricRegistry registry, final Database db) {
-    Set<String> bigtableClusters = db.getActiveClusterKeys();
-    for (Map.Entry<String, ClusterData> entry : registeredClusters.entrySet()) {
+    final Set<String> bigtableClusters = db.getActiveClusterKeys();
+    for (final Map.Entry<String, ClusterData> entry : registeredClusters.entrySet()) {
       if (!bigtableClusters.contains(entry.getKey())) {
         registeredClusters.remove(entry.getKey());
-        BigtableCluster cluster = entry.getValue().getCluster();
+        final BigtableCluster cluster = entry.getValue().getCluster();
         BigtableUtil.pushContext(cluster);
         registry.removeMatching(
             (name, m) -> {
@@ -106,7 +106,7 @@ public class ClusterStats {
 
   private static class ClusterData {
 
-    private BigtableCluster cluster;
+    private final BigtableCluster cluster;
     private int currentNodeCount;
     private int minNodeCount;
     private int maxNodeCount;
@@ -148,11 +148,11 @@ public class ClusterStats {
       return storageUtil;
     }
 
-    void setStorageUtil(double storageUtil) {
+    void setStorageUtil(final double storageUtil) {
       this.storageUtil = storageUtil;
     }
 
-    void setCpuUtil(double cpuUtil) {
+    void setCpuUtil(final double cpuUtil) {
       this.cpuUtil = cpuUtil;
     }
 
@@ -178,7 +178,7 @@ public class ClusterStats {
       return maxNodeCount;
     }
 
-    void setMaxNodeCount(int maxNodeCount) {
+    void setMaxNodeCount(final int maxNodeCount) {
       this.maxNodeCount = maxNodeCount;
     }
 
@@ -186,7 +186,7 @@ public class ClusterStats {
       return minNodeCount;
     }
 
-    void setMinNodeCount(int minNodeCount) {
+    void setMinNodeCount(final int minNodeCount) {
       this.minNodeCount = minNodeCount;
     }
 
@@ -194,12 +194,12 @@ public class ClusterStats {
       return effectiveMinNodeCount;
     }
 
-    public void setEffectiveMinNodeCount(int effectiveMinNodeCount) {
+    public void setEffectiveMinNodeCount(final int effectiveMinNodeCount) {
       this.effectiveMinNodeCount = effectiveMinNodeCount;
     }
   }
 
-  void setStats(BigtableCluster cluster, int currentNodes) {
+  void setStats(final BigtableCluster cluster, final int currentNodes) {
     final ClusterData clusterData =
         registeredClusters.putIfAbsent(
             cluster.clusterName(),
@@ -260,7 +260,7 @@ public class ClusterStats {
                       .get()
                       .getSeconds());
 
-      for (ErrorCode code : ErrorCode.values()) {
+      for (final ErrorCode code : ErrorCode.values()) {
         this.registry.register(
             APP_PREFIX
                 .tagged("what", "consecutive-failure-count")
@@ -270,7 +270,7 @@ public class ClusterStats {
                 .tagged("latest-error-code", code.name()),
             (Gauge<Integer>)
                 () -> {
-                  ClusterData c = registeredClusters.get(cluster.clusterName());
+                  final ClusterData c = registeredClusters.get(cluster.clusterName());
                   return c.getLastErrorCode().orElse(ErrorCode.OK) == code
                       ? c.getConsecutiveFailureCount()
                       : 0;
@@ -298,12 +298,12 @@ public class ClusterStats {
     }
   }
 
-  void setLoad(BigtableCluster cluster, double load, MetricType type) {
+  void setLoad(final BigtableCluster cluster, final double load, final MetricType type) {
     if (registeredClusters.get(cluster.clusterName()) == null) {
       return;
     }
-    ClusterData clusterData = registeredClusters.get(cluster.clusterName());
-    Callable<Double> lambda;
+    final ClusterData clusterData = registeredClusters.get(cluster.clusterName());
+    final Callable<Double> lambda;
     switch (type) {
       case CPU:
         clusterData.setCpuUtil(load);
@@ -331,7 +331,7 @@ public class ClusterStats {
               () -> {
                 try {
                   return lambda.call();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                   logger.error("Couldn't get metric", e);
                   return 0.0;
                 }
@@ -343,7 +343,7 @@ public class ClusterStats {
     CPU("cpu-util"),
     STORAGE("storage-util");
 
-    private String tag;
+    private final String tag;
 
     MetricType(final String tag) {
       this.tag = tag;

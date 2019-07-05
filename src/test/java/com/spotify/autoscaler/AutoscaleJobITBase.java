@@ -88,7 +88,7 @@ public class AutoscaleJobITBase {
         .thenAnswer(
             invocationOnMock -> {
               final Cluster cluster = invocationOnMock.getArgument(0);
-              int newSize = cluster.getServeNodes();
+              final int newSize = cluster.getServeNodes();
               fakeBTCluster.setNumberOfNodes(newSize);
               return null;
             });
