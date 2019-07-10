@@ -20,8 +20,11 @@
 
 package com.spotify.autoscaler.metric;
 
+import com.codahale.metrics.Gauge;
+import com.spotify.autoscaler.ClusterData;
 import java.util.ArrayList;
 import java.util.List;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class BigtableMetric {
 
@@ -30,8 +33,8 @@ public class BigtableMetric {
     for (Metrics metric : Metrics.values()) {
       metrics.add(metric.tag);
     }
-    for (MetricType metricType : MetricType.values()) {
-      metrics.add(metricType.tag);
+    for (LoadMetricType loadMetricType : LoadMetricType.values()) {
+      metrics.add(loadMetricType.tag);
     }
     for (ErrorCode errorCode : ErrorCode.values()) {
       metrics.add(errorCode.tag);
@@ -40,27 +43,61 @@ public class BigtableMetric {
   }
 
   public enum Metrics {
-    NODE_COUNT("node-count"),
-    MIN_NODE_COUNT("min-node-count"),
-    MAX_NODE_COUNT("max-node-count"),
-    EFFECTIVE_MIN_NODE_COUNT("effective-min-node-count"),
-    LAST_CHECK_TIME("last-check-time"),
-    CPU_TARGET_RATIO("cpu-target-ratio");
+    NODE_COUNT("node-count") {
+      @Override
+      public Gauge getMetricValue(final ClusterData clusterData) {
+        return clusterData::getCurrentNodeCount;
+      }
+    },
+    MIN_NODE_COUNT("min-node-count") {
+      @Override
+      public Gauge getMetricValue(final ClusterData clusterData) {
+        return clusterData::getMinNodeCount;
+      }
+    },
+    MAX_NODE_COUNT("max-node-count") {
+      @Override
+      public Gauge getMetricValue(final ClusterData clusterData) {
+        return clusterData::getMaxNodeCount;
+      }
+    },
+    EFFECTIVE_MIN_NODE_COUNT("effective-min-node-count") {
+      @Override
+      public Gauge getMetricValue(final ClusterData clusterData) {
+        return clusterData::getEffectiveMinNodeCount;
+      }
+    },
+    LAST_CHECK_TIME("last-check-time") {
+      @Override
+      public Gauge getMetricValue(final ClusterData clusterData) {
+        return null;
+      }
+    },
+    CPU_TARGET_RATIO("cpu-target-ratio") {
+      @Override
+      public Gauge getMetricValue(final ClusterData clusterData) {
+        return null;
+      }
+    };
 
     public String tag;
 
     Metrics(final String tag) {
       this.tag = tag;
     }
+
+    public Gauge getMetricValue(final ClusterData clusterData) {
+      throw new NotImplementedException();
+    }
   }
 
-  public enum MetricType {
+  public enum LoadMetricType {
     CPU("cpu-util"),
     STORAGE("storage-util");
 
     public String tag;
 
-    MetricType(final String tag) {
+    LoadMetricType(final String tag) {
       this.tag = tag;
     }
   }

@@ -203,7 +203,7 @@ public class AutoscaleJob implements Closeable {
     try {
       currentCpu = getCurrentCpu(samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, currentCpu, BigtableMetric.MetricType.CPU);
+      clusterStats.setLoad(cluster, currentCpu, BigtableMetric.LoadMetricType.CPU);
     }
 
     logger.info(
@@ -280,7 +280,7 @@ public class AutoscaleJob implements Closeable {
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, storageUtilization, BigtableMetric.MetricType.STORAGE);
+      clusterStats.setLoad(cluster, storageUtilization, BigtableMetric.LoadMetricType.STORAGE);
     }
     if (storageUtilization <= 0.0) {
       return Math.max(currentNodes, desiredNodes);

@@ -98,101 +98,6 @@ public class ClusterStats {
     }
   }
 
-  private static class ClusterData {
-
-    private BigtableCluster cluster;
-    private int currentNodeCount;
-    private int minNodeCount;
-    private int maxNodeCount;
-    private int effectiveMinNodeCount;
-    private double cpuUtil;
-    private int consecutiveFailureCount;
-    private double storageUtil;
-    private Optional<ErrorCode> lastErrorCode;
-
-    int getCurrentNodeCount() {
-      return currentNodeCount;
-    }
-
-    int getConsecutiveFailureCount() {
-      return consecutiveFailureCount;
-    }
-
-    double getCpuUtil() {
-      return cpuUtil;
-    }
-
-    Optional<ErrorCode> getLastErrorCode() {
-      return lastErrorCode;
-    }
-
-    void setCurrentNodeCount(final int currentNodeCount) {
-      this.currentNodeCount = currentNodeCount;
-    }
-
-    void setConsecutiveFailureCount(final int consecutiveFailureCount) {
-      this.consecutiveFailureCount = consecutiveFailureCount;
-    }
-
-    void setLastErrorCode(final Optional<ErrorCode> lastErrorCode) {
-      this.lastErrorCode = lastErrorCode;
-    }
-
-    double getStorageUtil() {
-      return storageUtil;
-    }
-
-    void setStorageUtil(double storageUtil) {
-      this.storageUtil = storageUtil;
-    }
-
-    void setCpuUtil(double cpuUtil) {
-      this.cpuUtil = cpuUtil;
-    }
-
-    BigtableCluster getCluster() {
-      return cluster;
-    }
-
-    private ClusterData(
-        final BigtableCluster cluster,
-        final int currentNodeCount,
-        final int consecutiveFailureCount,
-        final Optional<ErrorCode> lastErrorCode) {
-      this.currentNodeCount = currentNodeCount;
-      this.minNodeCount = cluster.minNodes();
-      this.maxNodeCount = cluster.maxNodes();
-      this.effectiveMinNodeCount = cluster.effectiveMinNodes();
-      this.cluster = cluster;
-      this.consecutiveFailureCount = consecutiveFailureCount;
-      this.lastErrorCode = lastErrorCode;
-    }
-
-    int getMaxNodeCount() {
-      return maxNodeCount;
-    }
-
-    void setMaxNodeCount(int maxNodeCount) {
-      this.maxNodeCount = maxNodeCount;
-    }
-
-    int getMinNodeCount() {
-      return minNodeCount;
-    }
-
-    void setMinNodeCount(int minNodeCount) {
-      this.minNodeCount = minNodeCount;
-    }
-
-    public int getEffectiveMinNodeCount() {
-      return effectiveMinNodeCount;
-    }
-
-    public void setEffectiveMinNodeCount(int effectiveMinNodeCount) {
-      this.effectiveMinNodeCount = effectiveMinNodeCount;
-    }
-  }
-
   void setStats(BigtableCluster cluster, int currentNodes) {
     final ClusterData clusterData =
         registeredClusters.putIfAbsent(
@@ -204,28 +109,11 @@ public class ClusterStats {
       // First time we saw this cluster, register a gauge
 
       for (BigtableMetric.Metrics metric : BigtableMetric.Metrics.values()) {
-        Gauge metricValue = null;
+        // This will return null for non implemented getMetricValues. This will happen when the
+        // metric depends in other things other than the registeredClusters or the cluster
+        // itself, e.g., when it is dependent on the database.
+        Gauge metricValue = metric.getMetricValue(registeredClusters.get(cluster.clusterName()));
         switch (metric) {
-          case NODE_COUNT:
-            metricValue =
-                (Gauge<Integer>)
-                    () -> registeredClusters.get(cluster.clusterName()).getCurrentNodeCount();
-            break;
-          case MIN_NODE_COUNT:
-            metricValue =
-                (Gauge<Integer>)
-                    () -> registeredClusters.get(cluster.clusterName()).getMinNodeCount();
-            break;
-          case MAX_NODE_COUNT:
-            metricValue =
-                (Gauge<Integer>)
-                    () -> registeredClusters.get(cluster.clusterName()).getMaxNodeCount();
-            break;
-          case EFFECTIVE_MIN_NODE_COUNT:
-            metricValue =
-                (Gauge<Integer>)
-                    () -> registeredClusters.get(cluster.clusterName()).getEffectiveMinNodeCount();
-            break;
           case LAST_CHECK_TIME:
             metricValue =
                 (Gauge<Long>)
@@ -248,18 +136,8 @@ public class ClusterStats {
                       return data.getCpuUtil() / cluster.cpuTarget();
                     };
             break;
-          default:
-            logger.error(
-                "The metric "
-                    + metric.tag
-                    + " is not registered correctly for the "
-                    + "cluster "
-                    + cluster.clusterName());
-            break;
         }
-        if (metricValue != null) {
-          registerMetric(metric.tag, cluster, metricValue);
-        }
+        registerMetric(metric.tag, cluster, metricValue);
       }
 
       for (ErrorCode code : ErrorCode.values()) {
@@ -298,7 +176,7 @@ public class ClusterStats {
         metric);
   }
 
-  void setLoad(BigtableCluster cluster, double load, BigtableMetric.MetricType type) {
+  void setLoad(BigtableCluster cluster, double load, BigtableMetric.LoadMetricType type) {
     if (registeredClusters.get(cluster.clusterName()) == null) {
       return;
     }
@@ -314,7 +192,7 @@ public class ClusterStats {
         lambda = clusterData::getStorageUtil;
         break;
       default:
-        throw new IllegalArgumentException(String.format("Undefined MetricType %s", type));
+        throw new IllegalArgumentException(String.format("Undefined LoadMetricType %s", type));
     }
 
     final MetricId key =
