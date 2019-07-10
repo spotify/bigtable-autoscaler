@@ -22,8 +22,12 @@ package com.spotify.autoscaler.metric;
 
 import com.codahale.metrics.Gauge;
 import com.spotify.autoscaler.ClusterData;
+import com.spotify.autoscaler.db.Database;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class BigtableMetric {
@@ -45,38 +49,48 @@ public class BigtableMetric {
   public enum Metrics {
     NODE_COUNT("node-count") {
       @Override
-      public Gauge getMetricValue(final ClusterData clusterData) {
+      public Gauge getMetricValue(final ClusterData clusterData, final Database db) {
         return clusterData::getCurrentNodeCount;
       }
     },
     MIN_NODE_COUNT("min-node-count") {
       @Override
-      public Gauge getMetricValue(final ClusterData clusterData) {
+      public Gauge getMetricValue(final ClusterData clusterData, final Database db) {
         return clusterData::getMinNodeCount;
       }
     },
     MAX_NODE_COUNT("max-node-count") {
       @Override
-      public Gauge getMetricValue(final ClusterData clusterData) {
+      public Gauge getMetricValue(final ClusterData clusterData, final Database db) {
         return clusterData::getMaxNodeCount;
       }
     },
     EFFECTIVE_MIN_NODE_COUNT("effective-min-node-count") {
       @Override
-      public Gauge getMetricValue(final ClusterData clusterData) {
+      public Gauge getMetricValue(final ClusterData clusterData, final Database db) {
         return clusterData::getEffectiveMinNodeCount;
       }
     },
     LAST_CHECK_TIME("last-check-time") {
       @Override
-      public Gauge getMetricValue(final ClusterData clusterData) {
-        return null;
+      public Gauge getMetricValue(final ClusterData clusterData, final Database db) {
+        return () ->
+            db.getBigtableCluster(
+                    clusterData.getCluster().projectId(),
+                    clusterData.getCluster().instanceId(),
+                    clusterData.getCluster().clusterId())
+                .flatMap(
+                    p ->
+                        Optional.of(
+                            Duration.between(p.lastCheck().orElse(Instant.EPOCH), Instant.now())))
+                .get()
+                .getSeconds();
       }
     },
     CPU_TARGET_RATIO("cpu-target-ratio") {
       @Override
-      public Gauge getMetricValue(final ClusterData clusterData) {
-        return null;
+      public Gauge getMetricValue(final ClusterData clusterData, final Database db) {
+        return () -> clusterData.getCpuUtil() / clusterData.getCluster().cpuTarget();
       }
     };
 
@@ -86,7 +100,7 @@ public class BigtableMetric {
       this.tag = tag;
     }
 
-    public Gauge getMetricValue(final ClusterData clusterData) {
+    public Gauge getMetricValue(final ClusterData clusterData, final Database db) {
       throw new NotImplementedException();
     }
   }

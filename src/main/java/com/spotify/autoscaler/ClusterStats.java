@@ -32,10 +32,8 @@ import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -112,31 +110,8 @@ public class ClusterStats {
         // This will return null for non implemented getMetricValues. This will happen when the
         // metric depends in other things other than the registeredClusters or the cluster
         // itself, e.g., when it is dependent on the database.
-        Gauge metricValue = metric.getMetricValue(registeredClusters.get(cluster.clusterName()));
-        switch (metric) {
-          case LAST_CHECK_TIME:
-            metricValue =
-                (Gauge<Long>)
-                    () ->
-                        db.getBigtableCluster(
-                                cluster.projectId(), cluster.instanceId(), cluster.clusterId())
-                            .flatMap(
-                                p ->
-                                    Optional.of(
-                                        Duration.between(
-                                            p.lastCheck().orElse(Instant.EPOCH), Instant.now())))
-                            .get()
-                            .getSeconds();
-            break;
-          case CPU_TARGET_RATIO:
-            metricValue =
-                (Gauge<Double>)
-                    () -> {
-                      final ClusterData data = registeredClusters.get(cluster.clusterName());
-                      return data.getCpuUtil() / cluster.cpuTarget();
-                    };
-            break;
-        }
+        Gauge metricValue =
+            metric.getMetricValue(registeredClusters.get(cluster.clusterName()), db);
         registerMetric(metric.tag, cluster, metricValue);
       }
 

@@ -25,7 +25,6 @@ import com.spotify.autoscaler.util.ErrorCode;
 import java.util.Optional;
 
 public class ClusterData {
-
   private BigtableCluster cluster;
   private int currentNodeCount;
   private int minNodeCount;
@@ -78,6 +77,10 @@ public class ClusterData {
 
   public BigtableCluster getCluster() {
     return cluster;
+  }
+
+  public void setCluster(final BigtableCluster cluster) {
+    this.cluster = cluster;
   }
 
   public ClusterData(
