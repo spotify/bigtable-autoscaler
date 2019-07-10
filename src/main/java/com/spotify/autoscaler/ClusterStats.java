@@ -135,6 +135,7 @@ public class ClusterStats {
       clusterData.setMinNodeCount(cluster.minNodes());
       clusterData.setMaxNodeCount(cluster.maxNodes());
       clusterData.setEffectiveMinNodeCount(cluster.effectiveMinNodes());
+      clusterData.setCluster(cluster);
     }
   }
 
