@@ -107,9 +107,6 @@ public class ClusterStats {
       // First time we saw this cluster, register a gauge
 
       for (BigtableMetric.Metrics metric : BigtableMetric.Metrics.values()) {
-        // This will return null for non implemented getMetricValues. This will happen when the
-        // metric depends in other things other than the registeredClusters or the cluster
-        // itself, e.g., when it is dependent on the database.
         Gauge metricValue =
             metric.getMetricValue(registeredClusters.get(cluster.clusterName()), db);
         registerMetric(metric.tag, cluster, metricValue);
