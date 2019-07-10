@@ -32,6 +32,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.metric.BigtableMetric;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.Closeable;
@@ -202,7 +203,7 @@ public class AutoscaleJob implements Closeable {
     try {
       currentCpu = getCurrentCpu(samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, currentCpu, ClusterStats.MetricType.CPU);
+      clusterStats.setLoad(cluster, currentCpu, BigtableMetric.MetricType.CPU);
     }
 
     logger.info(
@@ -279,7 +280,7 @@ public class AutoscaleJob implements Closeable {
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, storageUtilization, ClusterStats.MetricType.STORAGE);
+      clusterStats.setLoad(cluster, storageUtilization, BigtableMetric.MetricType.STORAGE);
     }
     if (storageUtilization <= 0.0) {
       return Math.max(currentNodes, desiredNodes);

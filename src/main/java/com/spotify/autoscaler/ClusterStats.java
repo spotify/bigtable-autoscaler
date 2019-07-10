@@ -23,15 +23,16 @@ package com.spotify.autoscaler;
 import static com.spotify.autoscaler.Main.APP_PREFIX;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Metric;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.metric.BigtableMetric;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,17 +54,7 @@ public class ClusterStats {
   private Database db;
   private Map<String, ClusterData> registeredClusters =
       new ConcurrentHashMap<String, ClusterData>();
-  private static final List<String> METRICS =
-      Arrays.asList(
-          "node-count",
-          "min-node-count",
-          "max-node-count",
-          "effective-min-node-count",
-          "cpu-util",
-          "last-check-time",
-          "consecutive-failure-count",
-          "storage-util",
-          "cpu-target-ratio");
+  private static final List<String> METRICS = BigtableMetric.getAllMetrics();
 
   ClusterStats(final SemanticMetricRegistry registry, final Database db) {
     this.registry = registry;
@@ -211,62 +202,70 @@ public class ClusterStats {
 
     if (clusterData == null) {
       // First time we saw this cluster, register a gauge
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>)
-              () -> registeredClusters.get(cluster.clusterName()).getCurrentNodeCount());
 
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "min-node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getMinNodeCount());
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "max-node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getMaxNodeCount());
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "effective-min-node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>)
-              () -> registeredClusters.get(cluster.clusterName()).getEffectiveMinNodeCount());
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "last-check-time")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Long>)
-              () ->
-                  db.getBigtableCluster(
-                          cluster.projectId(), cluster.instanceId(), cluster.clusterId())
-                      .flatMap(
-                          p ->
-                              Optional.of(
-                                  Duration.between(
-                                      p.lastCheck().orElse(Instant.EPOCH), Instant.now())))
-                      .get()
-                      .getSeconds());
+      for (BigtableMetric.Metrics metric : BigtableMetric.Metrics.values()) {
+        Gauge metricValue = null;
+        switch (metric) {
+          case NODE_COUNT:
+            metricValue =
+                (Gauge<Integer>)
+                    () -> registeredClusters.get(cluster.clusterName()).getCurrentNodeCount();
+            break;
+          case MIN_NODE_COUNT:
+            metricValue =
+                (Gauge<Integer>)
+                    () -> registeredClusters.get(cluster.clusterName()).getMinNodeCount();
+            break;
+          case MAX_NODE_COUNT:
+            metricValue =
+                (Gauge<Integer>)
+                    () -> registeredClusters.get(cluster.clusterName()).getMaxNodeCount();
+            break;
+          case EFFECTIVE_MIN_NODE_COUNT:
+            metricValue =
+                (Gauge<Integer>)
+                    () -> registeredClusters.get(cluster.clusterName()).getEffectiveMinNodeCount();
+            break;
+          case LAST_CHECK_TIME:
+            metricValue =
+                (Gauge<Long>)
+                    () ->
+                        db.getBigtableCluster(
+                                cluster.projectId(), cluster.instanceId(), cluster.clusterId())
+                            .flatMap(
+                                p ->
+                                    Optional.of(
+                                        Duration.between(
+                                            p.lastCheck().orElse(Instant.EPOCH), Instant.now())))
+                            .get()
+                            .getSeconds();
+            break;
+          case CPU_TARGET_RATIO:
+            metricValue =
+                (Gauge<Double>)
+                    () -> {
+                      final ClusterData data = registeredClusters.get(cluster.clusterName());
+                      return data.getCpuUtil() / cluster.cpuTarget();
+                    };
+            break;
+          default:
+            logger.error(
+                "The metric "
+                    + metric.tag
+                    + " is not registered correctly for the "
+                    + "cluster "
+                    + cluster.clusterName());
+            break;
+        }
+        if (metricValue != null) {
+          registerMetric(metric.tag, cluster, metricValue);
+        }
+      }
 
       for (ErrorCode code : ErrorCode.values()) {
         this.registry.register(
             APP_PREFIX
-                .tagged("what", "consecutive-failure-count")
+                .tagged("what", BigtableMetric.ErrorCode.CONSECUTIVE_FAILURE_COUNT.tag)
                 .tagged("project-id", cluster.projectId())
                 .tagged("cluster-id", cluster.clusterId())
                 .tagged("instance-id", cluster.instanceId())
@@ -279,18 +278,6 @@ public class ClusterStats {
                       : 0;
                 });
       }
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "cpu-target-ratio")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Double>)
-              () -> {
-                final ClusterData data = registeredClusters.get(cluster.clusterName());
-                return data.getCpuUtil() / cluster.cpuTarget();
-              });
     } else {
       clusterData.setCurrentNodeCount(currentNodes);
       clusterData.setConsecutiveFailureCount(cluster.consecutiveFailureCount());
@@ -301,7 +288,20 @@ public class ClusterStats {
     }
   }
 
-  void setLoad(BigtableCluster cluster, double load, MetricType type) {
+  public <T extends Metric> T registerMetric(String what, BigtableCluster cluster, T metric) {
+    System.out.println("what = " + what);
+    System.out.println("cluster = " + cluster.clusterName());
+    System.out.println("metric = " + metric.toString());
+    return this.registry.register(
+        APP_PREFIX
+            .tagged("what", what)
+            .tagged("project-id", cluster.projectId())
+            .tagged("cluster-id", cluster.clusterId())
+            .tagged("instance-id", cluster.instanceId()),
+        metric);
+  }
+
+  void setLoad(BigtableCluster cluster, double load, BigtableMetric.MetricType type) {
     if (registeredClusters.get(cluster.clusterName()) == null) {
       return;
     }
@@ -339,17 +339,6 @@ public class ClusterStats {
                   return 0.0;
                 }
               });
-    }
-  }
-
-  enum MetricType {
-    CPU("cpu-util"),
-    STORAGE("storage-util");
-
-    private String tag;
-
-    MetricType(final String tag) {
-      this.tag = tag;
     }
   }
 }
