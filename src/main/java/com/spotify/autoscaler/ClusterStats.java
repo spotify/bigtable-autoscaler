@@ -289,9 +289,6 @@ public class ClusterStats {
   }
 
   public <T extends Metric> T registerMetric(String what, BigtableCluster cluster, T metric) {
-    System.out.println("what = " + what);
-    System.out.println("cluster = " + cluster.clusterName());
-    System.out.println("metric = " + metric.toString());
     return this.registry.register(
         APP_PREFIX
             .tagged("what", what)
