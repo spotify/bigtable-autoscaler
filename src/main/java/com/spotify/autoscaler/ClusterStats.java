@@ -23,18 +23,17 @@ package com.spotify.autoscaler;
 import static com.spotify.autoscaler.Main.APP_PREFIX;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Metric;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.metric.BigtableMetric;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,17 +52,7 @@ public class ClusterStats {
   private Database db;
   private Map<String, ClusterData> registeredClusters =
       new ConcurrentHashMap<String, ClusterData>();
-  private static final List<String> METRICS =
-      Arrays.asList(
-          "node-count",
-          "min-node-count",
-          "max-node-count",
-          "effective-min-node-count",
-          "cpu-util",
-          "last-check-time",
-          "consecutive-failure-count",
-          "storage-util",
-          "cpu-target-ratio");
+  private static final List<String> METRICS = BigtableMetric.getAllMetrics();
 
   ClusterStats(final SemanticMetricRegistry registry, final Database db) {
     this.registry = registry;
@@ -107,101 +96,6 @@ public class ClusterStats {
     }
   }
 
-  private static class ClusterData {
-
-    private BigtableCluster cluster;
-    private int currentNodeCount;
-    private int minNodeCount;
-    private int maxNodeCount;
-    private int effectiveMinNodeCount;
-    private double cpuUtil;
-    private int consecutiveFailureCount;
-    private double storageUtil;
-    private Optional<ErrorCode> lastErrorCode;
-
-    int getCurrentNodeCount() {
-      return currentNodeCount;
-    }
-
-    int getConsecutiveFailureCount() {
-      return consecutiveFailureCount;
-    }
-
-    double getCpuUtil() {
-      return cpuUtil;
-    }
-
-    Optional<ErrorCode> getLastErrorCode() {
-      return lastErrorCode;
-    }
-
-    void setCurrentNodeCount(final int currentNodeCount) {
-      this.currentNodeCount = currentNodeCount;
-    }
-
-    void setConsecutiveFailureCount(final int consecutiveFailureCount) {
-      this.consecutiveFailureCount = consecutiveFailureCount;
-    }
-
-    void setLastErrorCode(final Optional<ErrorCode> lastErrorCode) {
-      this.lastErrorCode = lastErrorCode;
-    }
-
-    double getStorageUtil() {
-      return storageUtil;
-    }
-
-    void setStorageUtil(double storageUtil) {
-      this.storageUtil = storageUtil;
-    }
-
-    void setCpuUtil(double cpuUtil) {
-      this.cpuUtil = cpuUtil;
-    }
-
-    BigtableCluster getCluster() {
-      return cluster;
-    }
-
-    private ClusterData(
-        final BigtableCluster cluster,
-        final int currentNodeCount,
-        final int consecutiveFailureCount,
-        final Optional<ErrorCode> lastErrorCode) {
-      this.currentNodeCount = currentNodeCount;
-      this.minNodeCount = cluster.minNodes();
-      this.maxNodeCount = cluster.maxNodes();
-      this.effectiveMinNodeCount = cluster.effectiveMinNodes();
-      this.cluster = cluster;
-      this.consecutiveFailureCount = consecutiveFailureCount;
-      this.lastErrorCode = lastErrorCode;
-    }
-
-    int getMaxNodeCount() {
-      return maxNodeCount;
-    }
-
-    void setMaxNodeCount(int maxNodeCount) {
-      this.maxNodeCount = maxNodeCount;
-    }
-
-    int getMinNodeCount() {
-      return minNodeCount;
-    }
-
-    void setMinNodeCount(int minNodeCount) {
-      this.minNodeCount = minNodeCount;
-    }
-
-    public int getEffectiveMinNodeCount() {
-      return effectiveMinNodeCount;
-    }
-
-    public void setEffectiveMinNodeCount(int effectiveMinNodeCount) {
-      this.effectiveMinNodeCount = effectiveMinNodeCount;
-    }
-  }
-
   void setStats(BigtableCluster cluster, int currentNodes) {
     final ClusterData clusterData =
         registeredClusters.putIfAbsent(
@@ -211,62 +105,17 @@ public class ClusterStats {
 
     if (clusterData == null) {
       // First time we saw this cluster, register a gauge
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>)
-              () -> registeredClusters.get(cluster.clusterName()).getCurrentNodeCount());
 
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "min-node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getMinNodeCount());
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "max-node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>) () -> registeredClusters.get(cluster.clusterName()).getMaxNodeCount());
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "effective-min-node-count")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Integer>)
-              () -> registeredClusters.get(cluster.clusterName()).getEffectiveMinNodeCount());
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "last-check-time")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Long>)
-              () ->
-                  db.getBigtableCluster(
-                          cluster.projectId(), cluster.instanceId(), cluster.clusterId())
-                      .flatMap(
-                          p ->
-                              Optional.of(
-                                  Duration.between(
-                                      p.lastCheck().orElse(Instant.EPOCH), Instant.now())))
-                      .get()
-                      .getSeconds());
+      for (BigtableMetric.Metrics metric : BigtableMetric.Metrics.values()) {
+        Gauge metricValue =
+            metric.getMetricValue(registeredClusters.get(cluster.clusterName()), db);
+        registerMetric(metric.tag, cluster, metricValue);
+      }
 
       for (ErrorCode code : ErrorCode.values()) {
         this.registry.register(
             APP_PREFIX
-                .tagged("what", "consecutive-failure-count")
+                .tagged("what", BigtableMetric.ErrorCode.CONSECUTIVE_FAILURE_COUNT.tag)
                 .tagged("project-id", cluster.projectId())
                 .tagged("cluster-id", cluster.clusterId())
                 .tagged("instance-id", cluster.instanceId())
@@ -279,18 +128,6 @@ public class ClusterStats {
                       : 0;
                 });
       }
-
-      this.registry.register(
-          APP_PREFIX
-              .tagged("what", "cpu-target-ratio")
-              .tagged("project-id", cluster.projectId())
-              .tagged("cluster-id", cluster.clusterId())
-              .tagged("instance-id", cluster.instanceId()),
-          (Gauge<Double>)
-              () -> {
-                final ClusterData data = registeredClusters.get(cluster.clusterName());
-                return data.getCpuUtil() / cluster.cpuTarget();
-              });
     } else {
       clusterData.setCurrentNodeCount(currentNodes);
       clusterData.setConsecutiveFailureCount(cluster.consecutiveFailureCount());
@@ -298,10 +135,21 @@ public class ClusterStats {
       clusterData.setMinNodeCount(cluster.minNodes());
       clusterData.setMaxNodeCount(cluster.maxNodes());
       clusterData.setEffectiveMinNodeCount(cluster.effectiveMinNodes());
+      clusterData.setCluster(cluster);
     }
   }
 
-  void setLoad(BigtableCluster cluster, double load, MetricType type) {
+  public <T extends Metric> T registerMetric(String what, BigtableCluster cluster, T metric) {
+    return this.registry.register(
+        APP_PREFIX
+            .tagged("what", what)
+            .tagged("project-id", cluster.projectId())
+            .tagged("cluster-id", cluster.clusterId())
+            .tagged("instance-id", cluster.instanceId()),
+        metric);
+  }
+
+  void setLoad(BigtableCluster cluster, double load, BigtableMetric.LoadMetricType type) {
     if (registeredClusters.get(cluster.clusterName()) == null) {
       return;
     }
@@ -317,7 +165,7 @@ public class ClusterStats {
         lambda = clusterData::getStorageUtil;
         break;
       default:
-        throw new IllegalArgumentException(String.format("Undefined MetricType %s", type));
+        throw new IllegalArgumentException(String.format("Undefined LoadMetricType %s", type));
     }
 
     final MetricId key =
@@ -339,17 +187,6 @@ public class ClusterStats {
                   return 0.0;
                 }
               });
-    }
-  }
-
-  enum MetricType {
-    CPU("cpu-util"),
-    STORAGE("storage-util");
-
-    private String tag;
-
-    MetricType(final String tag) {
-      this.tag = tag;
     }
   }
 }
