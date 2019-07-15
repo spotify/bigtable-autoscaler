@@ -43,7 +43,7 @@ jobs:
       
       #Cucumber reports:
       - store_test_results:
-          path: /home/circleci/repo/target/cucumber-json-reports
+          path: cucumber-json-reports
       - store_artifacts:
-          path: /home/circleci/repo/target/cucumber-report-html/cucumber-html-reports
+          path: cucumber-html-reports
           destination: cucumber-reports
