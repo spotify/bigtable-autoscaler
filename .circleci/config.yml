@@ -43,7 +43,7 @@ jobs:
       
       #Cucumber reports:
       - store_test_results:
-          path: cucumber-json-reports
+          path: target/cucumber-json-reports/
       - store_artifacts:
-          path: cucumber-html-reports
+          path: target/cucumber-html-reports/
           destination: cucumber-reports
