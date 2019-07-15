@@ -375,7 +375,7 @@ public class AutoscaleJob implements Closeable {
     return desiredNodes;
   }
 
-  void run() throws IOException {
+  public void run() throws IOException {
 
     if (hasRun) {
       throw new RuntimeException("An autoscale job should only be run once!");
