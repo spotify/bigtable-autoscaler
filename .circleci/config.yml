@@ -40,3 +40,9 @@ jobs:
 
       # run tests
       - run: mvn verify
+      
+      #Cucumber reports:
+      - store_test_results:
+          path: /home/circleci/repo/target/cucumber-json-reports
+      - store_artifacts:
+          path: /home/circleci/repo/target/cucumber-json-reports
