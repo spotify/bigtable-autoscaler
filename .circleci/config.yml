@@ -45,5 +45,5 @@ jobs:
       - store_test_results:
           path: target/cucumber-json-reports/
       - store_artifacts:
-          path: target/cucumber-report-html/cucumber-html-reports/
+          path: target/cucumber-json-reports/
           destination: cucumber-reports
