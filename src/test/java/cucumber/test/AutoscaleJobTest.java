@@ -26,7 +26,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
-    plugin = {"pretty", "json:target/cucumber-json-reports/autoscale-job-it-report.json"},
+    plugin = {"pretty", "json:target/cucumber-json-reports/autoscale-job-report.json"},
     glue = {"cucumber.steps"},
     features = {"src/test/resources/cucumber/features/autoscale-job"})
-public class AutoscaleJobIT {}
+public class AutoscaleJobTest {}

@@ -140,8 +140,8 @@ public class AutoscaleJobSteps {
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, nodeCount);
   }
 
-  @And("the current load is {float}")
-  public void setCurrentLoad(float load) throws IOException {
+  @And("the current load is {double}")
+  public void setCurrentLoad(double load) throws IOException {
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, load);
     job.run();
   }
@@ -149,5 +149,10 @@ public class AutoscaleJobSteps {
   @Then("the revised number of nodes should be {int}")
   public void finalNodeCount(int nodeCount) {
     assertEquals(nodeCount, newSize);
+  }
+
+  @And("the current disk utilization is {double}")
+  public void setCurrentDiskUtilization(double diskUtilization) {
+    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilization);
   }
 }

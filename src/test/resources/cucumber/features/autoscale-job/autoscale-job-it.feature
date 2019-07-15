@@ -12,3 +12,9 @@ Feature: AutoscaleJob - Integration Test
       | 100             | 0.75 | 94             |
       | 90              | 0.6  | 68             |
       | 20              | 0.7  | 18             |
+
+    Scenario: Test Disk Constraint Overrides CPU Target Node Count
+      Given that the current node count is 100
+      And the current disk utilization is 0.8
+      And the current load is 0.4
+      Then the revised number of nodes should be 115
