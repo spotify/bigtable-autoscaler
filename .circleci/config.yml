@@ -42,8 +42,14 @@ jobs:
       - run: mvn verify
       
       #Cucumber reports:
-      - store_test_results:
-          path: target/cucumber-json-reports/
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/cucumber
+            bundle exec cucumber --format junit --out ~/cucumber/junit.xml
+          when: always
+      - store_test_results:qqq
+          path: ~/cucumber
       - store_artifacts:
-          path: target/cucumber-json-reports/
+          path: target/cucumber-report-html/cucumber-html-reports/
           destination: cucumber-reports
