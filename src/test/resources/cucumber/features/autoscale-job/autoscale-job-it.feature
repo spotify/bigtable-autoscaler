@@ -24,5 +24,18 @@ Feature: AutoscaleJob - Integration Test
       | 100             | 0.8             | 0.4  | 115            |
       | 100             | 0.6             | 0.4  | 86             |
       | 100             | 0.6             | 0.72 | 90             |
-      
-      
+
+  Scenario: Test Resize
+    Given that the current node count is 100
+    And the current load is 0.6
+    Then the revised number of nodes should be 75
+
+  Scenario: Test Huge Resize on Overload
+    Given that the current node count is 100
+    And the current load is 0.95
+    Then the revised number of nodes should be 200
+
+  Scenario: Job can't run twice.
+    Given that the current node count is 100
+    When the job is executed 2 times
+    Then a RuntimeException is expected.

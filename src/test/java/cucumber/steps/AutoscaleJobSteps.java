@@ -21,6 +21,7 @@
 package cucumber.steps;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -44,9 +45,12 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
+import cucumber.api.java.en.When;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.StringJoiner;
+import org.hamcrest.CoreMatchers;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -67,6 +71,7 @@ public class AutoscaleJobSteps {
   AutoscaleJob job;
   BigtableCluster cluster;
   int newSize;
+  StringJoiner exceptionCaught;
 
   @Before
   public void setUp() throws IOException {
@@ -75,6 +80,7 @@ public class AutoscaleJobSteps {
     cluster = getTestCluster();
     db = initDatabase(cluster, registry);
     job = getTestJob();
+    exceptionCaught = new StringJoiner(" ");
   }
 
   private void initialSetup() throws IOException {
@@ -135,24 +141,44 @@ public class AutoscaleJobSteps {
   }
   // Tests
 
-  @Given("that the current node count is {int}")
+  @Given("^that the current node count is (.+)$")
   public void setCurrentNodeCount(int nodeCount) {
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, nodeCount);
   }
 
-  @And("the current load is {double}")
+  @And("^the current load is (.+)$")
   public void setCurrentLoad(double load) throws IOException {
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, load);
     job.run();
   }
 
-  @Then("the revised number of nodes should be {int}")
+  @Then("^the revised number of nodes should be (.+)$")
   public void finalNodeCount(int nodeCount) {
     assertEquals(nodeCount, newSize);
   }
 
-  @And("the current disk utilization is {double}")
+  @And("^the current disk utilization is (.+)$")
   public void setCurrentDiskUtilization(double diskUtilization) {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilization);
+  }
+
+  @When("^the job is executed (.+) times$")
+  public void theJobIsExecutedTimes(int times) {
+    for (int i = 0; i < times; i++) {
+      try {
+        job.run();
+      } catch (IOException e) {
+        exceptionCaught.add("IOException");
+      } catch (RuntimeException e) {
+        exceptionCaught.add("RuntimeException");
+      }
+    }
+  }
+
+  @Then("^a (.+) is expected.$")
+  public void exceptionIsExpected(String exceptionTarget) {
+    assertThat(
+        exceptionCaught.toString().toUpperCase(),
+        CoreMatchers.containsString(exceptionTarget.toUpperCase()));
   }
 }
