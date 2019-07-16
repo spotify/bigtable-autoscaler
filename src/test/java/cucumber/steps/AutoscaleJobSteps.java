@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.function.Supplier;
 import org.hamcrest.CoreMatchers;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -57,6 +58,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobSteps {
+  // Default values:
+  private static final String projectName = "project";
+  private static final String instanceName = "instance";
+  private static final String clusterName = "cluster";
+  private static final double cpuTarget = 0.8;
+  private static final int minNumberNodes = 5;
+  private static final int maxNumberNodes = 500;
+  private static final int overloadStep = 100;
+  private static final boolean enabled = true;
+
   @Mock BigtableSession bigtableSession;
 
   @Mock BigtableInstanceClient bigtableInstanceClient;
@@ -67,19 +78,37 @@ public class AutoscaleJobSteps {
 
   @Mock ClusterStats clusterStats;
 
-  PostgresDatabase db;
-  AutoscaleJob job;
-  BigtableCluster cluster;
-  int newSize;
-  StringJoiner exceptionCaught;
+  private PostgresDatabase db;
+  private AutoscaleJob job;
+  private BigtableCluster cluster;
+  private int newSize;
+  private StringJoiner exceptionCaught;
 
   @Before
   public void setUp() throws IOException {
     initMocks(this);
     initialSetup();
-    cluster = getTestCluster();
+    cluster =
+        getMockCluster(
+            projectName,
+            instanceName,
+            clusterName,
+            cpuTarget,
+            maxNumberNodes,
+            minNumberNodes,
+            overloadStep,
+            enabled,
+            Optional.of(ErrorCode.OK));
     db = initDatabase(cluster, registry);
-    job = getTestJob();
+    job =
+        getMockJob(
+            bigtableSession,
+            stackdriverClient,
+            cluster,
+            db,
+            registry,
+            clusterStats,
+            () -> Instant.now());
     exceptionCaught = new StringJoiner(" ");
   }
 
@@ -104,28 +133,38 @@ public class AutoscaleJobSteps {
     return database;
   }
 
-  private AutoscaleJob getTestJob() {
+  private AutoscaleJob getMockJob(
+      BigtableSession bigtableSession,
+      StackdriverClient stackdriverClient,
+      BigtableCluster cluster,
+      PostgresDatabase db,
+      SemanticMetricRegistry registry,
+      ClusterStats clusterStats,
+      Supplier<Instant> timeSource) {
     return new AutoscaleJob(
-        bigtableSession,
-        stackdriverClient,
-        cluster,
-        db,
-        registry,
-        clusterStats,
-        () -> Instant.now());
+        bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, timeSource);
   }
 
-  private BigtableCluster getTestCluster() {
+  private BigtableCluster getMockCluster(
+      String projectName,
+      String instanceName,
+      String clusterName,
+      double cpuTarget,
+      int maxNumberNodes,
+      int minNumberNodes,
+      int overloadStep,
+      boolean enabled,
+      Optional<ErrorCode> errorCode) {
     return new BigtableClusterBuilder()
-        .projectId("project")
-        .instanceId("instance")
-        .clusterId("cluster")
-        .cpuTarget(0.8)
-        .maxNodes(500)
-        .minNodes(5)
-        .overloadStep(100)
-        .enabled(true)
-        .errorCode(Optional.of(ErrorCode.OK))
+        .projectId(projectName)
+        .instanceId(instanceName)
+        .clusterId(clusterName)
+        .cpuTarget(cpuTarget)
+        .maxNodes(maxNumberNodes)
+        .minNodes(minNumberNodes)
+        .overloadStep(overloadStep)
+        .enabled(enabled)
+        .errorCode(errorCode)
         .build();
   }
 
@@ -160,6 +199,20 @@ public class AutoscaleJobSteps {
   @And("^the current disk utilization is (.+)$")
   public void setCurrentDiskUtilization(double diskUtilization) {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilization);
+  }
+
+  @When("^the overload step is empty for the cluster$")
+  public void setOverloadStepToEmpty() {
+    cluster = BigtableClusterBuilder.from(this.cluster).overloadStep(Optional.empty()).build();
+    job =
+        getMockJob(
+            bigtableSession,
+            stackdriverClient,
+            this.cluster,
+            db,
+            registry,
+            clusterStats,
+            Instant::now);
   }
 
   @When("^the job is executed (.+) times$")

@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <name>bigtable-autoscaler</name>
@@ -353,6 +355,9 @@
                         <version>2.12.4</version>
                     </dependency>
                 </dependencies>
+                <configuration>
+                    <testFailureIgnore>true</testFailureIgnore>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>net.masterthought</groupId>
@@ -367,8 +372,10 @@
                         </goals>
                         <configuration>
                             <projectName>Bigtable-Autoscale-Integration-Tests</projectName>
-                            <inputDirectory>${project.build.directory}/cucumber-json-reports</inputDirectory>
-                            <outputDirectory>${project.build.directory}/cucumber-report-html</outputDirectory>
+                            <inputDirectory>${project.build.directory}/cucumber-json-reports
+                            </inputDirectory>
+                            <outputDirectory>${project.build.directory}/cucumber-report-html
+                            </outputDirectory>
                             <jsonFiles>
                                 <param>**/*.json</param>
                             </jsonFiles>

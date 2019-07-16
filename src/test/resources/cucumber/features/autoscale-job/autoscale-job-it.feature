@@ -39,3 +39,10 @@ Feature: AutoscaleJob - Integration Test
     Given that the current node count is 100
     When the job is executed 2 times
     Then a RuntimeException is expected.
+    
+    Scenario: Disk Constraint does not Override if Desired Nodes are already Enough
+      Given that the current node count is 100
+      When the overload step is empty for the cluster
+      And the current disk utilization is 0.8
+      And the current load is 0.96
+      Then the revised number of nodes should be 120
