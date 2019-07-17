@@ -4,6 +4,7 @@ Feature: AutoscaleJob - Integration Test
   Scenario Outline: Simple test
     Given that the current node count is <nodeCountBefore>
     And the current load is <load>
+    And the job is executed 1 times
     Then the revised number of nodes should be <nodeCountAfter>
 
     Examples: Simple test
@@ -17,6 +18,7 @@ Feature: AutoscaleJob - Integration Test
     Given that the current node count is <nodeCountBefore>
     And the current disk utilization is <diskUtilization>
     And the current load is <load>
+    And the job is executed 1 times
     Then the revised number of nodes should be <nodeCountAfter>
 
     Examples: Test Disk Constraints
@@ -28,21 +30,67 @@ Feature: AutoscaleJob - Integration Test
   Scenario: Test Resize
     Given that the current node count is 100
     And the current load is 0.6
+    And the job is executed 1 times
     Then the revised number of nodes should be 75
 
   Scenario: Test Huge Resize on Overload
     Given that the current node count is 100
     And the current load is 0.95
+    And the job is executed 1 times
     Then the revised number of nodes should be 200
 
   Scenario: Job can't run twice.
     Given that the current node count is 100
     When the job is executed 2 times
     Then a RuntimeException is expected.
+
+  Scenario: Disk Constraint does not Override if Desired Nodes are already Enough
+    Given that the current node count is 100
+    When the overload step is empty for the cluster
+    And the current disk utilization is 0.8
+    And the current load is 0.96
+    And the job is executed 1 times
+    Then the revised number of nodes should be 120
+
+  Scenario: Testing Upper Bound Limit
+    Given that the current node count is 480
+    And the maximum number of nodes of 500
+    When a job configured with a new registry
+    And the current load is 0.9
+    And the job is executed 1 times
+    And the metric is created with filter overridden-desired-node-count
+    Then the metrics size should be 1
+    And the following should match:
+      | 500 | target-nodes  |
+      | 540 | desired-nodes |
+    And the default values should match
+    And the revised number of nodes should be 500
+
+  Scenario: Testing Lower Bound Limit
+    Given that the current node count is 7
+    And the minimum number of nodes of 6
+    When a job configured with a new registry
+    And the current load is 0.0001
+    And the job is executed 1 times
+    And the metric is created with filter overridden-desired-node-count
+    Then the metrics size should be 2
+    And the following should match:
+      | 6 | target-nodes  |
+      | 5 | desired-nodes |
+    And the default values should match
+    And the revised number of nodes should be 6
+
+  Scenario: Exponential Backoff After Consecutive Failures
+    Given that the cluster had 5 failures
+    Then the job should do an exponential backoff after 300 seconds
+    But the job should not do an exponential backoff after 1000 seconds
+
+  Scenario: No Exponential Backoff After Success
+    Given that the cluster had 0 failures
+    Then the job should not do an exponential backoff after 50 seconds
     
-    Scenario: Disk Constraint does not Override if Desired Nodes are already Enough
+    Scenario: We don't resize too fast
       Given that the current node count is 100
-      When the overload step is empty for the cluster
-      And the current disk utilization is 0.8
-      And the current load is 0.96
-      Then the revised number of nodes should be 120
+      And the current load is 0.3
+      And the job is executed 1 times
+      Then the revised number of nodes should be 70

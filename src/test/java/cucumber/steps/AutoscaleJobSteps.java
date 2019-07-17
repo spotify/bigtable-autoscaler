@@ -20,6 +20,9 @@
 
 package cucumber.steps;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +42,7 @@ import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.db.PostgresDatabaseTest;
 import com.spotify.autoscaler.util.ErrorCode;
+import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -48,10 +52,12 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.Supplier;
-import org.hamcrest.CoreMatchers;
+import java.util.stream.Collectors;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -59,24 +65,38 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AutoscaleJobSteps {
   // Default values:
-  private static final String projectName = "project";
-  private static final String instanceName = "instance";
-  private static final String clusterName = "cluster";
-  private static final double cpuTarget = 0.8;
-  private static final int minNumberNodes = 5;
-  private static final int maxNumberNodes = 500;
-  private static final int overloadStep = 100;
-  private static final boolean enabled = true;
+  private static final String PROJECT_ID = "project";
+  private static final String INSTANCE_ID = "instance";
+  private static final String CLUSTER_ID = "cluster";
+  private static final double CPU_TARGET = 0.8;
+  private static final int MIN_NODES = 6;
+  private static final int MAX_NODES = 500;
+  private static final int OVERLOAD_STEP = 100;
+  private static final boolean ENABLED = true;
+  // Mocked Objects
+  @Mock BigtableSession bigtableSessionMocked;
+  @Mock BigtableInstanceClient bigtableInstanceClientMocked;
+  @Mock StackdriverClient stackdriverClientMocked;
+  @Mock SemanticMetricRegistry registryMocked;
+  @Mock ClusterStats clusterStatsMocked;
 
-  @Mock BigtableSession bigtableSession;
-
-  @Mock BigtableInstanceClient bigtableInstanceClient;
-
-  @Mock StackdriverClient stackdriverClient;
-
-  @Mock SemanticMetricRegistry registry;
-
-  @Mock ClusterStats clusterStats;
+  // May be non-default:
+  private List<MetricId> metric;
+  // Mocked
+  private BigtableSession bigtableSession;
+  private BigtableInstanceClient bigtableInstanceClient;
+  private StackdriverClient stackdriverClient;
+  private SemanticMetricRegistry registry;
+  private ClusterStats clusterStats;
+  // Non-mocked:
+  private String projectId;
+  private String instanceId;
+  private String clusterId;
+  private double cpuTarget;
+  private int minNumberNodes;
+  private int maxNumberNodes;
+  private int overloadStep;
+  private boolean enabled;
 
   private PostgresDatabase db;
   private AutoscaleJob job;
@@ -88,41 +108,40 @@ public class AutoscaleJobSteps {
   public void setUp() throws IOException {
     initMocks(this);
     initialSetup();
-    cluster =
-        getMockCluster(
-            projectName,
-            instanceName,
-            clusterName,
-            cpuTarget,
-            maxNumberNodes,
-            minNumberNodes,
-            overloadStep,
-            enabled,
-            Optional.of(ErrorCode.OK));
+    setDefaultValues();
+    cluster = getTestCluster();
     db = initDatabase(cluster, registry);
-    job =
-        getMockJob(
-            bigtableSession,
-            stackdriverClient,
-            cluster,
-            db,
-            registry,
-            clusterStats,
-            () -> Instant.now());
+    job = getTestJob();
     exceptionCaught = new StringJoiner(" ");
   }
 
-  private void initialSetup() throws IOException {
-    when(registry.meter(any())).thenReturn(new Meter());
-    when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
-    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
-    when(bigtableInstanceClient.updateCluster(any()))
-        .thenAnswer(
-            invocationOnMock -> {
-              newSize = ((Cluster) invocationOnMock.getArgument(0)).getServeNodes();
-              AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, newSize);
-              return null;
-            });
+  private void setDefaultValues() {
+    // Mocked
+    bigtableSession = bigtableSessionMocked;
+    bigtableInstanceClient = bigtableInstanceClientMocked;
+    stackdriverClient = stackdriverClientMocked;
+    registry = registryMocked;
+    clusterStats = clusterStatsMocked;
+    // default values
+    projectId = PROJECT_ID;
+    instanceId = INSTANCE_ID;
+    clusterId = CLUSTER_ID;
+    cpuTarget = CPU_TARGET;
+    minNumberNodes = MIN_NODES;
+    maxNumberNodes = MAX_NODES;
+    overloadStep = OVERLOAD_STEP;
+    enabled = ENABLED;
+  }
+
+  private AutoscaleJob getTestJob() {
+    return getMockJob(
+        bigtableSession,
+        stackdriverClient,
+        cluster,
+        db,
+        registry,
+        clusterStats,
+        () -> Instant.now());
   }
 
   private static PostgresDatabase initDatabase(
@@ -143,6 +162,32 @@ public class AutoscaleJobSteps {
       Supplier<Instant> timeSource) {
     return new AutoscaleJob(
         bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, timeSource);
+  }
+
+  private BigtableCluster getTestCluster() {
+    return getMockCluster(
+        projectId,
+        instanceId,
+        clusterId,
+        cpuTarget,
+        maxNumberNodes,
+        minNumberNodes,
+        overloadStep,
+        enabled,
+        Optional.of(ErrorCode.OK));
+  }
+
+  private void initialSetup() throws IOException {
+    when(registryMocked.meter(any())).thenReturn(new Meter());
+    when(bigtableSessionMocked.getInstanceAdminClient()).thenReturn(bigtableInstanceClientMocked);
+    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClientMocked, 0.00001);
+    when(bigtableInstanceClientMocked.updateCluster(any()))
+        .thenAnswer(
+            invocationOnMock -> {
+              newSize = ((Cluster) invocationOnMock.getArgument(0)).getServeNodes();
+              AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClientMocked, newSize);
+              return null;
+            });
   }
 
   private BigtableCluster getMockCluster(
@@ -186,9 +231,9 @@ public class AutoscaleJobSteps {
   }
 
   @And("^the current load is (.+)$")
-  public void setCurrentLoad(double load) throws IOException {
+  public void setCurrentLoad(double load) {
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, load);
-    job.run();
+    System.out.println(load);
   }
 
   @Then("^the revised number of nodes should be (.+)$")
@@ -231,7 +276,86 @@ public class AutoscaleJobSteps {
   @Then("^a (.+) is expected.$")
   public void exceptionIsExpected(String exceptionTarget) {
     assertThat(
-        exceptionCaught.toString().toUpperCase(),
-        CoreMatchers.containsString(exceptionTarget.toUpperCase()));
+        exceptionCaught.toString().toUpperCase(), containsString(exceptionTarget.toUpperCase()));
+  }
+
+  @Given("a job configured with a new registry")
+  public void jobConfiguredWithANewRegistry() {
+    registry = new SemanticMetricRegistry();
+    job =
+        getMockJob(
+            bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, Instant::now);
+  }
+
+  @And("^the metric is created with filter (.+)$")
+  public void theMetricIsCreatedWithFilterOverriddenDesiredNodeCount(String filter) {
+    metric =
+        registry
+            .getMeters()
+            .keySet()
+            .stream()
+            .filter(meter -> meter.getTags().containsValue(filter))
+            .collect(Collectors.toList());
+    System.out.println(metric.size());
+  }
+
+  @And("the maximum number of nodes of {int}")
+  public void withMaximumNumberOfNodesOf(int maxNodes) {
+    maxNumberNodes = maxNodes;
+  }
+
+  @And("the minimum number of nodes of {int}")
+  public void theMinimumNumberOfNodesOf(int minNodes) {
+    minNumberNodes = minNodes;
+  }
+
+  @Then("the metrics size should be {int}")
+  public void theMetricsSizeShouldBe(int metricSize) {
+    assertThat(metric.size(), is(equalTo(metricSize)));
+  }
+
+  @And("the following should match:")
+  public void shouldMatch(Map<String, String> map) {
+    Map<String, String> tags = metric.get(0).getTags();
+    for (Map.Entry<String, String> entry : map.entrySet()) {
+      assertThat(entry.getKey(), is(equalTo(tags.get(entry.getValue()))));
+    }
+  }
+
+  @And("the default values should match")
+  public void theDefaultValuesShouldMatch() {
+    Map<String, String> tags = metric.get(0).getTags();
+    assertEquals(String.valueOf(minNumberNodes), tags.get("min-nodes"));
+    assertEquals(String.valueOf(maxNumberNodes), tags.get("max-nodes"));
+    assertEquals(projectId, tags.get("project-id"));
+    assertEquals(clusterId, tags.get("cluster-id"));
+    assertEquals(instanceId, tags.get("instance-id"));
+  }
+
+  @Given("^that the cluster had (.+) failures$")
+  public void thatTheClusterAlreadyHadFailures(int failures) {
+    cluster =
+        BigtableClusterBuilder.from(cluster)
+            .consecutiveFailureCount(failures)
+            .lastFailure(Instant.now())
+            .build();
+  }
+
+  @Then("^the job should (.*) an exponential backoff after (.+) seconds$")
+  public void theJobShouldDoAnExponentialBackoffAfterSeconds(String shouldDo, int seconds) {
+    boolean should = true;
+    if (shouldDo.toUpperCase().contains("NOT")) {
+      should = false;
+    }
+    job =
+        new AutoscaleJob(
+            bigtableSession,
+            stackdriverClient,
+            cluster,
+            db,
+            registry,
+            clusterStats,
+            () -> Instant.now().plusSeconds(seconds));
+    assertThat(should, is(job.shouldExponentialBackoff()));
   }
 }

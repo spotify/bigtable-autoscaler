@@ -244,7 +244,7 @@ public class AutoscaleJob implements Closeable {
     return roundedDesiredNodes;
   }
 
-  boolean shouldExponentialBackoff() {
+  public boolean shouldExponentialBackoff() {
     Instant now = timeSource.get();
 
     if (cluster.lastFailure().isPresent() && cluster.consecutiveFailureCount() > 0) {
