@@ -3,7 +3,7 @@ Feature: AutoscaleJob - Integration Test
 
   Scenario Outline: Simple test
     Given that the current node count is <nodeCountBefore>
-    And the current load is <load>
+    When the current load is <load>
     And the job is executed 1 times
     Then the revised number of nodes should be <nodeCountAfter>
 
@@ -16,7 +16,7 @@ Feature: AutoscaleJob - Integration Test
 
   Scenario Outline: Test Disk Constraints
     Given that the current node count is <nodeCountBefore>
-    And the current disk utilization is <diskUtilization>
+    When the current disk utilization is <diskUtilization>
     And the current load is <load>
     And the job is executed 1 times
     Then the revised number of nodes should be <nodeCountAfter>
@@ -29,13 +29,13 @@ Feature: AutoscaleJob - Integration Test
 
   Scenario: Test Resize
     Given that the current node count is 100
-    And the current load is 0.6
+    When the current load is 0.6
     And the job is executed 1 times
     Then the revised number of nodes should be 75
 
   Scenario: Test Huge Resize on Overload
     Given that the current node count is 100
-    And the current load is 0.95
+    When the current load is 0.95
     And the job is executed 1 times
     Then the revised number of nodes should be 200
 
@@ -55,7 +55,8 @@ Feature: AutoscaleJob - Integration Test
   Scenario: Testing Upper Bound Limit
     Given that the current node count is 480
     And the maximum number of nodes of 500
-    When a job configured with a new registry
+    When a new registry is created
+    And a job is set
     And the current load is 0.9
     And the job is executed 1 times
     And the metric is created with filter overridden-desired-node-count
@@ -69,7 +70,8 @@ Feature: AutoscaleJob - Integration Test
   Scenario: Testing Lower Bound Limit
     Given that the current node count is 7
     And the minimum number of nodes of 6
-    When a job configured with a new registry
+    When a new registry is created
+    And a job is set
     And the current load is 0.0001
     And the job is executed 1 times
     And the metric is created with filter overridden-desired-node-count
@@ -88,9 +90,18 @@ Feature: AutoscaleJob - Integration Test
   Scenario: No Exponential Backoff After Success
     Given that the cluster had 0 failures
     Then the job should not do an exponential backoff after 50 seconds
+
+  Scenario: We don't resize too fast
+    Given that the current node count is 100
+    When the current load is 0.3
+    And the job is executed 1 times
+    Then the revised number of nodes should be 70
+
+  Scenario: We Resize if Size Constraints are not Met
+    Given that the cluster have a load delta of 10
+    And the minimum number of nodes of 6
+    And that the current node count is 6
+    When a job is set
+    And the current load is 0.1
     
-    Scenario: We don't resize too fast
-      Given that the current node count is 100
-      And the current load is 0.3
-      And the job is executed 1 times
-      Then the revised number of nodes should be 70
+    

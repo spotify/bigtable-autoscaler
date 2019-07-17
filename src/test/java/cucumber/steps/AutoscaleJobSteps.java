@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -134,7 +133,7 @@ public class AutoscaleJobSteps {
   }
 
   private AutoscaleJob getTestJob() {
-    return getMockJob(
+    return new AutoscaleJob(
         bigtableSession,
         stackdriverClient,
         cluster,
@@ -150,18 +149,6 @@ public class AutoscaleJobSteps {
     database.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
     database.insertBigtableCluster(cluster);
     return database;
-  }
-
-  private AutoscaleJob getMockJob(
-      BigtableSession bigtableSession,
-      StackdriverClient stackdriverClient,
-      BigtableCluster cluster,
-      PostgresDatabase db,
-      SemanticMetricRegistry registry,
-      ClusterStats clusterStats,
-      Supplier<Instant> timeSource) {
-    return new AutoscaleJob(
-        bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, timeSource);
   }
 
   private BigtableCluster getTestCluster() {
@@ -250,7 +237,7 @@ public class AutoscaleJobSteps {
   public void setOverloadStepToEmpty() {
     cluster = BigtableClusterBuilder.from(this.cluster).overloadStep(Optional.empty()).build();
     job =
-        getMockJob(
+        new AutoscaleJob(
             bigtableSession,
             stackdriverClient,
             this.cluster,
@@ -279,12 +266,9 @@ public class AutoscaleJobSteps {
         exceptionCaught.toString().toUpperCase(), containsString(exceptionTarget.toUpperCase()));
   }
 
-  @Given("a job configured with a new registry")
+  @Given("a new registry is created")
   public void jobConfiguredWithANewRegistry() {
     registry = new SemanticMetricRegistry();
-    job =
-        getMockJob(
-            bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, Instant::now);
   }
 
   @And("^the metric is created with filter (.+)$")
@@ -357,5 +341,21 @@ public class AutoscaleJobSteps {
             clusterStats,
             () -> Instant.now().plusSeconds(seconds));
     assertThat(should, is(job.shouldExponentialBackoff()));
+  }
+
+  @Given("that the cluster have a load delta of {int}")
+  public void theClusterHaveALoadDeltaOf(int loadDelta) {
+    cluster =
+        BigtableClusterBuilder.from(this.cluster)
+            .loadDelta(loadDelta)
+            .lastChange(Instant.now())
+            .build();
+  }
+
+  @When("a job is set")
+  public void aJobIsSet() {
+    job =
+        new AutoscaleJob(
+            bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, Instant::now);
   }
 }
