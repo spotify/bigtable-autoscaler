@@ -103,5 +103,21 @@ Feature: AutoscaleJob - Integration Test
     And that the current node count is 6
     When a job is set
     And the current load is 0.1
-    
+
+  Scenario: Resize If storage constraints are not met
+    Given that the current node count is 7
+    And the minimum number of nodes of 6
+    And the current disk utilization is 0.9
+    And a new registry is created
+    And a job is set
+    And the current load is 0.1
+    When the job is executed 1 times
+    And the metric is created with filter overridden-desired-node-count
+    Then the metrics size should be 1
+    And the following should match:
+      | storage-constraint | reason        |
+      | 9                  | target-nodes  |
+      | 5                  | desired-nodes |
+    And the default values should match
+    And the revised number of nodes should be 9
     
