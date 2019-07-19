@@ -67,7 +67,6 @@ public interface ApiTestResources {
         .queryParam("minNodes", Integer.toString(cluster.minNodes()))
         .queryParam("maxNodes", Integer.toString(cluster.maxNodes()))
         .queryParam("enabled", Boolean.toString(cluster.enabled()))
-        .queryParam("load_delta", Integer.toString(cluster.loadDelta()))
         .request();
   }
 

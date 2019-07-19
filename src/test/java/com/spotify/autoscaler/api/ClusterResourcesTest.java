@@ -23,6 +23,8 @@ package com.spotify.autoscaler.api;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -98,6 +100,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
         request(target(ApiTestResources.INSTANCES), ApiTestResources.CLUSTER).post(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1)).insertBigtableCluster(any());
   }
 
   @Test
@@ -107,6 +110,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
         request(target(ApiTestResources.INSTANCES), ApiTestResources.CLUSTER).put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1)).updateBigtableCluster(any());
   }
 
   @Test
@@ -121,6 +125,11 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
             .delete();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1))
+        .deleteBigtableCluster(
+            ApiTestResources.CLUSTER.projectId(),
+            ApiTestResources.CLUSTER.instanceId(),
+            ApiTestResources.CLUSTER.clusterId());
   }
 
   @Test
@@ -136,5 +145,11 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
             .put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1))
+        .updateLoadDelta(
+            ApiTestResources.CLUSTER.projectId(),
+            ApiTestResources.CLUSTER.instanceId(),
+            ApiTestResources.CLUSTER.clusterId(),
+            ApiTestResources.CLUSTER.loadDelta());
   }
 }
