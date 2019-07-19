@@ -43,28 +43,31 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+// DONTLIKEIT
+// rename to BigtableMetricReporter? And move it to the metric package
+// look at PR https://github.com/spotify/bigtable-autoscaler/pull/63/files
 public class ClusterStats {
 
   private static final Logger logger = LoggerFactory.getLogger(ClusterStats.class);
 
   private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
-  private SemanticMetricRegistry registry;
-  private Database db;
-  private Map<String, ClusterData> registeredClusters =
+  private final SemanticMetricRegistry registry;
+  private final Database db;
+  private final Map<String, ClusterData> registeredClusters =
       new ConcurrentHashMap<String, ClusterData>();
   private static final List<String> METRICS = BigtableMetric.getAllMetrics();
 
   ClusterStats(final SemanticMetricRegistry registry, final Database db) {
     this.registry = registry;
     this.db = db;
-    ScheduledExecutorService cleanupExecutor =
+    final ScheduledExecutorService cleanupExecutor =
         new ScheduledThreadPoolExecutor(1, r -> new Thread(r, "Cluster-Metrics-Cleaner"));
     cleanupExecutor.scheduleAtFixedRate(
         () -> {
           try {
             logger.info("Cleanup running");
             unregisterInactiveClustersMetrics(registry, db);
-          } catch (Throwable t) {
+          } catch (final Throwable t) {
             logger.error("Cleanup task failed", t);
           }
         },
@@ -75,19 +78,19 @@ public class ClusterStats {
 
   private void unregisterInactiveClustersMetrics(
       final SemanticMetricRegistry registry, final Database db) {
-    Set<String> bigtableClusters = db.getActiveClusterKeys();
-    for (Map.Entry<String, ClusterData> entry : registeredClusters.entrySet()) {
+    final Set<String> bigtableClusters = db.getActiveClusterKeys();
+    for (final Map.Entry<String, ClusterData> entry : registeredClusters.entrySet()) {
       if (!bigtableClusters.contains(entry.getKey())) {
         registeredClusters.remove(entry.getKey());
-        BigtableCluster cluster = entry.getValue().getCluster();
+        final BigtableCluster cluster = entry.getValue().getCluster();
         BigtableUtil.pushContext(cluster);
         registry.removeMatching(
             (name, m) -> {
               final Map<String, String> tags = name.getTags();
               return tags.getOrDefault("project-id", "").equals(cluster.projectId())
-                  && tags.getOrDefault("instance-id", "").equals(cluster.instanceId())
-                  && tags.getOrDefault("cluster-id", "").equals(cluster.clusterId())
-                  && METRICS.contains(tags.getOrDefault("what", ""));
+                     && tags.getOrDefault("instance-id", "").equals(cluster.instanceId())
+                     && tags.getOrDefault("cluster-id", "").equals(cluster.clusterId())
+                     && METRICS.contains(tags.getOrDefault("what", ""));
             });
 
         logger.info("Metrics unregistered");
@@ -96,7 +99,7 @@ public class ClusterStats {
     }
   }
 
-  void setStats(BigtableCluster cluster, int currentNodes) {
+  void setStats(final BigtableCluster cluster, final int currentNodes) {
     final ClusterData clusterData =
         registeredClusters.putIfAbsent(
             cluster.clusterName(),
@@ -106,13 +109,13 @@ public class ClusterStats {
     if (clusterData == null) {
       // First time we saw this cluster, register a gauge
 
-      for (BigtableMetric.Metrics metric : BigtableMetric.Metrics.values()) {
-        Gauge metricValue =
+      for (final BigtableMetric.Metrics metric : BigtableMetric.Metrics.values()) {
+        final Gauge metricValue =
             metric.getMetricValue(registeredClusters.get(cluster.clusterName()), db);
         registerMetric(metric.tag, cluster, metricValue);
       }
 
-      for (ErrorCode code : ErrorCode.values()) {
+      for (final ErrorCode code : ErrorCode.values()) {
         this.registry.register(
             APP_PREFIX
                 .tagged("what", BigtableMetric.ErrorCode.CONSECUTIVE_FAILURE_COUNT.tag)
@@ -122,13 +125,15 @@ public class ClusterStats {
                 .tagged("latest-error-code", code.name()),
             (Gauge<Integer>)
                 () -> {
-                  ClusterData c = registeredClusters.get(cluster.clusterName());
+                  final ClusterData c = registeredClusters.get(cluster.clusterName());
                   return c.getLastErrorCode().orElse(ErrorCode.OK) == code
-                      ? c.getConsecutiveFailureCount()
-                      : 0;
+                         ? c.getConsecutiveFailureCount()
+                         : 0;
                 });
       }
     } else {
+      // DONTLIKEIT
+      // why we do this? We should create a new instance
       clusterData.setCurrentNodeCount(currentNodes);
       clusterData.setConsecutiveFailureCount(cluster.consecutiveFailureCount());
       clusterData.setLastErrorCode(cluster.errorCode());
@@ -139,7 +144,9 @@ public class ClusterStats {
     }
   }
 
-  public <T extends Metric> T registerMetric(String what, BigtableCluster cluster, T metric) {
+  // DONTLIKEIT
+  // listen to Idea
+  public <T extends Metric> T registerMetric(final String what, final BigtableCluster cluster, final T metric) {
     return this.registry.register(
         APP_PREFIX
             .tagged("what", what)
@@ -149,12 +156,12 @@ public class ClusterStats {
         metric);
   }
 
-  void setLoad(BigtableCluster cluster, double load, BigtableMetric.LoadMetricType type) {
+  void setLoad(final BigtableCluster cluster, final double load, final BigtableMetric.LoadMetricType type) {
     if (registeredClusters.get(cluster.clusterName()) == null) {
       return;
     }
-    ClusterData clusterData = registeredClusters.get(cluster.clusterName());
-    Callable<Double> lambda;
+    final ClusterData clusterData = registeredClusters.get(cluster.clusterName());
+    final Callable<Double> lambda;
     switch (type) {
       case CPU:
         clusterData.setCpuUtil(load);
@@ -182,7 +189,7 @@ public class ClusterStats {
               () -> {
                 try {
                   return lambda.call();
-                } catch (Exception e) {
+                } catch (final Exception e) {
                   logger.error("Couldn't get metric", e);
                   return 0.0;
                 }

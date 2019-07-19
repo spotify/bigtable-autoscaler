@@ -24,7 +24,10 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.util.ErrorCode;
 import java.util.Optional;
 
+// DONTLIKEIT
+// make it immutable or use a builder?
 public class ClusterData {
+
   private BigtableCluster cluster;
   private int currentNodeCount;
   private int minNodeCount;
@@ -67,11 +70,11 @@ public class ClusterData {
     return storageUtil;
   }
 
-  public void setStorageUtil(double storageUtil) {
+  public void setStorageUtil(final double storageUtil) {
     this.storageUtil = storageUtil;
   }
 
-  public void setCpuUtil(double cpuUtil) {
+  public void setCpuUtil(final double cpuUtil) {
     this.cpuUtil = cpuUtil;
   }
 
@@ -101,7 +104,7 @@ public class ClusterData {
     return maxNodeCount;
   }
 
-  public void setMaxNodeCount(int maxNodeCount) {
+  public void setMaxNodeCount(final int maxNodeCount) {
     this.maxNodeCount = maxNodeCount;
   }
 
@@ -109,7 +112,7 @@ public class ClusterData {
     return minNodeCount;
   }
 
-  public void setMinNodeCount(int minNodeCount) {
+  public void setMinNodeCount(final int minNodeCount) {
     this.minNodeCount = minNodeCount;
   }
 
@@ -117,7 +120,7 @@ public class ClusterData {
     return effectiveMinNodeCount;
   }
 
-  public void setEffectiveMinNodeCount(int effectiveMinNodeCount) {
+  public void setEffectiveMinNodeCount(final int effectiveMinNodeCount) {
     this.effectiveMinNodeCount = effectiveMinNodeCount;
   }
 }

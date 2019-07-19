@@ -29,7 +29,10 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.function.Supplier;
 
+// DONTLIKEIT
+// this class encapsulates one line of logic, could it be removed? Or done differently?
 public class AutoscaleJobFactory {
+
   public AutoscaleJob createAutoscaleJob(
       final BigtableSession bigtableSession,
       final IOSupplier<StackdriverClient> stackdriverClient,
@@ -44,6 +47,7 @@ public class AutoscaleJobFactory {
   }
 
   public interface IOSupplier<T> {
+
     T get() throws IOException;
   }
 }
