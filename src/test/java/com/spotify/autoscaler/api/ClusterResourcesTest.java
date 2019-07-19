@@ -50,6 +50,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   private boolean insertBigtableClusterResult;
   private boolean updateBigtableClusterResult;
   private boolean deleteBigtableClusterResult;
+  private boolean updateLoadDeltaResult;
   private Collection<BigtableCluster> getBigtableClustersResult;
 
   @Override
@@ -61,6 +62,8 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
         .thenAnswer(invocation -> deleteBigtableClusterResult);
     when(db.getBigtableClusters(any(), any(), any()))
         .thenAnswer(invocation -> getBigtableClustersResult);
+    when(db.updateLoadDelta(any(), any(), any(), any()))
+        .thenAnswer(invocation -> updateLoadDeltaResult);
 
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
     final ResourceConfig resourceConfig =
@@ -116,6 +119,21 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
             .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
             .request()
             .delete();
+    assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
+    assertThat(response.readEntity(String.class), equalTo(""));
+  }
+
+  @Test
+  public void extraLoad() {
+    updateLoadDeltaResult = true;
+    final Response response =
+        target(ApiTestResources.LOAD)
+            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
+            .queryParam("loadDelta", ApiTestResources.CLUSTER.loadDelta())
+            .request()
+            .put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
   }
