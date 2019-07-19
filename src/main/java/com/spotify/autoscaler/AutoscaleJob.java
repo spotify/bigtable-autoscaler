@@ -191,8 +191,8 @@ public class AutoscaleJob implements Closeable {
     final Duration reducedTimeSinceLastChange =
         timeSinceLastChange.minus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
     return reducedTimeSinceLastChange.compareTo(MAX_SAMPLE_INTERVAL) <= 0
-           ? reducedTimeSinceLastChange
-           : MAX_SAMPLE_INTERVAL;
+        ? reducedTimeSinceLastChange
+        : MAX_SAMPLE_INTERVAL;
   }
 
   /*
@@ -286,7 +286,8 @@ public class AutoscaleJob implements Closeable {
     return false;
   }
 
-  private int storageConstraints(final Duration samplingDuration, final int desiredNodes, final int currentNodes) {
+  private int storageConstraints(
+      final Duration samplingDuration, final int desiredNodes, final int currentNodes) {
     Double storageUtilization = 0.0;
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
@@ -369,8 +370,8 @@ public class AutoscaleJob implements Closeable {
     // too much oscillation
     final double changeWeight =
         100.0
-        * Math.abs(1.0 - (double) desiredNodes / currentNodes)
-        * timeSinceLastChange.getSeconds();
+            * Math.abs(1.0 - (double) desiredNodes / currentNodes)
+            * timeSinceLastChange.getSeconds();
     final boolean scaleDown = (desiredNodes < currentNodes);
     String path = "normal";
 

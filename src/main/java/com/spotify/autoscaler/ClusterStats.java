@@ -88,9 +88,9 @@ public class ClusterStats {
             (name, m) -> {
               final Map<String, String> tags = name.getTags();
               return tags.getOrDefault("project-id", "").equals(cluster.projectId())
-                     && tags.getOrDefault("instance-id", "").equals(cluster.instanceId())
-                     && tags.getOrDefault("cluster-id", "").equals(cluster.clusterId())
-                     && METRICS.contains(tags.getOrDefault("what", ""));
+                  && tags.getOrDefault("instance-id", "").equals(cluster.instanceId())
+                  && tags.getOrDefault("cluster-id", "").equals(cluster.clusterId())
+                  && METRICS.contains(tags.getOrDefault("what", ""));
             });
 
         logger.info("Metrics unregistered");
@@ -127,8 +127,8 @@ public class ClusterStats {
                 () -> {
                   final ClusterData c = registeredClusters.get(cluster.clusterName());
                   return c.getLastErrorCode().orElse(ErrorCode.OK) == code
-                         ? c.getConsecutiveFailureCount()
-                         : 0;
+                      ? c.getConsecutiveFailureCount()
+                      : 0;
                 });
       }
     } else {
@@ -146,7 +146,8 @@ public class ClusterStats {
 
   // DONTLIKEIT
   // listen to Idea
-  public <T extends Metric> T registerMetric(final String what, final BigtableCluster cluster, final T metric) {
+  public <T extends Metric> T registerMetric(
+      final String what, final BigtableCluster cluster, final T metric) {
     return this.registry.register(
         APP_PREFIX
             .tagged("what", what)
@@ -156,7 +157,8 @@ public class ClusterStats {
         metric);
   }
 
-  void setLoad(final BigtableCluster cluster, final double load, final BigtableMetric.LoadMetricType type) {
+  void setLoad(
+      final BigtableCluster cluster, final double load, final BigtableMetric.LoadMetricType type) {
     if (registeredClusters.get(cluster.clusterName()) == null) {
       return;
     }

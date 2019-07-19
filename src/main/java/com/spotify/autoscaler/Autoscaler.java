@@ -113,15 +113,15 @@ public class Autoscaler implements Runnable {
     BigtableUtil.pushContext(cluster);
     logger.info("Autoscaling cluster!");
     try (final BigtableSession session = sessionProvider.apply(cluster);
-         final AutoscaleJob job =
-             autoscaleJobFactory.createAutoscaleJob(
-                 session,
-                 () -> stackDriverClient,
-                 cluster,
-                 db,
-                 registry,
-                 clusterStats,
-                 Instant::now)) {
+        final AutoscaleJob job =
+            autoscaleJobFactory.createAutoscaleJob(
+                session,
+                () -> stackDriverClient,
+                cluster,
+                db,
+                registry,
+                clusterStats,
+                Instant::now)) {
       job.run();
     } catch (final Exception e) {
       final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
