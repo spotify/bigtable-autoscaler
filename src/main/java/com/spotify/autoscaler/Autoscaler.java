@@ -79,7 +79,6 @@ public class Autoscaler implements Runnable {
 
   @Override
   public void run() {
-    // DONTLIKEIT
     /*
      * Without this horrible bit of horribleness,
      * any uncaught Exception would kill the whole autoscaler.
