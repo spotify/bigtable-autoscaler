@@ -31,6 +31,7 @@ final class ClusterMetricsData {
   public Double modifiedRows;
   public Double returnedRows;
   public Double errorCount;
+  public Double loadDelta;
 
   ClusterMetricsData() {}
 
@@ -43,7 +44,8 @@ final class ClusterMetricsData {
       final Double requestCount,
       final Double modifiedRows,
       final Double returnedRows,
-      final Double errorCount) {
+      final Double errorCount,
+      final Double loadDelta) {
     if (diskUtilization == null) {
       throw new NullPointerException("diskUtilization");
     } else if (nodeCount == null) {
@@ -62,6 +64,8 @@ final class ClusterMetricsData {
       throw new NullPointerException("returnedRows");
     } else if (errorCount == null) {
       throw new NullPointerException("errorCount");
+    } else if (errorCount == null) {
+      throw new NullPointerException("loadDelta");
     } else {
       this.diskUtilization = diskUtilization;
       this.nodeCount = nodeCount;
@@ -72,6 +76,7 @@ final class ClusterMetricsData {
       this.modifiedRows = modifiedRows;
       this.returnedRows = returnedRows;
       this.errorCount = errorCount;
+      this.loadDelta = loadDelta;
     }
   }
 
@@ -111,6 +116,10 @@ final class ClusterMetricsData {
     return this.errorCount;
   }
 
+  public Double loadDelta() {
+    return this.loadDelta;
+  }
+
   public static ClusterMetricsDataBuilder builder() {
     return new ClusterMetricsDataBuilder();
   }
@@ -126,6 +135,7 @@ final class ClusterMetricsData {
     private Double modifiedRows = 0.0d;
     private Double returnedRows = 0.0d;
     private Double errorCount = 0.0d;
+    private Double loadDelta = 0.0d;
 
     public ClusterMetricsDataBuilder() {}
 
@@ -139,6 +149,7 @@ final class ClusterMetricsData {
       this.modifiedRows = v.modifiedRows();
       this.returnedRows = v.returnedRows();
       this.errorCount = v.errorCount();
+      this.loadDelta = v.loadDelta();
     }
 
     private ClusterMetricsDataBuilder(final ClusterMetricsDataBuilder v) {
@@ -151,6 +162,7 @@ final class ClusterMetricsData {
       this.modifiedRows = v.modifiedRows;
       this.returnedRows = v.returnedRows;
       this.errorCount = v.errorCount;
+      this.loadDelta = v.loadDelta;
     }
 
     public Double diskUtilization() {
@@ -270,6 +282,19 @@ final class ClusterMetricsData {
       }
     }
 
+    public Double loadDelta() {
+      return this.loadDelta;
+    }
+
+    public ClusterMetricsDataBuilder loadDelta(final Double loadDelta) {
+      if (loadDelta == null) {
+        throw new NullPointerException("loadDelta");
+      } else {
+        this.loadDelta = loadDelta;
+        return this;
+      }
+    }
+
     public ClusterMetricsData build() {
       return new ClusterMetricsData(
           this.diskUtilization,
@@ -280,7 +305,8 @@ final class ClusterMetricsData {
           this.requestCount,
           this.modifiedRows,
           this.returnedRows,
-          this.errorCount);
+          this.errorCount,
+          this.loadDelta);
     }
 
     public static ClusterMetricsDataBuilder from(final ClusterMetricsData v) {
