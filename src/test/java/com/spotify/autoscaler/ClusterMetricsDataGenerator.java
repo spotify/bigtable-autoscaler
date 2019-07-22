@@ -21,6 +21,7 @@
 package com.spotify.autoscaler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.cloud.monitoring.v3.MetricServiceClient;
 import com.google.cloud.monitoring.v3.PagedResponseWrappers;
 import com.google.monitoring.v3.ListTimeSeriesRequest;
@@ -37,8 +38,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -105,7 +106,7 @@ public class ClusterMetricsDataGenerator {
 
     final TimeInterval interval = interval(Duration.ofHours(24));
 
-    final Map<Instant, ClusterMetricsData> metrics = new HashMap<>(1440); // Resolution: minutes
+    final Map<Instant, ClusterMetricsData> metrics = new TreeMap<>();
     populateIntervalWithValue(interval, metrics, p -> ClusterMetricsData.builder().build());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
@@ -118,14 +119,14 @@ public class ClusterMetricsDataGenerator {
     populateModifiedRows(metricServiceClient, metrics, cluster, interval);
     populateReturnedRows(metricServiceClient, metrics, cluster, interval);
     populateErrorCount(metricServiceClient, metrics, cluster, interval);
-
-    final Map<String, ClusterMetricsData> data = new HashMap<>();
-    metrics.forEach((k, v) -> data.put(k.toString(), v));
+    //    populateLoadDelta(metricServiceClient, metrics, cluster, interval);
 
     // save metrics as json
+    final ObjectMapper mapper = new ObjectMapper();
+    mapper.enable(SerializationFeature.INDENT_OUTPUT);
     try (final FileWriter file =
         new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
-      file.write(new ObjectMapper().writeValueAsString(data));
+      file.write(mapper.writeValueAsString(metrics));
       file.flush();
     } catch (final IOException e) {
       e.printStackTrace();
@@ -138,16 +139,8 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                ERROR_COUNT_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, ERROR_COUNT_METRIC),
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
@@ -163,19 +156,8 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                RETURNED_ROWS_METRIC,
-                cluster.projectId(),
-                cluster.instanceId(),
-                cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, RETURNED_ROWS_METRIC),
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
@@ -191,23 +173,13 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                MODIFIED_ROWS_METRIC,
-                cluster.projectId(),
-                cluster.instanceId(),
-                cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, MODIFIED_ROWS_METRIC),
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
             ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
+                .loadDelta(0)
                 .modifiedRows(Double.sum(existing.modifiedRows(), newValue))
                 .build(),
         true);
@@ -219,19 +191,8 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                REQUEST_COUNT_METRIC,
-                cluster.projectId(),
-                cluster.instanceId(),
-                cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, REQUEST_COUNT_METRIC),
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
@@ -247,16 +208,8 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                CPU_LOAD_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, CPU_LOAD_METRIC),
         metrics,
         TypedValue::getDoubleValue,
         (existing, newValue) ->
@@ -271,16 +224,8 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                SENT_BYTES_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, SENT_BYTES_METRIC),
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
@@ -296,19 +241,8 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                RECEIVED_BYTES_METRIC,
-                cluster.projectId(),
-                cluster.instanceId(),
-                cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, RECEIVED_BYTES_METRIC),
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
@@ -324,16 +258,8 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster cluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(cluster.projectId()),
-            String.format(
-                NODE_COUNT_METRIC, cluster.projectId(), cluster.instanceId(), cluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, cluster, interval, NODE_COUNT_METRIC),
         metrics,
         v -> (double) v.getInt64Value(),
         (existing, newValue) ->
@@ -348,25 +274,30 @@ public class ClusterMetricsDataGenerator {
       final BigtableCluster bigtableCluster,
       final TimeInterval interval) {
 
-    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
-        metricServiceClient.listTimeSeries(
-            ProjectName.of(bigtableCluster.projectId()),
-            String.format(
-                DISK_USAGE_METRIC,
-                bigtableCluster.projectId(),
-                bigtableCluster.instanceId(),
-                bigtableCluster.clusterId()),
-            interval,
-            ListTimeSeriesRequest.TimeSeriesView.FULL);
-
     aggregate(
-        response,
+        getMetric(metricServiceClient, bigtableCluster, interval, DISK_USAGE_METRIC),
         metrics,
         TypedValue::getDoubleValue,
         (existing, newValue) ->
             ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
                 .diskUtilization(Math.max(existing.diskUtilization(), newValue))
                 .build());
+  }
+
+  private static PagedResponseWrappers.ListTimeSeriesPagedResponse getMetric(
+      final MetricServiceClient metricServiceClient,
+      final BigtableCluster bigtableCluster,
+      final TimeInterval interval,
+      final String metricName) {
+    return metricServiceClient.listTimeSeries(
+        ProjectName.of(bigtableCluster.projectId()),
+        String.format(
+            metricName,
+            bigtableCluster.projectId(),
+            bigtableCluster.instanceId(),
+            bigtableCluster.clusterId()),
+        interval,
+        ListTimeSeriesRequest.TimeSeriesView.FULL);
   }
 
   private static void aggregate(
