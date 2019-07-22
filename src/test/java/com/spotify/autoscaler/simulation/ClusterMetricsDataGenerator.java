@@ -91,17 +91,18 @@ public class ClusterMetricsDataGenerator {
       final Map<Instant, ClusterMetricsData> metrics,
       final BigtableCluster cluster,
       final TimeInterval interval) {
-    final double averageCPU =
+    final double averageLoad =
         metrics
             .values()
             .stream()
-            .map(ClusterMetricsData::cpuLoad)
+            .map(d -> d.cpuLoad * d.nodeCount)
             .mapToDouble(Double::doubleValue)
-            .sum()
-        / metrics.values().size();
-    System.out.println("Average CPU: " + averageCPU);
+            .average()
+            .orElse(0.0);
+    System.out.println("Average load: " + averageLoad);
     for (final Instant instant : metrics.keySet()) {
-      if (metrics.get(instant).cpuLoad() > averageCPU * 2) {
+      final ClusterMetricsData metricsData = metrics.get(instant);
+      if (metricsData.cpuLoad() * metricsData.nodeCount() > averageLoad * 2) {
         System.out.println("Job started at " + instant);
       }
     }
