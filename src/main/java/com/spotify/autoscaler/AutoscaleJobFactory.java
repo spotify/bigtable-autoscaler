@@ -30,6 +30,7 @@ import java.time.Instant;
 import java.util.function.Supplier;
 
 public class AutoscaleJobFactory {
+
   public AutoscaleJob createAutoscaleJob(
       final BigtableSession bigtableSession,
       final IOSupplier<StackdriverClient> stackdriverClient,
@@ -44,6 +45,7 @@ public class AutoscaleJobFactory {
   }
 
   public interface IOSupplier<T> {
+
     T get() throws IOException;
   }
 }

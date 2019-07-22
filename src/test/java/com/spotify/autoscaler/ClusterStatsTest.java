@@ -35,13 +35,13 @@ public class ClusterStatsTest {
 
   @Test
   public void testNodeCountMetrics() {
-    SemanticMetricRegistry registry = new SemanticMetricRegistry();
-    ClusterStats clusterStats = new ClusterStats(registry, mock(PostgresDatabase.class));
-    int loadDelta = 10;
-    int currentNodes = 10;
-    int minNodes = 3;
-    int maxNodes = 30;
-    BigtableCluster bigtableCluster =
+    final SemanticMetricRegistry registry = new SemanticMetricRegistry();
+    final ClusterStats clusterStats = new ClusterStats(registry, mock(PostgresDatabase.class));
+    final int loadDelta = 10;
+    final int currentNodes = 10;
+    final int minNodes = 3;
+    final int maxNodes = 30;
+    final BigtableCluster bigtableCluster =
         new BigtableClusterBuilder()
             .projectId("project")
             .instanceId("instance")
@@ -57,8 +57,9 @@ public class ClusterStatsTest {
     assertMetric(registry, "effective-min-node-count", minNodes + loadDelta);
   }
 
-  private void assertMetric(SemanticMetricRegistry registry, String what, int expected) {
-    MetricId metricId =
+  private void assertMetric(
+      final SemanticMetricRegistry registry, final String what, final int expected) {
+    final MetricId metricId =
         registry
             .getMetrics()
             .keySet()
@@ -66,7 +67,7 @@ public class ClusterStatsTest {
             .filter(m -> m.getTags().containsValue(what))
             .findAny()
             .get();
-    Gauge gauge = registry.getGauges().get(metricId);
+    final Gauge gauge = registry.getGauges().get(metricId);
     assertEquals(expected, gauge.getValue());
   }
 }

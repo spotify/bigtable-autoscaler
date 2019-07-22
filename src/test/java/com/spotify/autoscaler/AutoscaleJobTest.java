@@ -67,9 +67,9 @@ public class AutoscaleJobTest {
   private static final int MIN_NODES = 6;
   private static final int MAX_NODES = 500;
   private BigtableCluster cluster;
-  private String projectId = "project";
-  private String instanceId = "instance";
-  private String clusterId = "cluster";
+  private final String projectId = "project";
+  private final String instanceId = "instance";
+  private final String clusterId = "cluster";
 
   private Optional<Integer> newSize = Optional.empty();
   private AutoscaleJob job;
@@ -166,13 +166,13 @@ public class AutoscaleJobTest {
   public void testUpperBound() throws IOException {
     // Test that we don't go over maximum size
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MAX_NODES - 20);
-    SemanticMetricRegistry registry = new SemanticMetricRegistry();
+    final SemanticMetricRegistry registry = new SemanticMetricRegistry();
     job =
         new AutoscaleJob(
             bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.9);
     job.run();
-    List<MetricId> metric =
+    final List<MetricId> metric =
         registry
             .getMeters()
             .keySet()
@@ -181,7 +181,7 @@ public class AutoscaleJobTest {
             .collect(Collectors.toList());
 
     assertEquals(1, metric.size());
-    Map<String, String> tags = metric.get(0).getTags();
+    final Map<String, String> tags = metric.get(0).getTags();
     assertEquals("max-nodes-constraint", tags.get("reason"));
     assertEquals(String.valueOf(MAX_NODES), tags.get("target-nodes"));
     assertEquals("540", tags.get("desired-nodes"));
@@ -197,13 +197,13 @@ public class AutoscaleJobTest {
   public void testLowerBound() throws IOException {
     // Test that we don't go under minimum size
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES + 1);
-    SemanticMetricRegistry registry = new SemanticMetricRegistry();
+    final SemanticMetricRegistry registry = new SemanticMetricRegistry();
     job =
         new AutoscaleJob(
             bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.0001);
     job.run();
-    List<MetricId> overrideMetrics =
+    final List<MetricId> overrideMetrics =
         registry
             .getMeters()
             .keySet()
@@ -214,7 +214,7 @@ public class AutoscaleJobTest {
     assertEquals(2, overrideMetrics.size());
     overrideMetrics.forEach(
         m -> {
-          Map<String, String> tags = m.getTags();
+          final Map<String, String> tags = m.getTags();
           assertEquals(String.valueOf(MIN_NODES), tags.get("target-nodes"));
           assertEquals("5", tags.get("desired-nodes"));
           assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
@@ -223,7 +223,7 @@ public class AutoscaleJobTest {
           assertEquals(clusterId, tags.get("cluster-id"));
           assertEquals(instanceId, tags.get("instance-id"));
         });
-    String[] reasons =
+    final String[] reasons =
         overrideMetrics.stream().map(m -> m.getTags().get("reason")).toArray(String[]::new);
     assertArrayEquals(
         new String[] {"min-nodes-constraint", "effective-min-nodes-constraint"}, reasons);
@@ -246,9 +246,9 @@ public class AutoscaleJobTest {
 
   @Test
   public void testExponentialBackoffAfterConsecutiveFailures() {
-    Instant now = Instant.now();
+    final Instant now = Instant.now();
 
-    BigtableCluster cluster =
+    final BigtableCluster cluster =
         BigtableClusterBuilder.from(this.cluster)
             .consecutiveFailureCount(5) // 5 failures = 8 minutes
             .lastFailure(now)
@@ -278,9 +278,9 @@ public class AutoscaleJobTest {
 
   @Test
   public void testNoExponentialBackoffAfterSuccess() {
-    Instant now = Instant.now();
+    final Instant now = Instant.now();
 
-    BigtableCluster cluster =
+    final BigtableCluster cluster =
         BigtableClusterBuilder.from(this.cluster)
             .consecutiveFailureCount(0) // last time succeeded
             .lastFailure(now)
@@ -317,8 +317,8 @@ public class AutoscaleJobTest {
 
   @Test
   public void testWeResizeIfSizeConstraintsAreNotMet() throws IOException {
-    int loadDelta = 10;
-    BigtableCluster cluster =
+    final int loadDelta = 10;
+    final BigtableCluster cluster =
         BigtableClusterBuilder.from(this.cluster)
             .loadDelta(loadDelta)
             .lastChange(Instant.now())
@@ -336,13 +336,13 @@ public class AutoscaleJobTest {
   public void testWeResizeIfStorageConstraintsAreNotMet() throws IOException {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.90);
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES + 1);
-    SemanticMetricRegistry registry = new SemanticMetricRegistry();
+    final SemanticMetricRegistry registry = new SemanticMetricRegistry();
     job =
         new AutoscaleJob(
             bigtableSession, stackdriverClient, cluster, db, registry, clusterStats, Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run();
-    List<MetricId> metric =
+    final List<MetricId> metric =
         registry
             .getMeters()
             .keySet()
@@ -351,7 +351,7 @@ public class AutoscaleJobTest {
             .collect(Collectors.toList());
 
     assertEquals(1, metric.size());
-    Map<String, String> tags = metric.get(0).getTags();
+    final Map<String, String> tags = metric.get(0).getTags();
     assertEquals("storage-constraint", tags.get("reason"));
     assertEquals("9", tags.get("target-nodes"));
     assertEquals("5", tags.get("desired-nodes"));
@@ -366,7 +366,7 @@ public class AutoscaleJobTest {
   @Test
   public void testWeDontResizeTooSoonEvenIfStorageConstraintsAreNotMet() throws IOException {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.90);
-    BigtableCluster cluster =
+    final BigtableCluster cluster =
         BigtableClusterBuilder.from(this.cluster).lastChange(Instant.now()).build();
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES + 1);
     job =

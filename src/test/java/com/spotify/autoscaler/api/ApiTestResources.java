@@ -57,7 +57,7 @@ public interface ApiTestResources {
   ObjectMapper MAPPER =
       new ObjectMapper().registerModule(new AutoMatterModule()).registerModule(new Jdk8Module());
 
-  default Invocation.Builder request(WebTarget target, BigtableCluster cluster) {
+  default Invocation.Builder request(final WebTarget target, final BigtableCluster cluster) {
     return target
         .queryParam("projectId", cluster.projectId())
         .queryParam("instanceId", cluster.instanceId())
@@ -70,8 +70,8 @@ public interface ApiTestResources {
         .request();
   }
 
-  default List<BigtableCluster> deserialize(Response response) throws IOException {
-    CollectionType type =
+  default List<BigtableCluster> deserialize(final Response response) throws IOException {
+    final CollectionType type =
         TypeFactory.defaultInstance().constructCollectionType(List.class, BigtableCluster.class);
     return MAPPER.readValue(response.readEntity(String.class), type);
   }

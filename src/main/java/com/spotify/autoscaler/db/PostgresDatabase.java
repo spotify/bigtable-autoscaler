@@ -88,7 +88,7 @@ public class PostgresDatabase implements Database {
   }
 
   private void registerMetricActiveConnections(final SemanticMetricRegistry registry) {
-    MetricId metricId = APP_PREFIX.tagged("what", "open-db-connections");
+    final MetricId metricId = APP_PREFIX.tagged("what", "open-db-connections");
     if (!registry.getGauges().containsKey(metricId)) {
       registry.register(
           metricId,

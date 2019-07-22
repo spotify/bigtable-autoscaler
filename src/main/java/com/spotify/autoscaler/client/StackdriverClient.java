@@ -54,7 +54,7 @@ public class StackdriverClient implements Closeable {
 
   public Double getDiskUtilization(final BigtableCluster bigtableCluster, final Duration duration) {
 
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(bigtableCluster.projectId()),
             String.format(
@@ -65,7 +65,7 @@ public class StackdriverClient implements Closeable {
   }
 
   public Double getCpuLoad(final BigtableCluster bigtableCluster, final Duration duration) {
-    PagedResponseWrappers.ListTimeSeriesPagedResponse response =
+    final PagedResponseWrappers.ListTimeSeriesPagedResponse response =
         metricServiceClient.listTimeSeries(
             ProjectName.of(bigtableCluster.projectId()),
             String.format(CPU_METRIC, bigtableCluster.instanceId(), bigtableCluster.clusterId()),
@@ -79,10 +79,10 @@ public class StackdriverClient implements Closeable {
       final T initialMax,
       final Function<TypedValue, T> converter) {
     T max = initialMax;
-    for (PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
-      for (TimeSeries ts : page.getValues()) {
-        for (Point p : ts.getPointsList()) {
-          T value = converter.apply(p.getValue());
+    for (final PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
+      for (final TimeSeries ts : page.getValues()) {
+        for (final Point p : ts.getPointsList()) {
+          final T value = converter.apply(p.getValue());
           max = value.compareTo(max) > 0 ? value : max;
         }
       }
@@ -91,7 +91,7 @@ public class StackdriverClient implements Closeable {
   }
 
   private TimeInterval interval(final Duration duration) {
-    long currentTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
+    final long currentTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
 
     final Timestamp pastTimestamp =
         Timestamp.newBuilder().setSeconds(currentTimeSeconds - duration.getSeconds()).build();
@@ -107,7 +107,7 @@ public class StackdriverClient implements Closeable {
   public void close() throws IOException {
     try {
       metricServiceClient.close();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
   }

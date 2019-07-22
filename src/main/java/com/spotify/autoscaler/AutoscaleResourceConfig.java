@@ -25,9 +25,10 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 public class AutoscaleResourceConfig extends ResourceConfig {
 
-  public AutoscaleResourceConfig(String serviceName, Config config, Object... resources) {
+  public AutoscaleResourceConfig(
+      final String serviceName, final Config config, final Object... resources) {
     setApplicationName(serviceName);
-    for (Object o : resources) {
+    for (final Object o : resources) {
       register(o);
     }
     if (config.hasPath("additionalPackages")) {

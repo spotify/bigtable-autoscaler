@@ -83,7 +83,7 @@ public final class Main {
   private Main() throws URISyntaxException, IOException {
     SLF4JBridgeHandler.removeHandlersForRootLogger();
     SLF4JBridgeHandler.install();
-    Config config = ConfigFactory.load(SERVICE_NAME);
+    final Config config = ConfigFactory.load(SERVICE_NAME);
 
     final SemanticMetricRegistry registry = new SemanticMetricRegistry();
     final String ffwdHost = config.getString("ffwd.host");
@@ -103,22 +103,22 @@ public final class Main {
       reporter = null;
     }
 
-    int port = config.getConfig("http").getConfig("server").getInt("port");
+    final int port = config.getConfig("http").getConfig("server").getInt("port");
     db = new PostgresDatabase(config.getConfig("database"), registry);
-    URI uri = new URI("http://0.0.0.0:" + port);
-    ResourceConfig resourceConfig =
+    final URI uri = new URI("http://0.0.0.0:" + port);
+    final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
             SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
     ClusterFilter clusterFilter = new AllowAllClusterFilter();
-    String clusterFilterClass = config.getString("clusterFilter");
+    final String clusterFilterClass = config.getString("clusterFilter");
     if (clusterFilterClass != null && !clusterFilterClass.isEmpty()) {
       try {
         clusterFilter =
             (ClusterFilter)
                 Class.forName(clusterFilterClass).getDeclaredConstructor().newInstance();
-      } catch (ClassNotFoundException
+      } catch (final ClassNotFoundException
           | InstantiationException
           | IllegalAccessException
           | NoSuchMethodException
@@ -148,7 +148,7 @@ public final class Main {
                 () -> {
                   try {
                     onShutdown();
-                  } catch (IOException | InterruptedException | ExecutionException e) {
+                  } catch (final IOException | InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                   }
                 }));
@@ -172,7 +172,7 @@ public final class Main {
         APP_PREFIX.tagged("what", "daily-resize-count"),
         (Gauge<Long>) () -> db.getDailyResizeCount());
 
-    for (ErrorCode code : ErrorCode.values()) {
+    for (final ErrorCode code : ErrorCode.values()) {
       registry.register(
           APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
           (Gauge<Long>)
@@ -191,7 +191,7 @@ public final class Main {
   private void onShutdown() throws IOException, ExecutionException, InterruptedException {
     try {
       stackdriverClient.close();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       logger.error("Exception while closing stackdriverClient", e);
     }
     server.shutdown(10, TimeUnit.SECONDS).get();
@@ -202,7 +202,7 @@ public final class Main {
     executor.shutdown();
     try {
       executor.awaitTermination(5, TimeUnit.SECONDS);
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       logger.error("Exception while awaiting executor termination", e);
     }
     logger.info("ScheduledExecutor stopped");
@@ -210,7 +210,7 @@ public final class Main {
     logger.info("Bigtable sessions and Stackdriver sessions have been closed");
     try {
       db.close();
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
     logger.info("Database connection closed");

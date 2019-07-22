@@ -53,7 +53,7 @@ public class SimulationIT extends AutoscaleJobITBase {
 
     final Collection<Object[]> data = new ArrayList<>();
 
-    try (Stream<Path> list = Files.list(Paths.get(FakeBTCluster.METRICS_PATH))) {
+    try (final Stream<Path> list = Files.list(Paths.get(FakeBTCluster.METRICS_PATH))) {
       list.forEach(
           path -> {
             final BigtableCluster cluster =
@@ -64,7 +64,7 @@ public class SimulationIT extends AutoscaleJobITBase {
                     .build();
             data.add(new Object[] {new FakeBTCluster(new TimeSupplier(), cluster)});
           });
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
 

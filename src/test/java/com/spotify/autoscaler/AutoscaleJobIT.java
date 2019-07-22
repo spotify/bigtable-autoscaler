@@ -48,9 +48,9 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
     // load the files as you want
-    Collection<Object[]> data = new ArrayList<>();
+    final Collection<Object[]> data = new ArrayList<>();
 
-    BigtableCluster cluster =
+    final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId("project")
             .instanceId("instance")
@@ -130,8 +130,6 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
     final TimeSupplier timeSupplier = new TimeSupplier();
     timeSupplier.setTime(start);
 
-    final BigtableCluster cluster = fakeBTCluster.getCluster();
-
     testThroughTime(
         timeSupplier,
         Duration.ofSeconds(300),
@@ -144,7 +142,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
   private void runJobAndAssertNewSize(
       final FakeBTCluster fakeBTCluster,
       final BigtableCluster cluster,
-      int expectedSize,
+      final int expectedSize,
       final Supplier<Instant> timeSource)
       throws IOException {
     final AutoscaleJob job =
