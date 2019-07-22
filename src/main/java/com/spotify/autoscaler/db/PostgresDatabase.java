@@ -302,8 +302,12 @@ public class PostgresDatabase implements Database {
   public boolean clearFailureCount(
       final String projectId, final String instanceId, final String clusterId) {
     final String sql =
-        "UPDATE autoscale SET consecutive_failure_count = 0 WHERE project_id = ? AND instance_id = ? AND cluster_id = ?";
-    return jdbc.getJdbcOperations().update(sql, projectId, instanceId, clusterId) == 1;
+        "UPDATE autoscale SET consecutive_failure_count = 0, error_code = ?::error_code "
+            + "WHERE project_id = ? "
+            + "AND instance_id = ? AND cluster_id = ?";
+    return jdbc.getJdbcOperations()
+            .update(sql, ErrorCode.OK.name(), projectId, instanceId, clusterId)
+        == 1;
   }
 
   @Override
