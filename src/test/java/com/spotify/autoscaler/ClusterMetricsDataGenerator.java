@@ -52,7 +52,7 @@ public class ClusterMetricsDataGenerator {
 
   private static final String CLUSTER_FILTER =
       "resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\""
-          + " AND resource.labels.cluster=\"%s\"";
+      + " AND resource.labels.cluster=\"%s\"";
 
   private static final String NODE_COUNT_METRIC =
       String.format(
@@ -110,14 +110,15 @@ public class ClusterMetricsDataGenerator {
     populateIntervalWithValue(interval, metrics, p -> ClusterMetricsData.builder().build());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
-    populateMetric(metricServiceClient, metrics, cluster, interval, DISK_USAGE_METRIC, false);
-    populateMetric(metricServiceClient, metrics, cluster, interval, NODE_COUNT_METRIC, false);
-    populateMetric(metricServiceClient, metrics, cluster, interval, CPU_LOAD_METRIC, false);
     populateMetric(metricServiceClient, metrics, cluster, interval, RECEIVED_BYTES_METRIC, true);
     populateMetric(metricServiceClient, metrics, cluster, interval, SENT_BYTES_METRIC, true);
     populateMetric(metricServiceClient, metrics, cluster, interval, REQUEST_COUNT_METRIC, true);
     populateMetric(metricServiceClient, metrics, cluster, interval, MODIFIED_ROWS_METRIC, true);
+    populateMetric(metricServiceClient, metrics, cluster, interval, RETURNED_ROWS_METRIC, true);
     populateMetric(metricServiceClient, metrics, cluster, interval, ERROR_COUNT_METRIC, true);
+    populateMetric(metricServiceClient, metrics, cluster, interval, DISK_USAGE_METRIC, false);
+    populateMetric(metricServiceClient, metrics, cluster, interval, NODE_COUNT_METRIC, false);
+    populateMetric(metricServiceClient, metrics, cluster, interval, CPU_LOAD_METRIC, false);
 
     // infer the value of loadDelta from the existing metrics, i.e. try to guess if a data job
     // started at some point
@@ -127,7 +128,7 @@ public class ClusterMetricsDataGenerator {
     final ObjectMapper mapper = new ObjectMapper();
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     try (final FileWriter file =
-        new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
+             new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
       file.write(mapper.writeValueAsString(metrics));
       file.flush();
     } catch (final IOException e) {
@@ -135,29 +136,64 @@ public class ClusterMetricsDataGenerator {
     }
   }
 
+  // TODO
   private static void calculateLoadDelta(
       final MetricServiceClient metricServiceClient,
       final Map<Instant, ClusterMetricsData> metrics,
       final BigtableCluster cluster,
-      final TimeInterval interval) {}
+      final TimeInterval interval) {
+    final double averageCPU =
+        metrics
+            .values()
+            .stream()
+            .map(ClusterMetricsData::cpuLoad)
+            .mapToDouble(Double::doubleValue)
+            .sum()
+        / metrics.values().size();
+    System.out.println("Average CPU: " + averageCPU);
+    for (final Instant instant : metrics.keySet()) {
+      if (metrics.get(instant).cpuLoad() > averageCPU * 2) {
+        System.out.println("Job started at " + instant);
+      }
+    }
+  }
 
   private static void populateMetric(
       final MetricServiceClient metricServiceClient,
       final Map<Instant, ClusterMetricsData> metrics,
       final BigtableCluster cluster,
       final TimeInterval interval,
-      final String metric,
-      final boolean populate) {
+      final String metricName,
+      final boolean distribute) {
 
     aggregate(
-        getMetric(metricServiceClient, cluster, interval, metric),
+        getMetric(metricServiceClient, cluster, interval, metricName),
         metrics,
-        v -> (double) v.getInt64Value(),
-        (existing, newValue) ->
-            ClusterMetricsData.ClusterMetricsDataBuilder.from(existing)
-                .errorCount(Double.sum(existing.errorCount(), newValue))
-                .build(),
-        populate);
+        TypedValue::getDoubleValue,
+        (existing, newValue) -> {
+          final ClusterMetricsData.ClusterMetricsDataBuilder builder =
+              ClusterMetricsData.ClusterMetricsDataBuilder.from(existing);
+          System.out.println(newValue);
+          if (metricName.equals(DISK_USAGE_METRIC)) {
+            builder.diskUtilization(Math.max(existing.diskUtilization(), newValue));
+          } else if (metricName.equals(NODE_COUNT_METRIC)) {
+            builder.nodeCount(Math.max(existing.nodeCount(), newValue));
+          } else if (metricName.equals(CPU_LOAD_METRIC)) {
+            builder.cpuLoad(Math.max(existing.cpuLoad(), newValue));
+          } else if (metricName.equals(RECEIVED_BYTES_METRIC)) {
+            builder.receivedBytes(Double.sum(existing.receivedBytes(), newValue));
+          } else if (metricName.equals(SENT_BYTES_METRIC)) {
+            builder.sentBytes(Double.sum(existing.sentBytes(), newValue));
+          } else if (metricName.equals(REQUEST_COUNT_METRIC)) {
+            builder.requestCount(Double.sum(existing.requestCount(), newValue));
+          } else if (metricName.equals(MODIFIED_ROWS_METRIC)) {
+            builder.modifiedRows(Double.sum(existing.modifiedRows(), newValue));
+          } else if (metricName.equals(ERROR_COUNT_METRIC)) {
+            builder.returnedRows(Double.sum(existing.returnedRows(), newValue));
+          }
+          return builder.build();
+        },
+        distribute);
   }
 
   private static PagedResponseWrappers.ListTimeSeriesPagedResponse getMetric(
@@ -217,8 +253,8 @@ public class ClusterMetricsDataGenerator {
     final Instant endMinute = endInstant.truncatedTo(ChronoUnit.MINUTES);
 
     for (Instant i = startMinute;
-        i.isBefore(endMinute) || i.equals(startMinute);
-        i = i.plus(1, ChronoUnit.MINUTES)) {
+         i.isBefore(endMinute) || i.equals(startMinute);
+         i = i.plus(1, ChronoUnit.MINUTES)) {
       result.put(i, valueCalculator.apply(result.get(i)));
     }
   }
