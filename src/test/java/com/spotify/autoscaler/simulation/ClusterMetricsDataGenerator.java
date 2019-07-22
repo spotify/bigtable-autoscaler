@@ -18,7 +18,7 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.simulation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -50,51 +50,6 @@ public class ClusterMetricsDataGenerator {
   private static final String INSTANCE_ID = "instance";
   private static final String CLUSTER_ID = "cluster";
 
-  private static final String CLUSTER_FILTER =
-      "resource.labels.project_id=\"%s\" AND resource.labels.instance=\"%s\""
-      + " AND resource.labels.cluster=\"%s\"";
-
-  private static final String NODE_COUNT_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/cluster/node_count\" " + "AND %s", CLUSTER_FILTER);
-
-  private static final String DISK_USAGE_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/cluster/storage_utilization\" " + "AND %s",
-          CLUSTER_FILTER);
-
-  private static final String CPU_LOAD_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\" " + "AND %s", CLUSTER_FILTER);
-
-  private static final String RECEIVED_BYTES_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/server/received_bytes_count\" " + "AND %s",
-          CLUSTER_FILTER);
-
-  private static final String SENT_BYTES_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/server/sent_bytes_count\" " + "AND %s",
-          CLUSTER_FILTER);
-
-  private static final String REQUEST_COUNT_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/server/request_count\" " + "AND %s",
-          CLUSTER_FILTER);
-
-  private static final String MODIFIED_ROWS_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/server/modified_rows_count\" " + "AND %s",
-          CLUSTER_FILTER);
-
-  private static final String RETURNED_ROWS_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/server/returned_rows_count\" " + "AND %s",
-          CLUSTER_FILTER);
-
-  private static final String ERROR_COUNT_METRIC =
-      String.format(
-          "metric.type=\"bigtable.googleapis.com/server/error_count\" " + "AND %s", CLUSTER_FILTER);
 
   public static void main(final String[] args) throws IOException {
     final BigtableCluster cluster =
@@ -110,15 +65,9 @@ public class ClusterMetricsDataGenerator {
     populateIntervalWithValue(interval, metrics, p -> ClusterMetricsData.builder().build());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
-    populateMetric(metricServiceClient, metrics, cluster, interval, RECEIVED_BYTES_METRIC, true);
-    populateMetric(metricServiceClient, metrics, cluster, interval, SENT_BYTES_METRIC, true);
-    populateMetric(metricServiceClient, metrics, cluster, interval, REQUEST_COUNT_METRIC, true);
-    populateMetric(metricServiceClient, metrics, cluster, interval, MODIFIED_ROWS_METRIC, true);
-    populateMetric(metricServiceClient, metrics, cluster, interval, RETURNED_ROWS_METRIC, true);
-    populateMetric(metricServiceClient, metrics, cluster, interval, ERROR_COUNT_METRIC, true);
-    populateMetric(metricServiceClient, metrics, cluster, interval, DISK_USAGE_METRIC, false);
-    populateMetric(metricServiceClient, metrics, cluster, interval, NODE_COUNT_METRIC, false);
-    populateMetric(metricServiceClient, metrics, cluster, interval, CPU_LOAD_METRIC, false);
+    for(Metric metric : Metric.values()) {
+      populateMetric(metricServiceClient, metrics, cluster, interval, metric);
+    }
 
     // infer the value of loadDelta from the existing metrics, i.e. try to guess if a data job
     // started at some point
@@ -163,37 +112,14 @@ public class ClusterMetricsDataGenerator {
       final Map<Instant, ClusterMetricsData> metrics,
       final BigtableCluster cluster,
       final TimeInterval interval,
-      final String metricName,
-      final boolean distribute) {
+      final Metric metric) {
 
     aggregate(
-        getMetric(metricServiceClient, cluster, interval, metricName),
+        getMetric(metricServiceClient, cluster, interval, metric.queryString()),
         metrics,
-        TypedValue::getDoubleValue,
-        (existing, newValue) -> {
-          final ClusterMetricsData.ClusterMetricsDataBuilder builder =
-              ClusterMetricsData.ClusterMetricsDataBuilder.from(existing);
-          System.out.println(newValue);
-          if (metricName.equals(DISK_USAGE_METRIC)) {
-            builder.diskUtilization(Math.max(existing.diskUtilization(), newValue));
-          } else if (metricName.equals(NODE_COUNT_METRIC)) {
-            builder.nodeCount(Math.max(existing.nodeCount(), newValue));
-          } else if (metricName.equals(CPU_LOAD_METRIC)) {
-            builder.cpuLoad(Math.max(existing.cpuLoad(), newValue));
-          } else if (metricName.equals(RECEIVED_BYTES_METRIC)) {
-            builder.receivedBytes(Double.sum(existing.receivedBytes(), newValue));
-          } else if (metricName.equals(SENT_BYTES_METRIC)) {
-            builder.sentBytes(Double.sum(existing.sentBytes(), newValue));
-          } else if (metricName.equals(REQUEST_COUNT_METRIC)) {
-            builder.requestCount(Double.sum(existing.requestCount(), newValue));
-          } else if (metricName.equals(MODIFIED_ROWS_METRIC)) {
-            builder.modifiedRows(Double.sum(existing.modifiedRows(), newValue));
-          } else if (metricName.equals(ERROR_COUNT_METRIC)) {
-            builder.returnedRows(Double.sum(existing.returnedRows(), newValue));
-          }
-          return builder.build();
-        },
-        distribute);
+        metric.typeConverter(),
+        metric.valueAggregator(),
+        metric.shouldBeDistributed());
   }
 
   private static PagedResponseWrappers.ListTimeSeriesPagedResponse getMetric(

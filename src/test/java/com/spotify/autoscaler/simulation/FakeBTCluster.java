@@ -18,7 +18,7 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.simulation;
 
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -112,6 +112,8 @@ public class FakeBTCluster {
   }
 
   public BigtableCluster getCluster() {
+    this.cluster =
+        BigtableClusterBuilder.from(cluster).loadDelta(getMetricsForNow().loadDelta.intValue()).build();
     return this.cluster;
   }
 
@@ -119,11 +121,11 @@ public class FakeBTCluster {
     return this.timeSource;
   }
 
-  int getNumberOfNodes() {
+  public int getNumberOfNodes() {
     return this.nodes;
   }
 
-  void setNumberOfNodes(final int nodes) {
+  public void setNumberOfNodes(final int nodes) {
     this.cluster = BigtableClusterBuilder.from(cluster).lastChange(timeSource.get()).build();
     this.nodes = nodes;
   }
@@ -139,7 +141,7 @@ public class FakeBTCluster {
     return metricsForNow.diskUtilization() * metricsForNow.nodeCount() / nodes;
   }
 
-  ClusterMetricsData getMetricsForNow() {
+  public ClusterMetricsData getMetricsForNow() {
     final Instant now = timeSource.get();
     final Instant nowMinute = now.truncatedTo(ChronoUnit.MINUTES);
     return metrics.get(nowMinute);

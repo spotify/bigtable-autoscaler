@@ -18,11 +18,13 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.simulation;
 
 import static org.junit.Assert.assertTrue;
 
 import com.google.bigtable.admin.v2.Cluster;
+import com.spotify.autoscaler.AutoscaleJobITBase;
+import com.spotify.autoscaler.TimeSupplier;
 import com.spotify.autoscaler.db.BigtableCluster;
 import java.io.IOException;
 import java.nio.file.Files;

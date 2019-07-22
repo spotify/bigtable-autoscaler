@@ -18,7 +18,7 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.simulation;
 
 final class ClusterMetricsData {
 
@@ -64,7 +64,7 @@ final class ClusterMetricsData {
       throw new NullPointerException("returnedRows");
     } else if (errorCount == null) {
       throw new NullPointerException("errorCount");
-    } else if (errorCount == null) {
+    } else if (loadDelta == null) {
       throw new NullPointerException("loadDelta");
     } else {
       this.diskUtilization = diskUtilization;
