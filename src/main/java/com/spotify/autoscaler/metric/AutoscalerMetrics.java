@@ -172,28 +172,16 @@ public class AutoscalerMetrics {
     return metrics;
   }
 
-  public void markStorageConstraint(
-      BigtableCluster cluster, int desiredNodes, int minNodesRequiredForStorage) {
+  public void markStorageConstraint(BigtableCluster cluster, int desiredNodes, int targetNodes) {
     registry
         .meter(
-            baseMetric(cluster)
-                .tagged("what", "overridden-desired-node-count")
-                .tagged("reason", "storage-constraint")
-                .tagged("desired-nodes", String.valueOf(desiredNodes))
-                .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
-                .tagged("target-nodes", String.valueOf(minNodesRequiredForStorage))
-                .tagged("max-nodes", String.valueOf(cluster.maxNodes())))
+            constraintMetric(cluster, desiredNodes, targetNodes)
+                .tagged("reason", "storage-constraint"))
         .mark();
   }
 
   public void markSizeConstraint(int desiredNodes, int finalNodes, BigtableCluster cluster) {
-    final MetricId metric =
-        baseMetric(cluster)
-            .tagged("what", "overridden-desired-node-count")
-            .tagged("desired-nodes", String.valueOf(desiredNodes))
-            .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
-            .tagged("target-nodes", String.valueOf(finalNodes))
-            .tagged("max-nodes", String.valueOf(cluster.maxNodes()));
+    final MetricId metric = constraintMetric(cluster, desiredNodes, finalNodes);
 
     if (cluster.minNodes() > desiredNodes) {
       registry.meter(metric.tagged("reason", "min-nodes-constraint")).mark();
@@ -206,6 +194,15 @@ public class AutoscalerMetrics {
     if (cluster.maxNodes() < desiredNodes) {
       registry.meter(metric.tagged("reason", "max-nodes-constraint")).mark();
     }
+  }
+
+  private MetricId constraintMetric(BigtableCluster cluster, int desiredNodes, int targetNodes) {
+    return baseMetric(cluster)
+        .tagged("what", "overridden-desired-node-count")
+        .tagged("desired-nodes", String.valueOf(desiredNodes))
+        .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
+        .tagged("target-nodes", String.valueOf(targetNodes))
+        .tagged("max-nodes", String.valueOf(cluster.maxNodes()));
   }
 
   public void markClusterCheck() {
