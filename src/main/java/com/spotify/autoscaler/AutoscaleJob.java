@@ -193,11 +193,11 @@ public class AutoscaleJob implements Closeable {
     }
 
     logger.info(
-        "Running autoscale job. Nodes: {} (min={}, max={}, loadDelta={}), CPU: {} (target={})",
+        "Running autoscale job. Nodes: {} (min={}, max={}, effectiveMinNodes={}), CPU: {} (target={})",
         nodes,
         cluster.minNodes(),
         cluster.maxNodes(),
-        cluster.loadDelta(),
+        cluster.effectiveMinNodes(),
         currentCpu,
         cluster.cpuTarget());
 

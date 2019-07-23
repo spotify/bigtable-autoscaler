@@ -58,4 +58,6 @@ public interface ClusterResizeLog {
   String resizeReason();
 
   Optional<String> errorMessage();
+
+  Optional<Integer> overriddenMinNodes();
 }

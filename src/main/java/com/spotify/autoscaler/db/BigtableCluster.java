@@ -61,6 +61,8 @@ public interface BigtableCluster {
 
   Optional<ErrorCode> errorCode();
 
+  Optional<Integer> overriddenMinNodes();
+
   default String clusterName() {
     return "projects/" + projectId() + "/instances/" + instanceId() + "/clusters/" + clusterId();
   }
@@ -70,7 +72,7 @@ public interface BigtableCluster {
   }
 
   default int effectiveMinNodes() {
-    return Math.min(minNodes() + loadDelta(), maxNodes());
+    return Math.min(overriddenMinNodes().orElse(minNodes()), maxNodes());
   }
 
   default boolean exists() {
