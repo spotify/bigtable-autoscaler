@@ -1,256 +1,4 @@
 {
-  "2019-07-22T11:34:00Z" : {
-    "diskUtilization" : 0.5515774427400867,
-    "nodeCount" : 40.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.6995195904E10,
-    "cpuLoad" : 0.4312557189183333,
-    "requestCount" : 252160.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 239288.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:35:00Z" : {
-    "diskUtilization" : 0.5515714134119273,
-    "nodeCount" : 40.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.6728205515E10,
-    "cpuLoad" : 0.4240695746966667,
-    "requestCount" : 248824.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 245905.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:36:00Z" : {
-    "diskUtilization" : 0.5515714134119273,
-    "nodeCount" : 40.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.7178102708E10,
-    "cpuLoad" : 0.43718456249666665,
-    "requestCount" : 253465.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 243985.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:37:00Z" : {
-    "diskUtilization" : 0.5515714134119273,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.7437741685E10,
-    "cpuLoad" : 0.41696548803809524,
-    "requestCount" : 255382.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 245133.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:38:00Z" : {
-    "diskUtilization" : 0.5515714134119273,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.9056905105E10,
-    "cpuLoad" : 0.42673276224285717,
-    "requestCount" : 274539.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 264866.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:39:00Z" : {
-    "diskUtilization" : 0.5515714134119273,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.9699328165E10,
-    "cpuLoad" : 0.44734533434761903,
-    "requestCount" : 281661.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 269403.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:40:00Z" : {
-    "diskUtilization" : 0.55156045393022,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 3.0116962059E10,
-    "cpuLoad" : 0.4604862183206349,
-    "requestCount" : 288712.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 283045.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:41:00Z" : {
-    "diskUtilization" : 0.55156045393022,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.9030914055E10,
-    "cpuLoad" : 0.45407974527777784,
-    "requestCount" : 276334.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 273058.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:42:00Z" : {
-    "diskUtilization" : 0.55156045393022,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.9407674694E10,
-    "cpuLoad" : 0.44309479117936507,
-    "requestCount" : 279217.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 269628.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:43:00Z" : {
-    "diskUtilization" : 0.55156045393022,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.8441803032E10,
-    "cpuLoad" : 0.4418507283238095,
-    "requestCount" : 267534.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 271449.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:44:00Z" : {
-    "diskUtilization" : 0.55156045393022,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.9098754895E10,
-    "cpuLoad" : 0.4342144293984127,
-    "requestCount" : 274603.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 251869.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:45:00Z" : {
-    "diskUtilization" : 0.5515584811578568,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.9946470136E10,
-    "cpuLoad" : 0.4533948874873016,
-    "requestCount" : 281312.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 283995.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:46:00Z" : {
-    "diskUtilization" : 0.5515584811578568,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.839828145E10,
-    "cpuLoad" : 0.449805683131746,
-    "requestCount" : 264104.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 258476.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:47:00Z" : {
-    "diskUtilization" : 0.5515584811578568,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.846601388E10,
-    "cpuLoad" : 0.42232883386666675,
-    "requestCount" : 264638.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 257789.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:48:00Z" : {
-    "diskUtilization" : 0.5515584811578568,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.8210397069E10,
-    "cpuLoad" : 0.4298454776253968,
-    "requestCount" : 263041.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 257650.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:49:00Z" : {
-    "diskUtilization" : 0.5515584811578568,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.8685743977E10,
-    "cpuLoad" : 0.4323475530714286,
-    "requestCount" : 267515.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 256495.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:50:00Z" : {
-    "diskUtilization" : 0.551550928847497,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.8788191615E10,
-    "cpuLoad" : 0.43448977595714283,
-    "requestCount" : 269082.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 263520.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:51:00Z" : {
-    "diskUtilization" : 0.551550928847497,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.8231195895E10,
-    "cpuLoad" : 0.4319016946095238,
-    "requestCount" : 263018.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 257516.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:52:00Z" : {
-    "diskUtilization" : 0.551550928847497,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.8633343056E10,
-    "cpuLoad" : 0.4282266841777778,
-    "requestCount" : 268178.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 257665.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:53:00Z" : {
-    "diskUtilization" : 0.551550928847497,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 3.0438869741E10,
-    "cpuLoad" : 0.44644865078253965,
-    "requestCount" : 287192.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 274917.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
-  "2019-07-22T11:54:00Z" : {
-    "diskUtilization" : 0.551550928847497,
-    "nodeCount" : 42.0,
-    "receivedBytes" : 0.0,
-    "sentBytes" : 2.9956680026E10,
-    "cpuLoad" : 0.4437165900857143,
-    "requestCount" : 282689.0,
-    "modifiedRows" : 0.0,
-    "returnedRows" : 275024.0,
-    "errorCount" : 0.0,
-    "loadDelta" : 0.0
-  },
   "2019-07-22T11:55:00Z" : {
     "diskUtilization" : 0.551550928847497,
     "nodeCount" : 42.0,
@@ -13065,7 +12813,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 216224.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:43:00Z" : {
     "diskUtilization" : 0.5784755408704132,
@@ -13077,7 +12825,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 216433.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:44:00Z" : {
     "diskUtilization" : 0.5784755408704132,
@@ -13089,7 +12837,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 216993.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:45:00Z" : {
     "diskUtilization" : 0.5784755408704132,
@@ -13101,7 +12849,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 204122.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:46:00Z" : {
     "diskUtilization" : 0.5784734132276208,
@@ -13113,7 +12861,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 204719.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:47:00Z" : {
     "diskUtilization" : 0.5784734132276208,
@@ -13125,7 +12873,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 201349.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:48:00Z" : {
     "diskUtilization" : 0.5784734132276208,
@@ -13137,7 +12885,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 194062.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:49:00Z" : {
     "diskUtilization" : 0.5784734132276208,
@@ -13149,7 +12897,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 201982.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:50:00Z" : {
     "diskUtilization" : 0.5784734132276208,
@@ -13161,7 +12909,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 198725.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:51:00Z" : {
     "diskUtilization" : 0.5784734132276208,
@@ -13173,7 +12921,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 194696.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:52:00Z" : {
     "diskUtilization" : 0.5784612654633656,
@@ -13185,7 +12933,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 195907.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:53:00Z" : {
     "diskUtilization" : 0.5784612654633656,
@@ -13197,7 +12945,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 201751.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:54:00Z" : {
     "diskUtilization" : 0.5784612654633656,
@@ -13209,7 +12957,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 208501.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:55:00Z" : {
     "diskUtilization" : 0.5784612654633656,
@@ -13221,7 +12969,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 197194.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:56:00Z" : {
     "diskUtilization" : 0.5784612654633656,
@@ -13233,7 +12981,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 211835.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:57:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13245,7 +12993,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 207695.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:58:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13257,7 +13005,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 201645.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T05:59:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13269,7 +13017,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 201311.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:00:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13281,7 +13029,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 198895.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:01:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13293,7 +13041,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 198760.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:02:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13305,7 +13053,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 191956.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:03:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13317,7 +13065,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 194983.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:04:00Z" : {
     "diskUtilization" : 0.5784594533222662,
@@ -13329,7 +13077,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 185426.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:05:00Z" : {
     "diskUtilization" : 0.5784576556378306,
@@ -13341,7 +13089,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 185193.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:06:00Z" : {
     "diskUtilization" : 0.5784576556378306,
@@ -13353,7 +13101,7 @@
     "modifiedRows" : 2413.0,
     "returnedRows" : 189282.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:07:00Z" : {
     "diskUtilization" : 0.5784576556378306,
@@ -13365,7 +13113,7 @@
     "modifiedRows" : 6399106.0,
     "returnedRows" : 182428.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:08:00Z" : {
     "diskUtilization" : 0.5784576556378306,
@@ -13377,7 +13125,7 @@
     "modifiedRows" : 6617719.0,
     "returnedRows" : 190803.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:09:00Z" : {
     "diskUtilization" : 0.5784576556378306,
@@ -13389,7 +13137,7 @@
     "modifiedRows" : 7564847.0,
     "returnedRows" : 192612.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:10:00Z" : {
     "diskUtilization" : 0.47220904467130265,
@@ -13401,7 +13149,7 @@
     "modifiedRows" : 7574695.0,
     "returnedRows" : 197379.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:11:00Z" : {
     "diskUtilization" : 0.47220904467130265,
@@ -13413,7 +13161,7 @@
     "modifiedRows" : 7825967.0,
     "returnedRows" : 192180.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:12:00Z" : {
     "diskUtilization" : 0.47220904467130265,
@@ -13425,7 +13173,7 @@
     "modifiedRows" : 7919793.0,
     "returnedRows" : 185391.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:13:00Z" : {
     "diskUtilization" : 0.47220904467130265,
@@ -13437,7 +13185,7 @@
     "modifiedRows" : 8148661.0,
     "returnedRows" : 192235.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:14:00Z" : {
     "diskUtilization" : 0.47220904467130265,
@@ -13449,7 +13197,7 @@
     "modifiedRows" : 8510384.0,
     "returnedRows" : 186222.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:15:00Z" : {
     "diskUtilization" : 0.4722056602109289,
@@ -13461,7 +13209,7 @@
     "modifiedRows" : 8381854.0,
     "returnedRows" : 185729.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:16:00Z" : {
     "diskUtilization" : 0.4722056602109289,
@@ -13473,7 +13221,7 @@
     "modifiedRows" : 8539961.0,
     "returnedRows" : 183702.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:17:00Z" : {
     "diskUtilization" : 0.4722056602109289,
@@ -13485,7 +13233,7 @@
     "modifiedRows" : 9193834.0,
     "returnedRows" : 179386.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:18:00Z" : {
     "diskUtilization" : 0.4722056602109289,
@@ -13497,7 +13245,7 @@
     "modifiedRows" : 9469166.0,
     "returnedRows" : 178940.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:19:00Z" : {
     "diskUtilization" : 0.4722056602109289,
@@ -13509,7 +13257,7 @@
     "modifiedRows" : 9962336.0,
     "returnedRows" : 172750.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:20:00Z" : {
     "diskUtilization" : 0.2928869407787393,
@@ -13521,7 +13269,7 @@
     "modifiedRows" : 9673699.0,
     "returnedRows" : 165742.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:21:00Z" : {
     "diskUtilization" : 0.2928869407787393,
@@ -13533,7 +13281,7 @@
     "modifiedRows" : 1.2103811E7,
     "returnedRows" : 179000.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:22:00Z" : {
     "diskUtilization" : 0.2928869407787393,
@@ -13545,7 +13293,7 @@
     "modifiedRows" : 1.3961642E7,
     "returnedRows" : 177682.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:23:00Z" : {
     "diskUtilization" : 0.2928869407787393,
@@ -13557,7 +13305,7 @@
     "modifiedRows" : 1.5670731E7,
     "returnedRows" : 176641.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:24:00Z" : {
     "diskUtilization" : 0.2928869407787393,
@@ -13569,7 +13317,7 @@
     "modifiedRows" : 1.5028664E7,
     "returnedRows" : 186441.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:25:00Z" : {
     "diskUtilization" : 0.2928940290242776,
@@ -13581,7 +13329,7 @@
     "modifiedRows" : 1.5197175E7,
     "returnedRows" : 183618.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:26:00Z" : {
     "diskUtilization" : 0.2928940290242776,
@@ -13593,7 +13341,7 @@
     "modifiedRows" : 1.5916882E7,
     "returnedRows" : 186355.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:27:00Z" : {
     "diskUtilization" : 0.2928940290242776,
@@ -13605,7 +13353,7 @@
     "modifiedRows" : 1.6282741E7,
     "returnedRows" : 182029.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:28:00Z" : {
     "diskUtilization" : 0.2928940290242776,
@@ -13617,7 +13365,7 @@
     "modifiedRows" : 1.7440868E7,
     "returnedRows" : 182978.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:29:00Z" : {
     "diskUtilization" : 0.2928940290242776,
@@ -13629,7 +13377,7 @@
     "modifiedRows" : 1.7371642E7,
     "returnedRows" : 173202.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:30:00Z" : {
     "diskUtilization" : 0.231396196849837,
@@ -13641,7 +13389,7 @@
     "modifiedRows" : 1.7377612E7,
     "returnedRows" : 174569.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:31:00Z" : {
     "diskUtilization" : 0.231396196849837,
@@ -13653,7 +13401,7 @@
     "modifiedRows" : 1.8914449E7,
     "returnedRows" : 172500.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:32:00Z" : {
     "diskUtilization" : 0.231396196849837,
@@ -13665,7 +13413,7 @@
     "modifiedRows" : 2.0661283E7,
     "returnedRows" : 166128.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:33:00Z" : {
     "diskUtilization" : 0.231396196849837,
@@ -13677,7 +13425,7 @@
     "modifiedRows" : 2.1366891E7,
     "returnedRows" : 167993.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:34:00Z" : {
     "diskUtilization" : 0.231396196849837,
@@ -13689,7 +13437,7 @@
     "modifiedRows" : 2.1884639E7,
     "returnedRows" : 166644.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:35:00Z" : {
     "diskUtilization" : 0.23140480817752904,
@@ -13701,7 +13449,7 @@
     "modifiedRows" : 2.153245E7,
     "returnedRows" : 170005.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:36:00Z" : {
     "diskUtilization" : 0.23140480817752904,
@@ -13713,7 +13461,7 @@
     "modifiedRows" : 2.2136087E7,
     "returnedRows" : 168365.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:37:00Z" : {
     "diskUtilization" : 0.23140480817752904,
@@ -13725,7 +13473,7 @@
     "modifiedRows" : 2.2210265E7,
     "returnedRows" : 162921.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:38:00Z" : {
     "diskUtilization" : 0.23140480817752904,
@@ -13737,7 +13485,7 @@
     "modifiedRows" : 2.2663216E7,
     "returnedRows" : 174577.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:39:00Z" : {
     "diskUtilization" : 0.23140480817752904,
@@ -13749,7 +13497,7 @@
     "modifiedRows" : 2.2444637E7,
     "returnedRows" : 172989.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:40:00Z" : {
     "diskUtilization" : 0.23140480817752904,
@@ -13761,7 +13509,7 @@
     "modifiedRows" : 2.2410179E7,
     "returnedRows" : 175324.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:41:00Z" : {
     "diskUtilization" : 0.23141545017277532,
@@ -13773,7 +13521,7 @@
     "modifiedRows" : 2.1488515E7,
     "returnedRows" : 178822.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:42:00Z" : {
     "diskUtilization" : 0.23141545017277532,
@@ -13785,7 +13533,7 @@
     "modifiedRows" : 2.1981363E7,
     "returnedRows" : 168342.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:43:00Z" : {
     "diskUtilization" : 0.23141545017277532,
@@ -13797,7 +13545,7 @@
     "modifiedRows" : 2.2854812E7,
     "returnedRows" : 170240.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:44:00Z" : {
     "diskUtilization" : 0.23141545017277532,
@@ -13809,7 +13557,7 @@
     "modifiedRows" : 2.2765832E7,
     "returnedRows" : 168336.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:45:00Z" : {
     "diskUtilization" : 0.23141545017277532,
@@ -13821,7 +13569,7 @@
     "modifiedRows" : 2.2394078E7,
     "returnedRows" : 169861.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:46:00Z" : {
     "diskUtilization" : 0.23142237425331041,
@@ -13833,7 +13581,7 @@
     "modifiedRows" : 2.2052903E7,
     "returnedRows" : 167047.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:47:00Z" : {
     "diskUtilization" : 0.23142237425331041,
@@ -13845,7 +13593,7 @@
     "modifiedRows" : 2.260297E7,
     "returnedRows" : 163472.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:48:00Z" : {
     "diskUtilization" : 0.23142237425331041,
@@ -13857,7 +13605,7 @@
     "modifiedRows" : 2.2608694E7,
     "returnedRows" : 164238.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:49:00Z" : {
     "diskUtilization" : 0.23142237425331041,
@@ -13869,7 +13617,7 @@
     "modifiedRows" : 2.2523267E7,
     "returnedRows" : 162850.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:50:00Z" : {
     "diskUtilization" : 0.23142237425331041,
@@ -13881,7 +13629,7 @@
     "modifiedRows" : 2.2744703E7,
     "returnedRows" : 157968.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:51:00Z" : {
     "diskUtilization" : 0.23142237425331041,
@@ -13893,7 +13641,7 @@
     "modifiedRows" : 2.2252212E7,
     "returnedRows" : 160517.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:52:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13905,7 +13653,7 @@
     "modifiedRows" : 2.190339E7,
     "returnedRows" : 161358.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:53:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13917,7 +13665,7 @@
     "modifiedRows" : 2.2397587E7,
     "returnedRows" : 165592.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:54:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13929,7 +13677,7 @@
     "modifiedRows" : 2.3515244E7,
     "returnedRows" : 169828.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:55:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13941,7 +13689,7 @@
     "modifiedRows" : 2.3014105E7,
     "returnedRows" : 167385.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:56:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13953,7 +13701,7 @@
     "modifiedRows" : 2.2639612E7,
     "returnedRows" : 163626.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:57:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13965,7 +13713,7 @@
     "modifiedRows" : 2.2478396E7,
     "returnedRows" : 169388.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:58:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13977,7 +13725,7 @@
     "modifiedRows" : 2.2997922E7,
     "returnedRows" : 170148.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T06:59:00Z" : {
     "diskUtilization" : 0.23146770108585407,
@@ -13989,7 +13737,7 @@
     "modifiedRows" : 2.2437273E7,
     "returnedRows" : 164859.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:00:00Z" : {
     "diskUtilization" : 0.23150329505368428,
@@ -14001,7 +13749,7 @@
     "modifiedRows" : 2.3368369E7,
     "returnedRows" : 164206.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:01:00Z" : {
     "diskUtilization" : 0.23150329505368428,
@@ -14013,7 +13761,7 @@
     "modifiedRows" : 2.2864859E7,
     "returnedRows" : 161720.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:02:00Z" : {
     "diskUtilization" : 0.23150329505368428,
@@ -14025,7 +13773,7 @@
     "modifiedRows" : 2.2705436E7,
     "returnedRows" : 168689.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:03:00Z" : {
     "diskUtilization" : 0.23150329505368428,
@@ -14037,7 +13785,7 @@
     "modifiedRows" : 2.3151224E7,
     "returnedRows" : 153844.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:04:00Z" : {
     "diskUtilization" : 0.23150329505368428,
@@ -14049,7 +13797,7 @@
     "modifiedRows" : 2.3666804E7,
     "returnedRows" : 152382.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:05:00Z" : {
     "diskUtilization" : 0.23152430732522408,
@@ -14061,7 +13809,7 @@
     "modifiedRows" : 2.3138321E7,
     "returnedRows" : 158691.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:06:00Z" : {
     "diskUtilization" : 0.23152430732522408,
@@ -14073,7 +13821,7 @@
     "modifiedRows" : 2.2512169E7,
     "returnedRows" : 153079.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:07:00Z" : {
     "diskUtilization" : 0.23152430732522408,
@@ -14085,7 +13833,7 @@
     "modifiedRows" : 1.9632204E7,
     "returnedRows" : 150921.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:08:00Z" : {
     "diskUtilization" : 0.23152430732522408,
@@ -14097,7 +13845,7 @@
     "modifiedRows" : 2.2645644E7,
     "returnedRows" : 157342.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:09:00Z" : {
     "diskUtilization" : 0.23152430732522408,
@@ -14109,7 +13857,7 @@
     "modifiedRows" : 2.2695306E7,
     "returnedRows" : 161759.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:10:00Z" : {
     "diskUtilization" : 0.23154454293150048,
@@ -14121,7 +13869,7 @@
     "modifiedRows" : 2.3104388E7,
     "returnedRows" : 160526.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:11:00Z" : {
     "diskUtilization" : 0.23154454293150048,
@@ -14133,7 +13881,7 @@
     "modifiedRows" : 2.3339682E7,
     "returnedRows" : 168974.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:12:00Z" : {
     "diskUtilization" : 0.23154454293150048,
@@ -14145,7 +13893,7 @@
     "modifiedRows" : 2.3164074E7,
     "returnedRows" : 134035.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:13:00Z" : {
     "diskUtilization" : 0.23154454293150048,
@@ -14157,7 +13905,7 @@
     "modifiedRows" : 2.4032586E7,
     "returnedRows" : 103630.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:14:00Z" : {
     "diskUtilization" : 0.23154454293150048,
@@ -14169,7 +13917,7 @@
     "modifiedRows" : 2.2109389E7,
     "returnedRows" : 181537.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:15:00Z" : {
     "diskUtilization" : 0.2315831745679352,
@@ -14181,7 +13929,7 @@
     "modifiedRows" : 2.238332E7,
     "returnedRows" : 216131.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:16:00Z" : {
     "diskUtilization" : 0.2315831745679352,
@@ -14193,7 +13941,7 @@
     "modifiedRows" : 2.3090414E7,
     "returnedRows" : 150812.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:17:00Z" : {
     "diskUtilization" : 0.2315831745679352,
@@ -14205,7 +13953,7 @@
     "modifiedRows" : 2.2329419E7,
     "returnedRows" : 152042.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:18:00Z" : {
     "diskUtilization" : 0.2315831745679352,
@@ -14217,7 +13965,7 @@
     "modifiedRows" : 2.2658574E7,
     "returnedRows" : 149685.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:19:00Z" : {
     "diskUtilization" : 0.2315831745679352,
@@ -14229,7 +13977,7 @@
     "modifiedRows" : 2.2972755E7,
     "returnedRows" : 149419.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:20:00Z" : {
     "diskUtilization" : 0.23166320246528266,
@@ -14241,7 +13989,7 @@
     "modifiedRows" : 2.2923018E7,
     "returnedRows" : 151700.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:21:00Z" : {
     "diskUtilization" : 0.23166320246528266,
@@ -14253,7 +14001,7 @@
     "modifiedRows" : 2.3360484E7,
     "returnedRows" : 144719.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:22:00Z" : {
     "diskUtilization" : 0.23166320246528266,
@@ -14265,7 +14013,7 @@
     "modifiedRows" : 2.290425E7,
     "returnedRows" : 146732.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:23:00Z" : {
     "diskUtilization" : 0.23166320246528266,
@@ -14277,7 +14025,7 @@
     "modifiedRows" : 2.2312715E7,
     "returnedRows" : 150851.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:24:00Z" : {
     "diskUtilization" : 0.23166320246528266,
@@ -14289,7 +14037,7 @@
     "modifiedRows" : 2.2694432E7,
     "returnedRows" : 156255.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:25:00Z" : {
     "diskUtilization" : 0.2317181267937449,
@@ -14301,7 +14049,7 @@
     "modifiedRows" : 2.3250742E7,
     "returnedRows" : 160169.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:26:00Z" : {
     "diskUtilization" : 0.2317181267937449,
@@ -14313,7 +14061,7 @@
     "modifiedRows" : 2.347553E7,
     "returnedRows" : 150663.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:27:00Z" : {
     "diskUtilization" : 0.2317181267937449,
@@ -14325,7 +14073,7 @@
     "modifiedRows" : 2.2701337E7,
     "returnedRows" : 159419.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:28:00Z" : {
     "diskUtilization" : 0.2317181267937449,
@@ -14337,7 +14085,7 @@
     "modifiedRows" : 2.2842886E7,
     "returnedRows" : 156426.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:29:00Z" : {
     "diskUtilization" : 0.2317181267937449,
@@ -14349,7 +14097,7 @@
     "modifiedRows" : 2.3173274E7,
     "returnedRows" : 147623.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:30:00Z" : {
     "diskUtilization" : 0.2317181267937449,
@@ -14361,7 +14109,7 @@
     "modifiedRows" : 2.343671E7,
     "returnedRows" : 155065.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:31:00Z" : {
     "diskUtilization" : 0.23174818593492091,
@@ -14373,7 +14121,7 @@
     "modifiedRows" : 2.306104E7,
     "returnedRows" : 152114.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:32:00Z" : {
     "diskUtilization" : 0.23174818593492091,
@@ -14385,7 +14133,7 @@
     "modifiedRows" : 2.3168251E7,
     "returnedRows" : 151160.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:33:00Z" : {
     "diskUtilization" : 0.23174818593492091,
@@ -14397,7 +14145,7 @@
     "modifiedRows" : 2.3025705E7,
     "returnedRows" : 149170.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:34:00Z" : {
     "diskUtilization" : 0.23174818593492091,
@@ -14409,7 +14157,7 @@
     "modifiedRows" : 2.2827767E7,
     "returnedRows" : 145756.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:35:00Z" : {
     "diskUtilization" : 0.23174818593492091,
@@ -14421,7 +14169,7 @@
     "modifiedRows" : 2.4012308E7,
     "returnedRows" : 138757.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:36:00Z" : {
     "diskUtilization" : 0.23174818593492091,
@@ -14433,7 +14181,7 @@
     "modifiedRows" : 2.3748744E7,
     "returnedRows" : 144841.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:37:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14445,7 +14193,7 @@
     "modifiedRows" : 2.3520524E7,
     "returnedRows" : 139856.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:38:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14457,7 +14205,7 @@
     "modifiedRows" : 2.3579991E7,
     "returnedRows" : 147088.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:39:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14469,7 +14217,7 @@
     "modifiedRows" : 2.3519153E7,
     "returnedRows" : 154760.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:40:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14481,7 +14229,7 @@
     "modifiedRows" : 2.3561426E7,
     "returnedRows" : 154928.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:41:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14493,7 +14241,7 @@
     "modifiedRows" : 2.3177299E7,
     "returnedRows" : 155939.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:42:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14505,7 +14253,7 @@
     "modifiedRows" : 2.297607E7,
     "returnedRows" : 149492.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:43:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14517,7 +14265,7 @@
     "modifiedRows" : 2.2135966E7,
     "returnedRows" : 148655.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:44:00Z" : {
     "diskUtilization" : 0.2317650205462487,
@@ -14529,7 +14277,7 @@
     "modifiedRows" : 2.228219E7,
     "returnedRows" : 149670.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:45:00Z" : {
     "diskUtilization" : 0.231805401587706,
@@ -14541,7 +14289,7 @@
     "modifiedRows" : 2.2679483E7,
     "returnedRows" : 148870.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:46:00Z" : {
     "diskUtilization" : 0.231805401587706,
@@ -14553,7 +14301,7 @@
     "modifiedRows" : 2.290028E7,
     "returnedRows" : 154759.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:47:00Z" : {
     "diskUtilization" : 0.231805401587706,
@@ -14565,7 +14313,7 @@
     "modifiedRows" : 2.3612761E7,
     "returnedRows" : 143178.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:48:00Z" : {
     "diskUtilization" : 0.231805401587706,
@@ -14577,7 +14325,7 @@
     "modifiedRows" : 2.2841627E7,
     "returnedRows" : 142106.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:49:00Z" : {
     "diskUtilization" : 0.231805401587706,
@@ -14589,7 +14337,7 @@
     "modifiedRows" : 2.3509881E7,
     "returnedRows" : 144113.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:50:00Z" : {
     "diskUtilization" : 0.2318685218940045,
@@ -14601,7 +14349,7 @@
     "modifiedRows" : 2.3381631E7,
     "returnedRows" : 145156.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:51:00Z" : {
     "diskUtilization" : 0.2318685218940045,
@@ -14613,7 +14361,7 @@
     "modifiedRows" : 2.337245E7,
     "returnedRows" : 144746.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:52:00Z" : {
     "diskUtilization" : 0.2318685218940045,
@@ -14625,7 +14373,7 @@
     "modifiedRows" : 2.3686865E7,
     "returnedRows" : 143812.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:53:00Z" : {
     "diskUtilization" : 0.2318685218940045,
@@ -14637,7 +14385,7 @@
     "modifiedRows" : 2.3222256E7,
     "returnedRows" : 150866.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:54:00Z" : {
     "diskUtilization" : 0.2318685218940045,
@@ -14649,7 +14397,7 @@
     "modifiedRows" : 2.2868169E7,
     "returnedRows" : 153874.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:55:00Z" : {
     "diskUtilization" : 0.23192510342814057,
@@ -14661,7 +14409,7 @@
     "modifiedRows" : 2.2516598E7,
     "returnedRows" : 158634.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:56:00Z" : {
     "diskUtilization" : 0.23192510342814057,
@@ -14673,7 +14421,7 @@
     "modifiedRows" : 2.2783349E7,
     "returnedRows" : 159446.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:57:00Z" : {
     "diskUtilization" : 0.23192510342814057,
@@ -14685,7 +14433,7 @@
     "modifiedRows" : 2.2972928E7,
     "returnedRows" : 155084.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:58:00Z" : {
     "diskUtilization" : 0.23192510342814057,
@@ -14697,7 +14445,7 @@
     "modifiedRows" : 2.3282351E7,
     "returnedRows" : 155775.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T07:59:00Z" : {
     "diskUtilization" : 0.23192510342814057,
@@ -14709,7 +14457,7 @@
     "modifiedRows" : 2.3006187E7,
     "returnedRows" : 152249.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:00:00Z" : {
     "diskUtilization" : 0.23195548257272822,
@@ -14721,7 +14469,7 @@
     "modifiedRows" : 2.3475356E7,
     "returnedRows" : 160307.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:01:00Z" : {
     "diskUtilization" : 0.23195548257272822,
@@ -14733,7 +14481,7 @@
     "modifiedRows" : 2.3456728E7,
     "returnedRows" : 148000.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:02:00Z" : {
     "diskUtilization" : 0.23195548257272822,
@@ -14745,7 +14493,7 @@
     "modifiedRows" : 2.4018261E7,
     "returnedRows" : 143561.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:03:00Z" : {
     "diskUtilization" : 0.23195548257272822,
@@ -14757,7 +14505,7 @@
     "modifiedRows" : 2.3732844E7,
     "returnedRows" : 146403.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:04:00Z" : {
     "diskUtilization" : 0.23195548257272822,
@@ -14769,7 +14517,7 @@
     "modifiedRows" : 2.3573526E7,
     "returnedRows" : 142537.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:05:00Z" : {
     "diskUtilization" : 0.23197504304245375,
@@ -14781,7 +14529,7 @@
     "modifiedRows" : 2.4041114E7,
     "returnedRows" : 136818.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:06:00Z" : {
     "diskUtilization" : 0.23197504304245375,
@@ -14793,7 +14541,7 @@
     "modifiedRows" : 2.4152389E7,
     "returnedRows" : 139553.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:07:00Z" : {
     "diskUtilization" : 0.23197504304245375,
@@ -14805,7 +14553,7 @@
     "modifiedRows" : 2.4032627E7,
     "returnedRows" : 142162.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:08:00Z" : {
     "diskUtilization" : 0.23197504304245375,
@@ -14817,7 +14565,7 @@
     "modifiedRows" : 2.4014342E7,
     "returnedRows" : 143384.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:09:00Z" : {
     "diskUtilization" : 0.23197504304245375,
@@ -14829,7 +14577,7 @@
     "modifiedRows" : 2.3038202E7,
     "returnedRows" : 145514.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:10:00Z" : {
     "diskUtilization" : 0.23199201871870173,
@@ -14841,7 +14589,7 @@
     "modifiedRows" : 2.3233156E7,
     "returnedRows" : 149980.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:11:00Z" : {
     "diskUtilization" : 0.23199201871870173,
@@ -14853,7 +14601,7 @@
     "modifiedRows" : 2.3766582E7,
     "returnedRows" : 151009.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:12:00Z" : {
     "diskUtilization" : 0.23199201871870173,
@@ -14865,7 +14613,7 @@
     "modifiedRows" : 2.4186452E7,
     "returnedRows" : 147468.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:13:00Z" : {
     "diskUtilization" : 0.23199201871870173,
@@ -14877,7 +14625,7 @@
     "modifiedRows" : 2.3735315E7,
     "returnedRows" : 145608.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:14:00Z" : {
     "diskUtilization" : 0.23199201871870173,
@@ -14889,7 +14637,7 @@
     "modifiedRows" : 2.3473184E7,
     "returnedRows" : 140395.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:15:00Z" : {
     "diskUtilization" : 0.23199201871870173,
@@ -14901,7 +14649,7 @@
     "modifiedRows" : 2.3404653E7,
     "returnedRows" : 144764.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:16:00Z" : {
     "diskUtilization" : 0.2320483731813838,
@@ -14913,7 +14661,7 @@
     "modifiedRows" : 2.3407234E7,
     "returnedRows" : 139598.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:17:00Z" : {
     "diskUtilization" : 0.2320483731813838,
@@ -14925,7 +14673,7 @@
     "modifiedRows" : 2.3495942E7,
     "returnedRows" : 135817.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:18:00Z" : {
     "diskUtilization" : 0.2320483731813838,
@@ -14937,7 +14685,7 @@
     "modifiedRows" : 2.3940508E7,
     "returnedRows" : 139318.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:19:00Z" : {
     "diskUtilization" : 0.2320483731813838,
@@ -14949,7 +14697,7 @@
     "modifiedRows" : 2.348571E7,
     "returnedRows" : 143830.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:20:00Z" : {
     "diskUtilization" : 0.2320483731813838,
@@ -14961,7 +14709,7 @@
     "modifiedRows" : 2.2721263E7,
     "returnedRows" : 142044.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:21:00Z" : {
     "diskUtilization" : 0.2320973992363979,
@@ -14973,7 +14721,7 @@
     "modifiedRows" : 2.401463E7,
     "returnedRows" : 136759.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:22:00Z" : {
     "diskUtilization" : 0.2320973992363979,
@@ -14985,7 +14733,7 @@
     "modifiedRows" : 2.1912442E7,
     "returnedRows" : 140138.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:23:00Z" : {
     "diskUtilization" : 0.2320973992363979,
@@ -14997,7 +14745,7 @@
     "modifiedRows" : 6123627.0,
     "returnedRows" : 145975.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:24:00Z" : {
     "diskUtilization" : 0.2320973992363979,
@@ -15009,7 +14757,7 @@
     "modifiedRows" : 9765.0,
     "returnedRows" : 145545.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:25:00Z" : {
     "diskUtilization" : 0.2320973992363979,
@@ -15021,7 +14769,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 145857.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:26:00Z" : {
     "diskUtilization" : 0.2320973992363979,
@@ -15033,7 +14781,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 156463.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:27:00Z" : {
     "diskUtilization" : 0.23214403774818493,
@@ -15045,7 +14793,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 149487.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:28:00Z" : {
     "diskUtilization" : 0.23214403774818493,
@@ -15057,7 +14805,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 147863.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:29:00Z" : {
     "diskUtilization" : 0.23214403774818493,
@@ -15069,7 +14817,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 145893.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:30:00Z" : {
     "diskUtilization" : 0.23214403774818493,
@@ -15081,7 +14829,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 154203.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:31:00Z" : {
     "diskUtilization" : 0.23214403774818493,
@@ -15093,7 +14841,7 @@
     "modifiedRows" : 0.0,
     "returnedRows" : 141854.0,
     "errorCount" : 0.0,
-    "loadDelta" : 60.0
+    "loadDelta" : 32.0
   },
   "2019-07-23T08:32:00Z" : {
     "diskUtilization" : 0.23214403774818493,
@@ -17256,11 +17004,11 @@
     "loadDelta" : 0.0
   },
   "2019-07-23T11:32:00Z" : {
-    "diskUtilization" : 0.0,
-    "nodeCount" : 0.0,
+    "diskUtilization" : 0.5045718783200873,
+    "nodeCount" : 46.0,
     "receivedBytes" : 0.0,
     "sentBytes" : 3.1449676632E10,
-    "cpuLoad" : 0.0,
+    "cpuLoad" : 0.4101215369347826,
     "requestCount" : 285661.0,
     "modifiedRows" : 0.0,
     "returnedRows" : 273782.0,
@@ -17268,6 +17016,258 @@
     "loadDelta" : 0.0
   },
   "2019-07-23T11:33:00Z" : {
+    "diskUtilization" : 0.5045718783200873,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.1015077492E10,
+    "cpuLoad" : 0.4013617583101449,
+    "requestCount" : 279630.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 276771.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:34:00Z" : {
+    "diskUtilization" : 0.5045718783200873,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.0867567597E10,
+    "cpuLoad" : 0.39641786038695653,
+    "requestCount" : 281849.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 270252.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:35:00Z" : {
+    "diskUtilization" : 0.5045718783200873,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.1045756133E10,
+    "cpuLoad" : 0.40314378840289855,
+    "requestCount" : 281112.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 277611.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:36:00Z" : {
+    "diskUtilization" : 0.5045698498275907,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.0708180408E10,
+    "cpuLoad" : 0.40541132818840586,
+    "requestCount" : 278357.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 268897.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:37:00Z" : {
+    "diskUtilization" : 0.5045698498275907,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.1521631934E10,
+    "cpuLoad" : 0.40765691799855075,
+    "requestCount" : 287266.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 273884.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:38:00Z" : {
+    "diskUtilization" : 0.5045698498275907,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.4059688576E10,
+    "cpuLoad" : 0.43231135398985504,
+    "requestCount" : 314323.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 299506.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:39:00Z" : {
+    "diskUtilization" : 0.5045698498275907,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.5196249371E10,
+    "cpuLoad" : 0.4526065579637681,
+    "requestCount" : 325655.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 312913.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:40:00Z" : {
+    "diskUtilization" : 0.5045698498275907,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.5944053077E10,
+    "cpuLoad" : 0.4620862370811594,
+    "requestCount" : 333312.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 327443.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:41:00Z" : {
+    "diskUtilization" : 0.5045633434159359,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.5126387404E10,
+    "cpuLoad" : 0.46719075225942036,
+    "requestCount" : 323369.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 318771.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:42:00Z" : {
+    "diskUtilization" : 0.5045633434159359,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.5206329927E10,
+    "cpuLoad" : 0.466708580257971,
+    "requestCount" : 324795.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 315958.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:43:00Z" : {
+    "diskUtilization" : 0.5045633434159359,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.4378228602E10,
+    "cpuLoad" : 0.45829222993913044,
+    "requestCount" : 316897.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 313794.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:44:00Z" : {
+    "diskUtilization" : 0.5045633434159359,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.4108906714E10,
+    "cpuLoad" : 0.4465979459260869,
+    "requestCount" : 312868.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 302419.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:45:00Z" : {
+    "diskUtilization" : 0.5045633434159359,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.4508159647E10,
+    "cpuLoad" : 0.45561201841594196,
+    "requestCount" : 315936.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 313102.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:46:00Z" : {
+    "diskUtilization" : 0.5045566632125448,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.3201496668E10,
+    "cpuLoad" : 0.4482985594695652,
+    "requestCount" : 301036.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 295423.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:47:00Z" : {
+    "diskUtilization" : 0.5045566632125448,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.247801355E10,
+    "cpuLoad" : 0.42960468978115945,
+    "requestCount" : 294824.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 289312.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:48:00Z" : {
+    "diskUtilization" : 0.5045566632125448,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.2121910324E10,
+    "cpuLoad" : 0.4258626228391304,
+    "requestCount" : 289487.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 283238.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:49:00Z" : {
+    "diskUtilization" : 0.5045566632125448,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.2452134912E10,
+    "cpuLoad" : 0.4187534704884058,
+    "requestCount" : 294855.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 282780.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:50:00Z" : {
+    "diskUtilization" : 0.5045566632125448,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.330152075E10,
+    "cpuLoad" : 0.4306802275043478,
+    "requestCount" : 302328.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 293832.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:51:00Z" : {
+    "diskUtilization" : 0.5045590327151528,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.2576771768E10,
+    "cpuLoad" : 0.4354877357695653,
+    "requestCount" : 295846.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 292789.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:52:00Z" : {
+    "diskUtilization" : 0.5045590327151528,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.2995378783E10,
+    "cpuLoad" : 0.4258225367275362,
+    "requestCount" : 299895.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 287167.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:53:00Z" : {
+    "diskUtilization" : 0.0,
+    "nodeCount" : 46.0,
+    "receivedBytes" : 0.0,
+    "sentBytes" : 3.5010725553E10,
+    "cpuLoad" : 0.0,
+    "requestCount" : 323026.0,
+    "modifiedRows" : 0.0,
+    "returnedRows" : 305068.0,
+    "errorCount" : 0.0,
+    "loadDelta" : 0.0
+  },
+  "2019-07-23T11:54:00Z" : {
     "diskUtilization" : 0.0,
     "nodeCount" : 0.0,
     "receivedBytes" : 0.0,
@@ -17275,7 +17275,7 @@
     "cpuLoad" : 0.0,
     "requestCount" : 0.0,
     "modifiedRows" : 0.0,
-    "returnedRows" : 0.0,
+    "returnedRows" : 336230.0,
     "errorCount" : 0.0,
     "loadDelta" : 0.0
   }
