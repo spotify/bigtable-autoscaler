@@ -39,6 +39,7 @@ import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
@@ -64,7 +65,7 @@ public class AutoscalerTest {
 
   @Mock private Autoscaler.SessionProvider sessionProvider;
 
-  @Mock private ClusterStats clusterStats;
+  @Mock private AutoscalerMetrics autoscalerMetrics;
 
   @Mock private AutoscaleJobFactory autoscaleJobFactory;
 
@@ -104,7 +105,7 @@ public class AutoscalerTest {
         stackDriverClient,
         database,
         sessionProvider,
-        clusterStats,
+        autoscalerMetrics,
         cluster);
   }
 

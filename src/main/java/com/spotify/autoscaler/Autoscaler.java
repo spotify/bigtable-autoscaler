@@ -28,6 +28,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.ClusterFilter;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -51,7 +52,7 @@ public class Autoscaler implements Runnable {
   private final SemanticMetricRegistry registry;
   private final StackdriverClient stackDriverClient;
   private final Database db;
-  private final ClusterStats clusterStats;
+  private final AutoscalerMetrics autoscalerMetrics;
   private final ClusterFilter filter;
 
   private final SessionProvider sessionProvider;
@@ -65,7 +66,7 @@ public class Autoscaler implements Runnable {
       final StackdriverClient stackDriverClient,
       final Database db,
       final SessionProvider sessionProvider,
-      final ClusterStats clusterStats,
+      final AutoscalerMetrics autoscalerMetrics,
       final ClusterFilter filter) {
     this.autoscaleJobFactory = checkNotNull(autoscaleJobFactory);
     this.executorService = checkNotNull(executorService);
@@ -73,7 +74,7 @@ public class Autoscaler implements Runnable {
     this.stackDriverClient = stackDriverClient;
     this.db = checkNotNull(db);
     this.sessionProvider = checkNotNull(sessionProvider);
-    this.clusterStats = checkNotNull(clusterStats);
+    this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.filter = checkNotNull(filter);
   }
 
@@ -119,7 +120,7 @@ public class Autoscaler implements Runnable {
                 cluster,
                 db,
                 registry,
-                clusterStats,
+                autoscalerMetrics,
                 Instant::now)) {
       job.run();
     } catch (final Exception e) {

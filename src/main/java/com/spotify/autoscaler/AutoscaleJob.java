@@ -32,7 +32,8 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
-import com.spotify.autoscaler.metric.BigtableMetric;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
+import com.spotify.autoscaler.metric.ClusterLoadGauges;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.Closeable;
@@ -55,7 +56,7 @@ public class AutoscaleJob implements Closeable {
   private final SemanticMetricRegistry registry;
   private final Supplier<Instant> timeSource;
   private final Database db;
-  private final ClusterStats clusterStats;
+  private final AutoscalerMetrics autoscalerMetrics;
 
   public static final Duration CHECK_INTERVAL = Duration.ofSeconds(30);
   private boolean hasRun = false;
@@ -94,13 +95,13 @@ public class AutoscaleJob implements Closeable {
       final BigtableCluster cluster,
       final Database db,
       final SemanticMetricRegistry registry,
-      final ClusterStats clusterStats,
+      final AutoscalerMetrics autoscalerMetrics,
       final Supplier<Instant> timeSource) {
     this.bigtableSession = checkNotNull(bigtableSession);
     this.stackdriverClient = checkNotNull(stackdriverClient);
     this.cluster = checkNotNull(cluster);
     this.registry = checkNotNull(registry);
-    this.clusterStats = checkNotNull(clusterStats);
+    this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.timeSource = checkNotNull(timeSource);
     this.db = checkNotNull(db);
     this.log =
@@ -203,7 +204,7 @@ public class AutoscaleJob implements Closeable {
     try {
       currentCpu = getCurrentCpu(samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, currentCpu, BigtableMetric.LoadMetricType.CPU);
+      autoscalerMetrics.registerClusterLoadMetrics(cluster, currentCpu, ClusterLoadGauges.CPU);
     }
 
     logger.info(
@@ -281,7 +282,8 @@ public class AutoscaleJob implements Closeable {
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, storageUtilization, BigtableMetric.LoadMetricType.STORAGE);
+      autoscalerMetrics.registerClusterLoadMetrics(
+          cluster, storageUtilization, ClusterLoadGauges.STORAGE);
     }
     if (storageUtilization <= 0.0) {
       return Math.max(currentNodes, desiredNodes);
@@ -391,7 +393,7 @@ public class AutoscaleJob implements Closeable {
 
     final Cluster clusterInfo = getClusterInfo();
     final int currentNodes = getSize(clusterInfo);
-    clusterStats.setStats(this.cluster, currentNodes);
+    autoscalerMetrics.registerClusterDataMetrics(this.cluster, currentNodes);
 
     registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
 

@@ -24,6 +24,7 @@ import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Instant;
@@ -37,11 +38,17 @@ public class AutoscaleJobFactory {
       final BigtableCluster cluster,
       final Database db,
       final SemanticMetricRegistry registry,
-      final ClusterStats clusterStats,
+      final AutoscalerMetrics autoscalerMetrics,
       final Supplier<Instant> timeSource)
       throws IOException {
     return new AutoscaleJob(
-        bigtableSession, stackdriverClient.get(), cluster, db, registry, clusterStats, timeSource);
+        bigtableSession,
+        stackdriverClient.get(),
+        cluster,
+        db,
+        registry,
+        autoscalerMetrics,
+        timeSource);
   }
 
   public interface IOSupplier<T> {

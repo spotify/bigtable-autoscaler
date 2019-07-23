@@ -33,6 +33,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.db.PostgresDatabaseTest;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
@@ -53,7 +54,7 @@ public class AutoscaleJobITBase {
 
   @Mock SemanticMetricRegistry registry;
 
-  @Mock ClusterStats clusterStats;
+  @Mock AutoscalerMetrics autoscalerMetrics;
 
   PostgresDatabase db;
 
@@ -139,7 +140,7 @@ public class AutoscaleJobITBase {
               fakeBTCluster.getCluster(),
               db,
               registry,
-              clusterStats,
+              autoscalerMetrics,
               timeSupplier);
       job.run();
       assertion.accept(null);
