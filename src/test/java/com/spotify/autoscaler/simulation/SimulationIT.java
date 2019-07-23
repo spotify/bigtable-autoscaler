@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 public class SimulationIT extends AutoscaleJobITBase {
 
   private static final Logger logger = LoggerFactory.getLogger(SimulationIT.class);
-  private static final double CRITICAL_ADDITIONAL_CPU_THRESHOLD = 0.6d;
+  private static final double CRITICAL_ADDITIONAL_CPU_THRESHOLD = 0.3d;
 
   public SimulationIT(final FakeBTCluster fakeBTCluster) {
     super(fakeBTCluster);
@@ -61,8 +61,8 @@ public class SimulationIT extends AutoscaleJobITBase {
             final BigtableCluster cluster =
                 FakeBTCluster.getClusterBuilderForFilePath(path)
                     .minNodes(5)
-                    .maxNodes(1000)
-                    .cpuTarget(0.1)
+                    .maxNodes(2000)
+                    .cpuTarget(0.6)
                     .build();
             data.add(new Object[] {new FakeBTCluster(new TimeSupplier(), cluster)});
           });

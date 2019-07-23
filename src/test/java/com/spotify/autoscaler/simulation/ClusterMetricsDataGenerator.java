@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
@@ -50,10 +51,27 @@ public class ClusterMetricsDataGenerator {
   private static final String INSTANCE_ID = "instance";
   private static final String CLUSTER_ID = "cluster";
 
+  public static class DataJobInformation {
+
+    private DataJobInformation(
+        final String dataJobStart, final String dataJobEnd, final Double dataJobLoadDelta) {
+      this.dataJobStart = dataJobStart;
+      this.dataJobEnd = dataJobEnd;
+      this.dataJobLoadDelta = dataJobLoadDelta;
+    }
+
+    String dataJobStart;
+    String dataJobEnd;
+    Double dataJobLoadDelta;
+  }
+
   // for now we don't have reliable data, so we manually set data job start, duration, etc
-  private static final String DATA_JOB_START = "2019-01-00T00:00:00Z";
-  private static final String DATA_JOB_END = "2019-01-00T00:00:00Z";
-  private static final Double DATA_JOB_LOAD_DELTA = 0.0;
+  private static final List<DataJobInformation> jobs =
+      List.of(
+          new DataJobInformation("2019-07-22T06:19:00Z", "2019-07-22T13:24:00Z", 750.0),
+          new DataJobInformation("2019-07-22T17:04:00Z", "2019-07-22T21:24:00Z", 300.0),
+          new DataJobInformation("2019-07-22T23:46:00Z", "2019-07-23T00:36:00Z", 250.0),
+          new DataJobInformation("2019-07-23T02:52:00Z", "2019-07-23T20:00:00Z", 750.0));
 
   public static void main(final String[] args) throws IOException {
     final BigtableCluster cluster =
@@ -81,7 +99,7 @@ public class ClusterMetricsDataGenerator {
     final ObjectMapper mapper = new ObjectMapper();
     mapper.enable(SerializationFeature.INDENT_OUTPUT);
     try (final FileWriter file =
-             new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
+        new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
       file.write(mapper.writeValueAsString(metrics));
       file.flush();
     } catch (final IOException e) {
@@ -90,19 +108,22 @@ public class ClusterMetricsDataGenerator {
   }
 
   private static void populateLoadDelta(final Map<Instant, ClusterMetricsData> metrics) {
-    final Instant dataJobStart = Instant.parse(DATA_JOB_START);
-    dataJobStart.truncatedTo(ChronoUnit.MINUTES);
-    final Instant dataJobEnd = Instant.parse(DATA_JOB_END);
-    dataJobEnd.truncatedTo(ChronoUnit.MINUTES);
+    for (final DataJobInformation job : jobs) {
+      final Instant dataJobStart = Instant.parse(job.dataJobStart);
+      dataJobStart.truncatedTo(ChronoUnit.MINUTES);
+      final Instant dataJobEnd = Instant.parse(job.dataJobEnd);
+      dataJobEnd.truncatedTo(ChronoUnit.MINUTES);
 
-    for (Instant instant = dataJobStart;
-         instant.isBefore(dataJobEnd);
-         instant = instant.plus(1, ChronoUnit.MINUTES)) {
-      metrics.put(
-          instant,
-          ClusterMetricsData.ClusterMetricsDataBuilder.from(metrics.get(instant))
-              .loadDelta(DATA_JOB_LOAD_DELTA)
-              .build());
+      for (Instant instant = dataJobStart;
+          instant.isBefore(dataJobEnd);
+          instant = instant.plus(1, ChronoUnit.MINUTES)) {
+        metrics.computeIfPresent(
+            instant,
+            (unused, current) ->
+                ClusterMetricsData.ClusterMetricsDataBuilder.from(current)
+                    .loadDelta(current.loadDelta() + job.dataJobLoadDelta)
+                    .build());
+      }
     }
   }
 
@@ -178,8 +199,8 @@ public class ClusterMetricsDataGenerator {
     final Instant endMinute = endInstant.truncatedTo(ChronoUnit.MINUTES);
 
     for (Instant i = startMinute;
-         i.isBefore(endMinute) || i.equals(startMinute);
-         i = i.plus(1, ChronoUnit.MINUTES)) {
+        i.isBefore(endMinute) || i.equals(startMinute);
+        i = i.plus(1, ChronoUnit.MINUTES)) {
       result.put(i, valueCalculator.apply(result.get(i)));
     }
   }
