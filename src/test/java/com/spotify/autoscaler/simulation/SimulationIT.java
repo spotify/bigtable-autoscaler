@@ -45,6 +45,7 @@ public class SimulationIT extends AutoscaleJobITBase {
 
   private static final Logger logger = LoggerFactory.getLogger(SimulationIT.class);
   private static final double CRITICAL_ADDITIONAL_CPU_THRESHOLD = 0.3d;
+  private static final double IDEAL_CPU_INTERVAL = 0.25d;
 
   public SimulationIT(final FakeBTCluster fakeBTCluster) {
     super(fakeBTCluster);
@@ -60,7 +61,7 @@ public class SimulationIT extends AutoscaleJobITBase {
           path -> {
             final BigtableCluster cluster =
                 FakeBTCluster.getClusterBuilderForFilePath(path)
-                    .minNodes(5)
+                    .minNodes(3)
                     .maxNodes(2000)
                     .cpuTarget(0.6)
                     .build();
@@ -94,6 +95,7 @@ public class SimulationIT extends AutoscaleJobITBase {
         1400,
         fakeBTCluster::getCPU,
         fakeBTCluster::getStorage,
+        ignored -> assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + IDEAL_CPU_INTERVAL),
         ignored -> {
           logger.warn(
               "Instant: {}, cpu: {}, nodeCount: {}, status: {}",

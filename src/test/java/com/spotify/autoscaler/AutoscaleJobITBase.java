@@ -124,14 +124,15 @@ public class AutoscaleJobITBase {
       final int repetition,
       final Supplier<Double> cpuSupplier,
       final Supplier<Double> diskUtilSupplier,
-      final Consumer<Void> assertion)
+      final Consumer<Void> assertionImmediatelyAfterAutoscaleJob,
+      final Consumer<Void> assertionAfterTime)
       throws IOException {
 
     Instant now = timeSupplier.get();
     for (int i = 0; i < repetition; ++i) {
       now = now.plus(period);
       timeSupplier.setTime(now);
-      assertion.accept(null);
+      assertionAfterTime.accept(null);
       AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
@@ -145,7 +146,7 @@ public class AutoscaleJobITBase {
               clusterStats,
               timeSupplier);
       job.run();
-      assertion.accept(null);
+      assertionImmediatelyAfterAutoscaleJob.accept(null);
     }
   }
 }

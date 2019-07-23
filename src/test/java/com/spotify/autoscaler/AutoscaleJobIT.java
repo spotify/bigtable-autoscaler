@@ -137,6 +137,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
         512,
         random::nextDouble,
         random::nextDouble,
+        ignored -> assertTrue(true),
         ignored -> assertTrue(true));
   }
 
