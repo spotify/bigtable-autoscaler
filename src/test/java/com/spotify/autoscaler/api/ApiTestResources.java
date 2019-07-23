@@ -37,9 +37,9 @@ import javax.ws.rs.core.Response;
 
 public interface ApiTestResources {
 
-  String INSTANCES = "/instances";
+  String CLUSTERS = "/clusters";
   String HEALTH = "/health";
-  String LOAD = "/instances/load";
+  String LOAD = "/clusters/load";
   String SERVICE_NAME = "test-service";
 
   BigtableCluster CLUSTER =
