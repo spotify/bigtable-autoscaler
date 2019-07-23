@@ -23,6 +23,8 @@ package com.spotify.autoscaler.api;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -50,6 +52,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   private boolean insertBigtableClusterResult;
   private boolean updateBigtableClusterResult;
   private boolean deleteBigtableClusterResult;
+  private boolean updateLoadDeltaResult;
   private Collection<BigtableCluster> getBigtableClustersResult;
 
   @Override
@@ -61,6 +64,8 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
         .thenAnswer(invocation -> deleteBigtableClusterResult);
     when(db.getBigtableClusters(any(), any(), any()))
         .thenAnswer(invocation -> getBigtableClustersResult);
+    when(db.updateLoadDelta(any(), any(), any(), any()))
+        .thenAnswer(invocation -> updateLoadDeltaResult);
 
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
     final ResourceConfig resourceConfig =
@@ -71,17 +76,17 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   }
 
   @Test
-  public void getEmptyAllInstances() {
+  public void getEmptyAllClusters() {
     getBigtableClustersResult = ImmutableList.of();
-    final Response response = target(ApiTestResources.INSTANCES).request().get();
+    final Response response = target(ApiTestResources.CLUSTERS).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo("[]"));
   }
 
   @Test
-  public void getNonEmptyAllInstances() throws IOException {
+  public void getNonEmptyAllClusters() throws IOException {
     getBigtableClustersResult = ImmutableList.of(ApiTestResources.CLUSTER);
-    final Response response = target(ApiTestResources.INSTANCES).request().get();
+    final Response response = target(ApiTestResources.CLUSTERS).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     final List<BigtableCluster> parsed = deserialize(response);
     assertThat(parsed.size(), equalTo(1));
@@ -89,28 +94,30 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   }
 
   @Test
-  public void createInstance() {
+  public void createCluster() {
     insertBigtableClusterResult = true;
     final Response response =
-        request(target(ApiTestResources.INSTANCES), ApiTestResources.CLUSTER).post(Entity.text(""));
+        request(target(ApiTestResources.CLUSTERS), ApiTestResources.CLUSTER).post(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1)).insertBigtableCluster(any());
   }
 
   @Test
-  public void updateInstance() {
+  public void updateCluster() {
     updateBigtableClusterResult = true;
     final Response response =
-        request(target(ApiTestResources.INSTANCES), ApiTestResources.CLUSTER).put(Entity.text(""));
+        request(target(ApiTestResources.CLUSTERS), ApiTestResources.CLUSTER).put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1)).updateBigtableCluster(any());
   }
 
   @Test
-  public void deleteInstance() {
+  public void deleteCluster() {
     deleteBigtableClusterResult = true;
     final Response response =
-        target(ApiTestResources.INSTANCES)
+        target(ApiTestResources.CLUSTERS)
             .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
             .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
             .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
@@ -118,5 +125,31 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
             .delete();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1))
+        .deleteBigtableCluster(
+            ApiTestResources.CLUSTER.projectId(),
+            ApiTestResources.CLUSTER.instanceId(),
+            ApiTestResources.CLUSTER.clusterId());
+  }
+
+  @Test
+  public void extraLoad() {
+    updateLoadDeltaResult = true;
+    final Response response =
+        target(ApiTestResources.LOAD)
+            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
+            .queryParam("loadDelta", ApiTestResources.CLUSTER.loadDelta())
+            .request()
+            .put(Entity.text(""));
+    assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
+    assertThat(response.readEntity(String.class), equalTo(""));
+    verify(db, times(1))
+        .updateLoadDelta(
+            ApiTestResources.CLUSTER.projectId(),
+            ApiTestResources.CLUSTER.instanceId(),
+            ApiTestResources.CLUSTER.clusterId(),
+            ApiTestResources.CLUSTER.loadDelta());
   }
 }
