@@ -118,11 +118,12 @@ public class FakeBTCluster {
   public BigtableCluster getCluster() {
     final int loadDelta = getMetricsForNow().loadDelta.intValue();
     final int loadDeltaDiff = loadDelta - cluster.loadDelta();
-    final Optional<Integer> overridenMinNodes = loadDelta == 0 ?
-                                                  Optional.empty() :
-                                                  loadDeltaDiff == 0 ?
-                                                    cluster.overriddenMinNodes() :
-                                                    Optional.of(nodes + (loadDelta - cluster.loadDelta()));
+    final Optional<Integer> overridenMinNodes =
+        loadDelta == 0
+            ? Optional.empty()
+            : loadDeltaDiff == 0
+                ? cluster.overriddenMinNodes()
+                : Optional.of(nodes + (loadDelta - cluster.loadDelta()));
     this.cluster =
         BigtableClusterBuilder.from(cluster)
             .loadDelta(loadDelta)

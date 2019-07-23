@@ -170,7 +170,7 @@ public class PostgresDatabase implements Database {
     final String sql =
         "INSERT INTO "
             + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, "
-        + "overload_step, enabled, overridden_min_nodes) "
+            + "overload_step, enabled, overridden_min_nodes) "
             + "VALUES(:project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, "
             + ":cpu_target, :overload_step, :enabled, :overridden_min_nodes) "
             + "ON CONFLICT(project_id, instance_id, cluster_id) "
@@ -428,13 +428,27 @@ public class PostgresDatabase implements Database {
       final String projectId,
       final String instanceId,
       final String clusterId,
-      final Integer loadDelta) {
+      final int loadDelta,
+      final int currentNodeCount) {
+
     final String sql =
         "UPDATE autoscale "
-            + "SET load_delta = ? "
-            + "WHERE project_id = ? AND instance_id = ? AND cluster_id = ?";
-    final int numRowsUpdated =
-        jdbc.getJdbcOperations().update(sql, loadDelta, projectId, instanceId, clusterId);
+            + "set load_delta = :new_load_delta, "
+            + "overridden_min_nodes = case "
+            + "                         when :new_load_delta = 0 then null"
+            + "                         when load_delta = :new_load_delta then overridden_min_nodes "
+            + "                         else :current_node_count + :new_load_delta - load_delta "
+            + "                       end "
+            + "WHERE project_id = :project_id AND instance_id = :instance_id AND cluster_id = "
+            + ":cluster_id";
+
+    final Map<String, Object> params = new HashMap<String, Object>();
+    params.put("project_id", projectId);
+    params.put("instance_id", instanceId);
+    params.put("cluster_id", clusterId);
+    params.put("new_load_delta", loadDelta);
+    params.put("current_node_count", currentNodeCount);
+    final int numRowsUpdated = jdbc.update(sql, Collections.unmodifiableMap(params));
     return numRowsUpdated == 1;
   }
 }

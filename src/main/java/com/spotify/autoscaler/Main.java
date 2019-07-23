@@ -110,7 +110,14 @@ public final class Main {
     final URI uri = new URI("http://0.0.0.0:" + port);
     final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
-            SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
+            SERVICE_NAME,
+            config,
+            new ClusterResources(
+                db,
+                cluster ->
+                    BigtableUtil.createSession(
+                        cluster.instanceId(), SERVICE_NAME, cluster.projectId())),
+            new HealthCheck(db));
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
     ClusterFilter clusterFilter = new AllowAllClusterFilter();
