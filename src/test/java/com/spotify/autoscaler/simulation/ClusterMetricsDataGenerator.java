@@ -50,6 +50,10 @@ public class ClusterMetricsDataGenerator {
   private static final String INSTANCE_ID = "instance";
   private static final String CLUSTER_ID = "cluster";
 
+  // for now we don't have reliable data, so we manually set data job start, duration, etc
+  private static final String DATA_JOB_START = "2019-01-00T00:00:00Z";
+  private static final String DATA_JOB_END = "2019-01-00T00:00:00Z";
+  private static final Double DATA_JOB_LOAD_DELTA = 0.0;
 
   public static void main(final String[] args) throws IOException {
     final BigtableCluster cluster =
@@ -65,13 +69,13 @@ public class ClusterMetricsDataGenerator {
     populateIntervalWithValue(interval, metrics, p -> ClusterMetricsData.builder().build());
 
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
-    for(Metric metric : Metric.values()) {
+    for (final Metric metric : Metric.values()) {
       populateMetric(metricServiceClient, metrics, cluster, interval, metric);
     }
 
     // infer the value of loadDelta from the existing metrics, i.e. try to guess if a data job
     // started at some point
-    calculateLoadDelta(metricServiceClient, metrics, cluster, interval);
+    populateLoadDelta(metrics);
 
     // save metrics as json
     final ObjectMapper mapper = new ObjectMapper();
@@ -85,26 +89,20 @@ public class ClusterMetricsDataGenerator {
     }
   }
 
-  // TODO
-  private static void calculateLoadDelta(
-      final MetricServiceClient metricServiceClient,
-      final Map<Instant, ClusterMetricsData> metrics,
-      final BigtableCluster cluster,
-      final TimeInterval interval) {
-    final double averageLoad =
-        metrics
-            .values()
-            .stream()
-            .map(d -> d.cpuLoad * d.nodeCount)
-            .mapToDouble(Double::doubleValue)
-            .average()
-            .orElse(0.0);
-    System.out.println("Average load: " + averageLoad);
-    for (final Instant instant : metrics.keySet()) {
-      final ClusterMetricsData metricsData = metrics.get(instant);
-      if (metricsData.cpuLoad() * metricsData.nodeCount() > averageLoad * 2) {
-        System.out.println("Job started at " + instant);
-      }
+  private static void populateLoadDelta(final Map<Instant, ClusterMetricsData> metrics) {
+    final Instant dataJobStart = Instant.parse(DATA_JOB_START);
+    dataJobStart.truncatedTo(ChronoUnit.MINUTES);
+    final Instant dataJobEnd = Instant.parse(DATA_JOB_END);
+    dataJobEnd.truncatedTo(ChronoUnit.MINUTES);
+
+    for (Instant instant = dataJobStart;
+         instant.isBefore(dataJobEnd);
+         instant = instant.plus(1, ChronoUnit.MINUTES)) {
+      metrics.put(
+          instant,
+          ClusterMetricsData.ClusterMetricsDataBuilder.from(metrics.get(instant))
+              .loadDelta(DATA_JOB_LOAD_DELTA)
+              .build());
     }
   }
 

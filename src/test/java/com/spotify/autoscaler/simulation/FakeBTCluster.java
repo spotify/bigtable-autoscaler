@@ -111,9 +111,14 @@ public class FakeBTCluster {
     throw new RuntimeException("Invalid file: " + path.toString());
   }
 
+  // DONTLIKEIT
+  // make it clear that we return a modified version of the cluster, like simulating a read from the
+  // database
   public BigtableCluster getCluster() {
     this.cluster =
-        BigtableClusterBuilder.from(cluster).loadDelta(getMetricsForNow().loadDelta.intValue()).build();
+        BigtableClusterBuilder.from(cluster)
+            .loadDelta(getMetricsForNow().loadDelta.intValue())
+            .build();
     return this.cluster;
   }
 
@@ -125,6 +130,8 @@ public class FakeBTCluster {
     return this.nodes;
   }
 
+  // DONTLIKEIT
+  // make it clear that we are simulating a write to the database
   public void setNumberOfNodes(final int nodes) {
     this.cluster = BigtableClusterBuilder.from(cluster).lastChange(timeSource.get()).build();
     this.nodes = nodes;
