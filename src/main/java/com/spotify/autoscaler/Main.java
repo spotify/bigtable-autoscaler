@@ -137,7 +137,7 @@ public final class Main {
             db,
             cluster ->
                 BigtableUtil.createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
-                new AutoscalerMetrics(registry, db),
+            new AutoscalerMetrics(registry, db),
             clusterFilter);
 
     executor.scheduleWithFixedDelay(
