@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.codahale.metrics.Meter;
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
@@ -61,8 +60,6 @@ public class AutoscaleJobTest {
 
   @Mock Database db;
 
-  @Mock SemanticMetricRegistry registry;
-
   @Mock AutoscalerMetrics autoscalerMetrics;
 
   private static final int MIN_NODES = 6;
@@ -90,19 +87,12 @@ public class AutoscaleJobTest {
             .build();
 
     initMocks(this);
-    when(registry.meter(any())).thenReturn(new Meter());
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
     job =
         new AutoscaleJob(
-            bigtableSession,
-            stackdriverClient,
-            this.cluster,
-            db,
-            registry,
-            autoscalerMetrics,
-            Instant::now);
+            bigtableSession, stackdriverClient, this.cluster, db, autoscalerMetrics, Instant::now);
     when(bigtableInstanceClient.updateCluster(any()))
         .thenAnswer(
             invocationOnMock -> {
@@ -142,13 +132,7 @@ public class AutoscaleJobTest {
     cluster = BigtableClusterBuilder.from(this.cluster).overloadStep(Optional.empty()).build();
     job =
         new AutoscaleJob(
-            bigtableSession,
-            stackdriverClient,
-            this.cluster,
-            db,
-            registry,
-            autoscalerMetrics,
-            Instant::now);
+            bigtableSession, stackdriverClient, this.cluster, db, autoscalerMetrics, Instant::now);
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.8d);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.96d);
     job.run();
@@ -174,8 +158,7 @@ public class AutoscaleJobTest {
             stackdriverClient,
             cluster,
             db,
-            registry,
-            autoscalerMetrics,
+            new AutoscalerMetrics(registry),
             Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.9);
     job.run();
@@ -211,8 +194,7 @@ public class AutoscaleJobTest {
             stackdriverClient,
             cluster,
             db,
-            registry,
-            autoscalerMetrics,
+            new AutoscalerMetrics(registry),
             Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.0001);
     job.run();
@@ -273,7 +255,6 @@ public class AutoscaleJobTest {
             stackdriverClient,
             cluster,
             db,
-            registry,
             autoscalerMetrics,
             () -> now.plusSeconds(300));
     assertTrue(job.shouldExponentialBackoff());
@@ -283,7 +264,6 @@ public class AutoscaleJobTest {
             stackdriverClient,
             cluster,
             db,
-            registry,
             autoscalerMetrics,
             () -> now.plusSeconds(1000));
     assertFalse(job.shouldExponentialBackoff());
@@ -305,7 +285,6 @@ public class AutoscaleJobTest {
             stackdriverClient,
             cluster,
             db,
-            registry,
             autoscalerMetrics,
             () -> now.plusSeconds(50));
     assertFalse(job.shouldExponentialBackoff());
@@ -339,13 +318,7 @@ public class AutoscaleJobTest {
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES);
     job =
         new AutoscaleJob(
-            bigtableSession,
-            stackdriverClient,
-            cluster,
-            db,
-            registry,
-            autoscalerMetrics,
-            Instant::now);
+            bigtableSession, stackdriverClient, cluster, db, autoscalerMetrics, Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run();
     assertEquals(Optional.of(MIN_NODES + loadDelta), newSize);
@@ -362,8 +335,7 @@ public class AutoscaleJobTest {
             stackdriverClient,
             cluster,
             db,
-            registry,
-            autoscalerMetrics,
+            new AutoscalerMetrics(registry),
             Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run();
@@ -396,13 +368,7 @@ public class AutoscaleJobTest {
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES + 1);
     job =
         new AutoscaleJob(
-            bigtableSession,
-            stackdriverClient,
-            cluster,
-            db,
-            registry,
-            autoscalerMetrics,
-            Instant::now);
+            bigtableSession, stackdriverClient, cluster, db, autoscalerMetrics, Instant::now);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run();
     assertEquals(Optional.empty(), newSize);

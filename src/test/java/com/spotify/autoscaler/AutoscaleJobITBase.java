@@ -24,7 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.codahale.metrics.Meter;
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
@@ -34,7 +33,6 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.db.PostgresDatabaseTest;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
-import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -52,8 +50,6 @@ public class AutoscaleJobITBase {
 
   @Mock StackdriverClient stackdriverClient;
 
-  @Mock SemanticMetricRegistry registry;
-
   @Mock AutoscalerMetrics autoscalerMetrics;
 
   PostgresDatabase db;
@@ -67,7 +63,6 @@ public class AutoscaleJobITBase {
   @Before
   public void setUp() throws IOException {
     initMocks(this);
-    when(registry.meter(any())).thenReturn(new Meter());
     db = initDatabase();
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
 
@@ -100,7 +95,6 @@ public class AutoscaleJobITBase {
   @After
   public void tearDown() {
     db.getBigtableClusters()
-        .stream()
         .forEach(
             cluster ->
                 db.deleteBigtableCluster(
@@ -139,7 +133,6 @@ public class AutoscaleJobITBase {
               stackdriverClient,
               fakeBTCluster.getCluster(),
               db,
-              registry,
               autoscalerMetrics,
               timeSupplier);
       job.run();

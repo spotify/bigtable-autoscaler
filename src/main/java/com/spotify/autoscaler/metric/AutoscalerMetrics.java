@@ -22,12 +22,14 @@ package com.spotify.autoscaler.metric;
 
 import static com.spotify.autoscaler.Main.APP_PREFIX;
 
+import com.codahale.metrics.Gauge;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
+import com.zaxxer.hikari.HikariDataSource;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,22 +43,21 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/*Helper class containing methods to register and measure autoscaler metrics.*/
 public class AutoscalerMetrics {
 
   private static final Logger LOG = LoggerFactory.getLogger(AutoscalerMetrics.class);
 
   private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
   private final SemanticMetricRegistry registry;
-  private final Database db;
   private final Map<String, ClusterData> registeredClusters = new ConcurrentHashMap<>();
 
-  public AutoscalerMetrics(final SemanticMetricRegistry registry, final Database db) {
+  public AutoscalerMetrics(final SemanticMetricRegistry registry) {
     this.registry = registry;
-    this.db = db;
-    scheduleCleanup();
   }
 
-  public void registerClusterDataMetrics(final BigtableCluster cluster, final int currentNodes) {
+  public void registerClusterDataMetrics(
+      final BigtableCluster cluster, final int currentNodes, final Database db) {
     final ClusterData clusterData =
         new ClusterDataBuilder()
             .cluster(cluster)
@@ -90,7 +91,7 @@ public class AutoscalerMetrics {
     }
   }
 
-  private void scheduleCleanup() {
+  public void scheduleCleanup(Database db) {
     final ScheduledExecutorService cleanupExecutor =
         new ScheduledThreadPoolExecutor(1, r -> new Thread(r, "Cluster-Metrics-Cleaner"));
     cleanupExecutor.scheduleAtFixedRate(
@@ -169,5 +170,73 @@ public class AutoscalerMetrics {
     Arrays.stream(ClusterLoadGauges.values()).map(ClusterLoadGauges::getTag).forEach(metrics::add);
     Arrays.stream(ErrorGauges.values()).map(ErrorGauges::getTag).forEach(metrics::add);
     return metrics;
+  }
+
+  public void markStorageConstraint(
+      BigtableCluster cluster, int desiredNodes, int minNodesRequiredForStorage) {
+    registry
+        .meter(
+            baseMetric(cluster)
+                .tagged("what", "overridden-desired-node-count")
+                .tagged("reason", "storage-constraint")
+                .tagged("desired-nodes", String.valueOf(desiredNodes))
+                .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
+                .tagged("target-nodes", String.valueOf(minNodesRequiredForStorage))
+                .tagged("max-nodes", String.valueOf(cluster.maxNodes())))
+        .mark();
+  }
+
+  public void markSizeConstraint(int desiredNodes, int finalNodes, BigtableCluster cluster) {
+    final MetricId metric =
+        baseMetric(cluster)
+            .tagged("what", "overridden-desired-node-count")
+            .tagged("desired-nodes", String.valueOf(desiredNodes))
+            .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
+            .tagged("target-nodes", String.valueOf(finalNodes))
+            .tagged("max-nodes", String.valueOf(cluster.maxNodes()));
+
+    if (cluster.minNodes() > desiredNodes) {
+      registry.meter(metric.tagged("reason", "min-nodes-constraint")).mark();
+    }
+
+    if (cluster.effectiveMinNodes() > desiredNodes) {
+      registry.meter(metric.tagged("reason", "effective-min-nodes-constraint")).mark();
+    }
+
+    if (cluster.maxNodes() < desiredNodes) {
+      registry.meter(metric.tagged("reason", "max-nodes-constraint")).mark();
+    }
+  }
+
+  public void markClusterCheck() {
+    registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
+  }
+
+  public void markCallToGetSize() {
+    registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
+  }
+
+  public void markCallToSetSize() {
+    registry.meter(APP_PREFIX.tagged("what", "call-to-set-size")).mark();
+  }
+
+  public void markClusterChanged() {
+    registry.meter(APP_PREFIX.tagged("what", "clusters-changed")).mark();
+  }
+
+  public void markSetSizeError() {
+    registry.meter(APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
+  }
+
+  public void markHeartBeat() {
+    registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
+  }
+
+  public void registerMetricActiveConnections(HikariDataSource dataSource) {
+    final MetricId metricId = APP_PREFIX.tagged("what", "open-db-connections");
+    if (!registry.getGauges().containsKey(metricId)) {
+      registry.register(
+          metricId, (Gauge<Integer>) () -> dataSource.getHikariPoolMXBean().getTotalConnections());
+    }
   }
 }
