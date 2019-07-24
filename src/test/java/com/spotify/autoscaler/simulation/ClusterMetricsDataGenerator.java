@@ -30,7 +30,7 @@ import com.google.monitoring.v3.ProjectName;
 import com.google.monitoring.v3.TimeInterval;
 import com.google.monitoring.v3.TimeSeries;
 import com.google.monitoring.v3.TypedValue;
-import com.google.protobuf.Timestamp;
+import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import java.io.FileWriter;
@@ -38,10 +38,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -51,7 +51,7 @@ public class ClusterMetricsDataGenerator {
   private static final String INSTANCE_ID = "instance";
   private static final String CLUSTER_ID = "cluster";
 
-  public static class DataJobInformation {
+  private static class DataJobInformation {
 
     private DataJobInformation(
         final String dataJobStart, final String dataJobEnd, final Double dataJobLoadDelta) {
@@ -66,12 +66,7 @@ public class ClusterMetricsDataGenerator {
   }
 
   // for now we don't have reliable data, so we manually set data job start, duration, etc
-  private static final List<DataJobInformation> jobs =
-      List.of(
-          new DataJobInformation("2019-07-22T06:19:00Z", "2019-07-22T13:24:00Z", 750.0),
-          new DataJobInformation("2019-07-22T17:04:00Z", "2019-07-22T21:24:00Z", 300.0),
-          new DataJobInformation("2019-07-22T23:46:00Z", "2019-07-23T00:36:00Z", 250.0),
-          new DataJobInformation("2019-07-23T02:52:00Z", "2019-07-23T20:00:00Z", 750.0));
+  private static final List<DataJobInformation> jobs = Collections.EMPTY_LIST;
 
   public static void main(final String[] args) throws IOException {
     final BigtableCluster cluster =
@@ -81,11 +76,13 @@ public class ClusterMetricsDataGenerator {
             .clusterId(CLUSTER_ID)
             .build();
 
-    final TimeInterval interval = interval(Duration.ofHours(24));
+    final TimeInterval interval = StackdriverClient.interval(Duration.ofHours(24));
 
+    // create all the data point and initialize them
     final Map<Instant, ClusterMetricsData> metrics = new TreeMap<>();
-    populateIntervalWithValue(interval, metrics, p -> ClusterMetricsData.builder().build());
+    populateIntervalWithValue(interval, metrics, unused -> ClusterMetricsData.builder().build());
 
+    // update the data points with real metric data
     final MetricServiceClient metricServiceClient = MetricServiceClient.create();
     for (final Metric metric : Metric.values()) {
       populateMetric(metricServiceClient, metrics, cluster, interval, metric);
@@ -203,18 +200,5 @@ public class ClusterMetricsDataGenerator {
         i = i.plus(1, ChronoUnit.MINUTES)) {
       result.put(i, valueCalculator.apply(result.get(i)));
     }
-  }
-
-  private static TimeInterval interval(final Duration duration) {
-    final long currentTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
-
-    final Timestamp pastTimestamp =
-        Timestamp.newBuilder().setSeconds(currentTimeSeconds - duration.getSeconds()).build();
-    final Timestamp currentTimestamp =
-        Timestamp.newBuilder().setSeconds(currentTimeSeconds).build();
-    return TimeInterval.newBuilder()
-        .setStartTime(pastTimestamp)
-        .setEndTime(currentTimestamp)
-        .build();
   }
 }

@@ -55,7 +55,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
         new BigtableClusterBuilder()
             .projectId("project")
             .instanceId("instance")
-            .clusterId("cluster")
+            .clusterId("no-jobs")
             .cpuTarget(0.8)
             .maxNodes(500)
             .minNodes(5)

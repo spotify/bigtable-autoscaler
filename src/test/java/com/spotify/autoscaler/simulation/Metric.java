@@ -1,3 +1,23 @@
+/*-
+ * -\-\-
+ * bigtable-autoscaler
+ * --
+ * Copyright (C) 2018 Spotify AB
+ * --
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -/-/-
+ */
+
 package com.spotify.autoscaler.simulation;
 
 import com.google.monitoring.v3.TypedValue;
@@ -8,20 +28,23 @@ public enum Metric {
   NODE_COUNT_METRIC(
       "bigtable.googleapis.com/cluster/node_count", v -> (double) v.getInt64Value(), false) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.nodeCount(Math.max(builder.nodeCount(), newValue));
     }
   },
   DISK_USAGE_METRIC(
       "bigtable.googleapis.com/cluster/storage_utilization", TypedValue::getDoubleValue, false) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.diskUtilization(Math.max(builder.diskUtilization(), newValue));
     }
   },
   CPU_LOAD_METRIC("bigtable.googleapis.com/cluster/cpu_load", TypedValue::getDoubleValue, false) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.cpuLoad(Math.max(builder.cpuLoad(), newValue));
     }
   },
@@ -30,42 +53,48 @@ public enum Metric {
       v -> (double) v.getInt64Value(),
       true) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.receivedBytes(Double.sum(builder.receivedBytes(), newValue));
     }
   },
   SENT_BYTES_METRIC(
       "bigtable.googleapis.com/server/sent_bytes_count", v -> (double) v.getInt64Value(), true) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.sentBytes(Double.sum(builder.sentBytes(), newValue));
     }
   },
   REQUEST_COUNT_METRIC(
       "bigtable.googleapis.com/server/request_count", v -> (double) v.getInt64Value(), true) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.requestCount(Double.sum(builder.requestCount(), newValue));
     }
   },
   MODIFIED_ROWS_METRIC(
       "bigtable.googleapis.com/server/modified_rows_count", v -> (double) v.getInt64Value(), true) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.modifiedRows(Double.sum(builder.modifiedRows(), newValue));
     }
   },
   RETURNED_ROWS_METRIC(
       "bigtable.googleapis.com/server/returned_rows_count", v -> (double) v.getInt64Value(), true) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.returnedRows(Double.sum(builder.returnedRows(), newValue));
     }
   },
   ERROR_COUNT_METRIC(
       "bigtable.googleapis.com/server/error_count", v -> (double) v.getInt64Value(), true) {
     @Override
-    void setMetricValue(ClusterMetricsData.ClusterMetricsDataBuilder builder, Double newValue) {
+    void setMetricValue(
+        final ClusterMetricsData.ClusterMetricsDataBuilder builder, final Double newValue) {
       builder.errorCount(Double.sum(builder.errorCount(), newValue));
     }
   };
@@ -81,7 +110,7 @@ public enum Metric {
   Metric(
       final String metricType,
       final Function<TypedValue, Double> typeConverter,
-      boolean shouldBeDistributed) {
+      final boolean shouldBeDistributed) {
     this.metricType = metricType;
     this.typeConverter = typeConverter;
     this.shouldBeDistributed = shouldBeDistributed;
