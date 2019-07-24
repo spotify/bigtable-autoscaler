@@ -29,7 +29,6 @@ import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
-import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -59,7 +58,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 public final class Main {
 
   private static final Logger logger = LoggerFactory.getLogger(Main.class);
-  private static final String SERVICE_NAME = "bigtable-autoscaler";
+  public static final String SERVICE_NAME = "bigtable-autoscaler";
   public static final MetricId APP_PREFIX = MetricId.build("key", SERVICE_NAME);
 
   private static final Duration RUN_INTERVAL = Duration.ofSeconds(5);
@@ -131,12 +130,9 @@ public final class Main {
 
     autoscaler =
         new Autoscaler(
-            new AutoscaleJobFactory(),
             Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
             stackdriverClient,
             db,
-            cluster ->
-                BigtableUtil.createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
             autoscalerMetrics,
             clusterFilter);
 

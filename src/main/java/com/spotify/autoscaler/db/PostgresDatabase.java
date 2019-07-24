@@ -286,22 +286,24 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public boolean clearFailureCount(
-      final String projectId, final String instanceId, final String clusterId) {
+  public boolean clearFailureCount(BigtableCluster cluster) {
     final String sql =
         "UPDATE autoscale SET consecutive_failure_count = 0, error_code = ?::error_code "
             + "WHERE project_id = ? "
             + "AND instance_id = ? AND cluster_id = ?";
     return jdbc.getJdbcOperations()
-            .update(sql, ErrorCode.OK.name(), projectId, instanceId, clusterId)
+            .update(
+                sql,
+                ErrorCode.OK.name(),
+                cluster.projectId(),
+                cluster.instanceId(),
+                cluster.instanceId())
         == 1;
   }
 
   @Override
   public boolean increaseFailureCount(
-      final String projectId,
-      final String instanceId,
-      final String clusterId,
+      BigtableCluster cluster,
       final Instant lastFailure,
       final String lastFailureMessage,
       final ErrorCode errorCode) {
@@ -317,9 +319,9 @@ public class PostgresDatabase implements Database {
                 Timestamp.from(lastFailure),
                 lastFailureMessage,
                 errorCode.name(),
-                projectId,
-                instanceId,
-                clusterId);
+                cluster.projectId(),
+                cluster.instanceId(),
+                cluster.clusterId());
     return numRowsUpdated == 1;
   }
 
@@ -347,7 +349,7 @@ public class PostgresDatabase implements Database {
     params.put("target_nodes", log.targetNodes());
     params.put("cpu_utilization", log.cpuUtilization());
     params.put("storage_utilization", log.storageUtilization());
-    params.put("detail", log.resizeReason());
+    params.put("detail", String.join("", log.resizeReasons()));
     params.put("success", log.success());
     params.put("error_message", log.errorMessage().orElse(null));
     params.put("load_delta", log.loadDelta());

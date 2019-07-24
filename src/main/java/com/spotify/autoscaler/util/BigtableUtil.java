@@ -25,6 +25,7 @@ import com.google.cloud.bigtable.config.BulkOptions;
 import com.google.cloud.bigtable.config.CallOptionsConfig;
 import com.google.cloud.bigtable.grpc.BigtableInstanceName;
 import com.google.cloud.bigtable.grpc.BigtableSession;
+import com.spotify.autoscaler.Main;
 import com.spotify.autoscaler.db.BigtableCluster;
 import java.io.IOException;
 import java.time.Duration;
@@ -36,8 +37,8 @@ public class BigtableUtil {
   private static final int LONG_TIMEOUT = (int) Duration.ofSeconds(60).toMillis();
   private static final boolean USE_TIMEOUT = true;
 
-  public static BigtableSession createSession(
-      final String instanceId, final String userAgent, final String projectId) throws IOException {
+  public static BigtableSession createSession(final String instanceId, final String projectId)
+      throws IOException {
     final BigtableInstanceName bigtableInstanceName =
         new BigtableInstanceName(projectId, instanceId);
 
@@ -46,7 +47,7 @@ public class BigtableUtil {
             .setDataChannelCount(64)
             .setProjectId(projectId)
             .setInstanceId(bigtableInstanceName.getInstanceId())
-            .setUserAgent(userAgent)
+            .setUserAgent(Main.SERVICE_NAME)
             .setCallOptionsConfig(new CallOptionsConfig(USE_TIMEOUT, SHORT_TIMEOUT, LONG_TIMEOUT))
             .setBulkOptions(
                 new BulkOptions.Builder()
