@@ -28,6 +28,7 @@ import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
@@ -104,7 +105,8 @@ public final class Main {
     }
 
     final int port = config.getConfig("http").getConfig("server").getInt("port");
-    db = new PostgresDatabase(config.getConfig("database"), registry);
+    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
+    db = new PostgresDatabase(config.getConfig("database"), autoscalerMetrics);
     final URI uri = new URI("http://0.0.0.0:" + port);
     final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
@@ -131,17 +133,17 @@ public final class Main {
         new Autoscaler(
             new AutoscaleJobFactory(),
             Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
-            registry,
             stackdriverClient,
             db,
             cluster ->
                 BigtableUtil.createSession(cluster.instanceId(), SERVICE_NAME, cluster.projectId()),
-            new ClusterStats(registry, db),
+            autoscalerMetrics,
             clusterFilter);
 
     executor.scheduleWithFixedDelay(
         autoscaler, RUN_INTERVAL.toMillis(), RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
 
+    autoscalerMetrics.scheduleCleanup(db);
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(

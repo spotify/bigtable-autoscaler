@@ -21,16 +21,15 @@
 package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
-import static com.spotify.autoscaler.Main.APP_PREFIX;
 
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.ClusterFilter;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
-import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
@@ -48,10 +47,9 @@ public class Autoscaler implements Runnable {
 
   private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
 
-  private final SemanticMetricRegistry registry;
   private final StackdriverClient stackDriverClient;
   private final Database db;
-  private final ClusterStats clusterStats;
+  private final AutoscalerMetrics autoscalerMetrics;
   private final ClusterFilter filter;
 
   private final SessionProvider sessionProvider;
@@ -61,19 +59,17 @@ public class Autoscaler implements Runnable {
   public Autoscaler(
       final AutoscaleJobFactory autoscaleJobFactory,
       final ExecutorService executorService,
-      final SemanticMetricRegistry registry,
       final StackdriverClient stackDriverClient,
       final Database db,
       final SessionProvider sessionProvider,
-      final ClusterStats clusterStats,
+      final AutoscalerMetrics autoscalerMetrics,
       final ClusterFilter filter) {
     this.autoscaleJobFactory = checkNotNull(autoscaleJobFactory);
     this.executorService = checkNotNull(executorService);
-    this.registry = checkNotNull(registry);
     this.stackDriverClient = stackDriverClient;
     this.db = checkNotNull(db);
     this.sessionProvider = checkNotNull(sessionProvider);
-    this.clusterStats = checkNotNull(clusterStats);
+    this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.filter = checkNotNull(filter);
   }
 
@@ -91,7 +87,7 @@ public class Autoscaler implements Runnable {
   }
 
   private void runUnsafe() {
-    registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
+    autoscalerMetrics.markHeartBeat();
 
     final CompletableFuture[] futures =
         db.getCandidateClusters()
@@ -114,13 +110,7 @@ public class Autoscaler implements Runnable {
     try (final BigtableSession session = sessionProvider.apply(cluster);
         final AutoscaleJob job =
             autoscaleJobFactory.createAutoscaleJob(
-                session,
-                () -> stackDriverClient,
-                cluster,
-                db,
-                registry,
-                clusterStats,
-                Instant::now)) {
+                session, () -> stackDriverClient, cluster, db, autoscalerMetrics, Instant::now)) {
       job.run();
     } catch (final Exception e) {
       final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));

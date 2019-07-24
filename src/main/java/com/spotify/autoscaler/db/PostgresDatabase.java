@@ -20,15 +20,11 @@
 
 package com.spotify.autoscaler.db;
 
-import static com.spotify.autoscaler.Main.APP_PREFIX;
-
-import com.codahale.metrics.Gauge;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.spotify.autoscaler.AutoscaleJob;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.ErrorCode;
-import com.spotify.metrics.core.MetricId;
-import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.typesafe.config.Config;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.ResultSet;
@@ -77,23 +73,14 @@ public class PostgresDatabase implements Database {
   private static final String SELECT_ALL_COLUMNS = "SELECT " + ALL_COLUMNS + " FROM autoscale";
 
   private final HikariDataSource dataSource;
+  private AutoscalerMetrics autoscalerMetrics;
   private final NamedParameterJdbcTemplate jdbc;
-  private final SemanticMetricRegistry registry;
 
-  public PostgresDatabase(final Config config, final SemanticMetricRegistry registry) {
+  public PostgresDatabase(final Config config, final AutoscalerMetrics autoscalerMetrics) {
     this.dataSource = dataSource(config);
+    this.autoscalerMetrics = autoscalerMetrics;
     this.jdbc = new NamedParameterJdbcTemplate(dataSource);
-    this.registry = registry;
-    registerMetricActiveConnections(this.registry);
-  }
-
-  private void registerMetricActiveConnections(final SemanticMetricRegistry registry) {
-    final MetricId metricId = APP_PREFIX.tagged("what", "open-db-connections");
-    if (!registry.getGauges().containsKey(metricId)) {
-      registry.register(
-          metricId,
-          (Gauge<Integer>) () -> this.dataSource.getHikariPoolMXBean().getTotalConnections());
-    }
+    autoscalerMetrics.registerMetricActiveConnections(dataSource);
   }
 
   private HikariDataSource dataSource(final Config config) {
@@ -108,7 +95,7 @@ public class PostgresDatabase implements Database {
 
   @Override
   public void close() {
-    registerMetricActiveConnections(this.registry);
+    autoscalerMetrics.registerMetricActiveConnections(this.dataSource);
     this.dataSource.close();
   }
 

@@ -29,7 +29,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.codahale.metrics.Meter;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -39,8 +38,8 @@ import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.ErrorCode;
-import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
@@ -52,8 +51,6 @@ import org.mockito.Mock;
 
 public class AutoscalerTest {
 
-  @Mock private SemanticMetricRegistry registry;
-
   @Mock private StackdriverClient stackDriverClient;
 
   @Mock private BigtableSession bigtableSession;
@@ -64,15 +61,15 @@ public class AutoscalerTest {
 
   @Mock private Autoscaler.SessionProvider sessionProvider;
 
-  @Mock private ClusterStats clusterStats;
+  @Mock private AutoscalerMetrics autoscalerMetrics;
 
   @Mock private AutoscaleJobFactory autoscaleJobFactory;
 
   @Mock private AutoscaleJob autoscaleJob;
 
-  ExecutorService executorService = MoreExecutors.newDirectExecutorService();
+  private ExecutorService executorService = MoreExecutors.newDirectExecutorService();
 
-  BigtableCluster cluster1 =
+  private BigtableCluster cluster1 =
       new BigtableClusterBuilder()
           .projectId("project")
           .instanceId("instance1")
@@ -84,7 +81,7 @@ public class AutoscalerTest {
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 
-  BigtableCluster cluster2 =
+  private BigtableCluster cluster2 =
       new BigtableClusterBuilder()
           .projectId("project")
           .instanceId("instance2")
@@ -100,21 +97,19 @@ public class AutoscalerTest {
     return new Autoscaler(
         autoscaleJobFactory,
         executorService,
-        registry,
         stackDriverClient,
         database,
         sessionProvider,
-        clusterStats,
+        autoscalerMetrics,
         cluster);
   }
 
   @Before
   public void setUp() throws IOException {
     initMocks(this);
-    when(registry.meter(any())).thenReturn(new Meter());
     when(sessionProvider.apply(any())).thenReturn(bigtableSession);
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
-    when(autoscaleJobFactory.createAutoscaleJob(any(), any(), any(), any(), any(), any(), any()))
+    when(autoscaleJobFactory.createAutoscaleJob(any(), any(), any(), any(), any(), any()))
         .thenReturn(autoscaleJob);
   }
 
@@ -143,10 +138,10 @@ public class AutoscalerTest {
     final InOrder inOrder = inOrder(autoscaleJobFactory);
     inOrder
         .verify(autoscaleJobFactory)
-        .createAutoscaleJob(any(), any(), eq(cluster1), any(), any(), any(), any());
+        .createAutoscaleJob(any(), any(), eq(cluster1), any(), any(), any());
     inOrder
         .verify(autoscaleJobFactory)
-        .createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any(), any());
+        .createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any());
 
     verifyNoMoreInteractions(database);
     verifyNoMoreInteractions(autoscaleJobFactory);
@@ -168,8 +163,7 @@ public class AutoscalerTest {
     autoscaler.run();
 
     verify(autoscaleJob).run();
-    verify(autoscaleJobFactory)
-        .createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any(), any());
+    verify(autoscaleJobFactory).createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any());
     verifyNoMoreInteractions(autoscaleJobFactory);
   }
 
@@ -188,8 +182,7 @@ public class AutoscalerTest {
     verify(database).getCandidateClusters();
     verify(database).updateLastChecked(cluster2);
 
-    verify(autoscaleJobFactory)
-        .createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any(), any());
+    verify(autoscaleJobFactory).createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any());
     verify(autoscaleJob).run();
 
     verifyNoMoreInteractions(database);
@@ -204,18 +197,15 @@ public class AutoscalerTest {
     when(database.getCandidateClusters()).thenReturn(Arrays.asList(cluster1, cluster2));
     when(database.updateLastChecked(cluster1)).thenReturn(true).thenReturn(false);
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
-    when(autoscaleJobFactory.createAutoscaleJob(
-            any(), any(), eq(cluster1), any(), any(), any(), any()))
+    when(autoscaleJobFactory.createAutoscaleJob(any(), any(), eq(cluster1), any(), any(), any()))
         .thenThrow(new RuntimeException("cluster1"));
 
     final Autoscaler autoscaler = getAutoscaler(new AllowAllClusterFilter());
 
     autoscaler.run();
 
-    verify(autoscaleJobFactory)
-        .createAutoscaleJob(any(), any(), eq(cluster1), any(), any(), any(), any());
-    verify(autoscaleJobFactory)
-        .createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any(), any());
+    verify(autoscaleJobFactory).createAutoscaleJob(any(), any(), eq(cluster1), any(), any(), any());
+    verify(autoscaleJobFactory).createAutoscaleJob(any(), any(), eq(cluster2), any(), any(), any());
 
     verifyNoMoreInteractions(autoscaleJobFactory);
   }

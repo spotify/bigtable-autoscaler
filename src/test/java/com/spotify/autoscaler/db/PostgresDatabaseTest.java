@@ -22,7 +22,7 @@ package com.spotify.autoscaler.db;
 
 import static org.mockito.Mockito.mock;
 
-import com.spotify.metrics.core.SemanticMetricRegistry;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import com.typesafe.config.ConfigValueFactory;
@@ -46,7 +46,7 @@ public class PostgresDatabaseTest {
             .withValue("username", ConfigValueFactory.fromAnyRef(container.getUsername()))
             .withValue("password", ConfigValueFactory.fromAnyRef(container.getPassword()))
             .withValue("maxConnectionPool", ConfigValueFactory.fromAnyRef(1));
-    SemanticMetricRegistry registry = mock(SemanticMetricRegistry.class);
+    AutoscalerMetrics registry = mock(AutoscalerMetrics.class);
     PostgresDatabase db = new PostgresDatabase(config, registry);
 
     return db;

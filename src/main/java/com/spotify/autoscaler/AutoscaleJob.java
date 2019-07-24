@@ -21,20 +21,17 @@
 package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
-import static com.spotify.autoscaler.Main.APP_PREFIX;
 
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.google.common.annotations.VisibleForTesting;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
-import com.spotify.autoscaler.metric.BigtableMetric;
-import com.spotify.metrics.core.MetricId;
-import com.spotify.metrics.core.SemanticMetricRegistry;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
+import com.spotify.autoscaler.metric.ClusterLoadGauges;
 import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
@@ -52,10 +49,9 @@ public class AutoscaleJob implements Closeable {
   private final BigtableSession bigtableSession;
   private final StackdriverClient stackdriverClient;
   private final BigtableCluster cluster;
-  private final SemanticMetricRegistry registry;
   private final Supplier<Instant> timeSource;
   private final Database db;
-  private final ClusterStats clusterStats;
+  private final AutoscalerMetrics autoscalerMetrics;
 
   public static final Duration CHECK_INTERVAL = Duration.ofSeconds(30);
   private boolean hasRun = false;
@@ -84,7 +80,6 @@ public class AutoscaleJob implements Closeable {
   // This means that a 2 % capacity decrease can only happen every eight hours,
   // but a twenty percent change can happen as often as every 48 minutes.
   private static final double MINIMUM_DOWNSCALE_WEIGHT = 57600;
-  private final MetricId clusterMetricPrefix;
 
   // Storage related constants
 
@@ -93,14 +88,12 @@ public class AutoscaleJob implements Closeable {
       final StackdriverClient stackdriverClient,
       final BigtableCluster cluster,
       final Database db,
-      final SemanticMetricRegistry registry,
-      final ClusterStats clusterStats,
+      final AutoscalerMetrics autoscalerMetrics,
       final Supplier<Instant> timeSource) {
     this.bigtableSession = checkNotNull(bigtableSession);
     this.stackdriverClient = checkNotNull(stackdriverClient);
     this.cluster = checkNotNull(cluster);
-    this.registry = checkNotNull(registry);
-    this.clusterStats = checkNotNull(clusterStats);
+    this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.timeSource = checkNotNull(timeSource);
     this.db = checkNotNull(db);
     this.log =
@@ -114,16 +107,10 @@ public class AutoscaleJob implements Closeable {
             .cpuTarget(cluster.cpuTarget())
             .overloadStep(cluster.overloadStep())
             .loadDelta(cluster.loadDelta());
-
-    this.clusterMetricPrefix =
-        APP_PREFIX
-            .tagged("project-id", cluster.projectId())
-            .tagged("instance-id", cluster.instanceId())
-            .tagged("cluster-id", cluster.clusterId());
   }
 
   private int getSize(final Cluster clusterInfo) {
-    registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
+    autoscalerMetrics.markCallToGetSize();
     final int currentNodes = clusterInfo.getServeNodes();
     log.currentNodes(currentNodes);
     return currentNodes;
@@ -132,7 +119,7 @@ public class AutoscaleJob implements Closeable {
   private Cluster getClusterInfo() throws IOException {
     final BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
     return adminClient.getCluster(
-        GetClusterRequest.newBuilder().setName(this.cluster.clusterName()).build());
+        GetClusterRequest.newBuilder().setName(cluster.clusterName()).build());
   }
 
   private void setSize(final int newSize) {
@@ -143,17 +130,17 @@ public class AutoscaleJob implements Closeable {
     // clusters-changed would only reflect the ones that are successfully changed, while
     // call-to-set-size would reflect the number of API calls, to monitor if we are reaching the
     // daily limit
-    registry.meter(APP_PREFIX.tagged("what", "call-to-set-size")).mark();
+    autoscalerMetrics.markCallToSetSize();
     try {
       log.targetNodes(newSize);
       bigtableSession.getInstanceAdminClient().updateCluster(cluster);
       log.success(true);
-      registry.meter(APP_PREFIX.tagged("what", "clusters-changed")).mark();
+      autoscalerMetrics.markClusterChanged();
     } catch (final IOException e) {
       logger.error("Failed to set cluster size", e);
       log.errorMessage(Optional.of(e.toString()));
       log.success(false);
-      registry.meter(APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
+      autoscalerMetrics.markSetSizeError();
     } catch (final Throwable t) {
       log.errorMessage(Optional.of(t.toString()));
       log.success(false);
@@ -192,7 +179,6 @@ public class AutoscaleJob implements Closeable {
    * quickly scaling up on load increases. Basically, we want to scale up optimistically
    * but scale down pessimistically.
    */
-  @VisibleForTesting
   private double getCurrentCpu(final Duration samplingDuration) {
     return stackdriverClient.getCpuLoad(cluster, samplingDuration);
   }
@@ -203,7 +189,7 @@ public class AutoscaleJob implements Closeable {
     try {
       currentCpu = getCurrentCpu(samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, currentCpu, BigtableMetric.LoadMetricType.CPU);
+      autoscalerMetrics.registerClusterLoadMetrics(cluster, currentCpu, ClusterLoadGauges.CPU);
     }
 
     logger.info(
@@ -281,7 +267,8 @@ public class AutoscaleJob implements Closeable {
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
     } finally {
-      clusterStats.setLoad(cluster, storageUtilization, BigtableMetric.LoadMetricType.STORAGE);
+      autoscalerMetrics.registerClusterLoadMetrics(
+          cluster, storageUtilization, ClusterLoadGauges.STORAGE);
     }
     if (storageUtilization <= 0.0) {
       return Math.max(currentNodes, desiredNodes);
@@ -295,16 +282,7 @@ public class AutoscaleJob implements Closeable {
         currentNodes);
     log.storageUtilization(storageUtilization);
     if (minNodesRequiredForStorage > desiredNodes) {
-      registry
-          .meter(
-              clusterMetricPrefix
-                  .tagged("what", "overridden-desired-node-count")
-                  .tagged("reason", "storage-constraint")
-                  .tagged("desired-nodes", String.valueOf(desiredNodes))
-                  .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
-                  .tagged("target-nodes", String.valueOf(minNodesRequiredForStorage))
-                  .tagged("max-nodes", String.valueOf(cluster.maxNodes())))
-          .mark();
+      autoscalerMetrics.markStorageConstraint(cluster, desiredNodes, minNodesRequiredForStorage);
       addResizeReason(
           String.format(
               "Storage strategy: Target node count overridden(%d -> %d).",
@@ -318,25 +296,7 @@ public class AutoscaleJob implements Closeable {
     final int finalNodes =
         Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
     if (desiredNodes != finalNodes) {
-      final MetricId metric =
-          clusterMetricPrefix
-              .tagged("what", "overridden-desired-node-count")
-              .tagged("desired-nodes", String.valueOf(desiredNodes))
-              .tagged("min-nodes", String.valueOf(cluster.effectiveMinNodes()))
-              .tagged("target-nodes", String.valueOf(finalNodes))
-              .tagged("max-nodes", String.valueOf(cluster.maxNodes()));
-
-      if (cluster.minNodes() > desiredNodes) {
-        registry.meter(metric.tagged("reason", "min-nodes-constraint")).mark();
-      }
-
-      if (cluster.effectiveMinNodes() > desiredNodes) {
-        registry.meter(metric.tagged("reason", "effective-min-nodes-constraint")).mark();
-      }
-
-      if (cluster.maxNodes() < desiredNodes) {
-        registry.meter(metric.tagged("reason", "max-nodes-constraint")).mark();
-      }
+      autoscalerMetrics.markSizeConstraint(desiredNodes, finalNodes, cluster);
       addResizeReason(
           String.format(
               "Size strategy: Target count overridden(%d -> %d)", desiredNodes, finalNodes));
@@ -391,9 +351,8 @@ public class AutoscaleJob implements Closeable {
 
     final Cluster clusterInfo = getClusterInfo();
     final int currentNodes = getSize(clusterInfo);
-    clusterStats.setStats(this.cluster, currentNodes);
-
-    registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
+    autoscalerMetrics.registerClusterDataMetrics(cluster, currentNodes, db);
+    autoscalerMetrics.markClusterCheck();
 
     if (isTooEarlyToFetchMetrics()) {
       final int newNodeCount = sizeConstraints(currentNodes);
