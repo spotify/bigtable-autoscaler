@@ -133,8 +133,8 @@ public class AutoscalerTest {
 
     // Clusters should be checked in order since the unit test uses DirectExecutor executorservice
     final InOrder inOrder = inOrder(autoscaleJob);
-    inOrder.verify(autoscaleJob).run(eq(cluster1), any());
-    inOrder.verify(autoscaleJob).run(eq(cluster2), any());
+    inOrder.verify(autoscaleJob).run(eq(cluster1), any(), any());
+    inOrder.verify(autoscaleJob).run(eq(cluster2), any(), any());
 
     verifyNoMoreInteractions(database);
   }
@@ -153,8 +153,8 @@ public class AutoscalerTest {
     final Autoscaler autoscaler = getAutoscaler(new AllowAllClusterFilter());
     autoscaler.run();
 
-    verify(autoscaleJob, never()).run(eq(cluster1), any());
-    verify(autoscaleJob).run(eq(cluster2), any());
+    verify(autoscaleJob, never()).run(eq(cluster1), any(), any());
+    verify(autoscaleJob).run(eq(cluster2), any(), any());
     verifyNoMoreInteractions(autoscaleJob);
   }
 
@@ -175,8 +175,8 @@ public class AutoscalerTest {
     verify(database).updateLastChecked(cluster2);
     verifyNoMoreInteractions(database);
 
-    verify(autoscaleJob, never()).run(eq(cluster1), any());
-    verify(autoscaleJob).run(eq(cluster2), any());
+    verify(autoscaleJob, never()).run(eq(cluster1), any(), any());
+    verify(autoscaleJob).run(eq(cluster2), any(), any());
   }
 
   @Test
@@ -188,13 +188,15 @@ public class AutoscalerTest {
     when(database.updateLastChecked(cluster1)).thenReturn(true).thenReturn(false);
     when(database.updateLastChecked(cluster2)).thenReturn(true).thenReturn(false);
 
-    doThrow(new RuntimeException("cluster1 exception")).when(autoscaleJob).run(eq(cluster1), any());
+    doThrow(new RuntimeException("cluster1 exception"))
+        .when(autoscaleJob)
+        .run(eq(cluster1), any(), any());
 
     final Autoscaler autoscaler = getAutoscaler(new AllowAllClusterFilter());
     autoscaler.run();
 
-    verify(autoscaleJob).run(eq(cluster1), any());
-    verify(autoscaleJob).run(eq(cluster2), any());
+    verify(autoscaleJob).run(eq(cluster1), any(), any());
+    verify(autoscaleJob).run(eq(cluster2), any(), any());
 
     verify(database)
         .increaseFailureCount(

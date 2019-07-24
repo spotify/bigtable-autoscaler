@@ -101,7 +101,10 @@ public class Autoscaler implements Runnable {
     LOGGER.info("Autoscaling cluster!");
     try {
       if (hasRun.putIfAbsent(cluster.clusterName(), true) == null) {
-        autoscaleJob.run(cluster, Instant::now);
+        autoscaleJob.run(
+            cluster,
+            BigtableUtil.createSession(cluster.instanceId(), cluster.projectId()),
+            Instant::now);
       } else {
         throw new RuntimeException("An autoscale job should only be run once!");
       }
