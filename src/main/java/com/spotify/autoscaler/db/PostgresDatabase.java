@@ -321,7 +321,7 @@ public class PostgresDatabase implements Database {
                 errorCode.name(),
                 cluster.projectId(),
                 cluster.instanceId(),
-                cluster.instanceId());
+                cluster.clusterId());
     return numRowsUpdated == 1;
   }
 

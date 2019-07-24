@@ -29,6 +29,7 @@ import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.annotations.VisibleForTesting;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
+import com.spotify.autoscaler.db.ClusterResizeLog;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
@@ -36,7 +37,6 @@ import com.spotify.autoscaler.metric.ClusterLoadGauges;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -158,7 +158,7 @@ public class AutoscaleJob {
 
   private int cpuStrategy(
       final BigtableCluster cluster,
-      ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
       final Duration samplingDuration,
       final int nodes) {
     double currentCpu = 0d;
@@ -327,7 +327,10 @@ public class AutoscaleJob {
     return desiredNodes;
   }
 
-  void run(BigtableCluster cluster, BigtableSession session, Supplier<Instant> timeSupplier)
+  void run(
+      final BigtableCluster cluster,
+      final BigtableSession session,
+      final Supplier<Instant> timeSupplier)
       throws IOException {
 
     if (shouldExponentialBackoff(cluster, timeSupplier)) {
@@ -339,7 +342,7 @@ public class AutoscaleJob {
         instanceAdminClient.getCluster(
             GetClusterRequest.newBuilder().setName(cluster.clusterName()).build());
     final int currentNodes = getSize(clusterInfo);
-    final ClusterResizeLogBuilder clusterResizeLogBuilder = resizeLogBuilder(cluster);
+    final ClusterResizeLogBuilder clusterResizeLogBuilder = ClusterResizeLog.builder(cluster);
     clusterResizeLogBuilder.currentNodes(currentNodes);
     autoscalerMetrics.registerClusterDataMetrics(cluster, currentNodes, database);
     autoscalerMetrics.markClusterCheck();
@@ -384,18 +387,5 @@ public class AutoscaleJob {
     }
     LOGGER.info("Finished running autoscale job");
     database.clearFailureCount(cluster);
-  }
-
-  private ClusterResizeLogBuilder resizeLogBuilder(final BigtableCluster cluster) {
-    return new ClusterResizeLogBuilder()
-        .timestamp(new Date())
-        .projectId(cluster.projectId())
-        .instanceId(cluster.instanceId())
-        .clusterId(cluster.clusterId())
-        .minNodes(cluster.minNodes())
-        .maxNodes(cluster.maxNodes())
-        .cpuTarget(cluster.cpuTarget())
-        .overloadStep(cluster.overloadStep())
-        .loadDelta(cluster.loadDelta());
   }
 }

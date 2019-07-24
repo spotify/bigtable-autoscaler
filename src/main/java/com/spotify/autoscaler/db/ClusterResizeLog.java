@@ -63,4 +63,17 @@ public interface ClusterResizeLog {
   List<String> resizeReasons();
 
   Optional<String> errorMessage();
+
+  static ClusterResizeLogBuilder builder(final BigtableCluster cluster) {
+    return new ClusterResizeLogBuilder()
+        .timestamp(new Date())
+        .projectId(cluster.projectId())
+        .instanceId(cluster.instanceId())
+        .clusterId(cluster.clusterId())
+        .minNodes(cluster.minNodes())
+        .maxNodes(cluster.maxNodes())
+        .cpuTarget(cluster.cpuTarget())
+        .overloadStep(cluster.overloadStep())
+        .loadDelta(cluster.loadDelta());
+  }
 }
