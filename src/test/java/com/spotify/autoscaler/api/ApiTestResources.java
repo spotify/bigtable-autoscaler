@@ -37,8 +37,9 @@ import javax.ws.rs.core.Response;
 
 public interface ApiTestResources {
 
-  String INSTANCES = "/instances";
+  String CLUSTERS = "/clusters";
   String HEALTH = "/health";
+  String LOAD = "/clusters/load";
   String SERVICE_NAME = "test-service";
 
   BigtableCluster CLUSTER =
@@ -66,7 +67,6 @@ public interface ApiTestResources {
         .queryParam("minNodes", Integer.toString(cluster.minNodes()))
         .queryParam("maxNodes", Integer.toString(cluster.maxNodes()))
         .queryParam("enabled", Boolean.toString(cluster.enabled()))
-        .queryParam("load_delta", Integer.toString(cluster.loadDelta()))
         .request();
   }
 

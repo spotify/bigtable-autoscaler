@@ -25,6 +25,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
+import com.spotify.autoscaler.simulation.FakeBTCluster;
 import com.spotify.autoscaler.util.ErrorCode;
 import java.io.IOException;
 import java.time.Duration;
@@ -54,7 +55,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
         new BigtableClusterBuilder()
             .projectId("project")
             .instanceId("instance")
-            .clusterId("cluster")
+            .clusterId("no-jobs")
             .cpuTarget(0.8)
             .maxNodes(500)
             .minNodes(5)
@@ -136,6 +137,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
         512,
         random::nextDouble,
         random::nextDouble,
+        ignored -> assertTrue(true),
         ignored -> assertTrue(true));
   }
 

@@ -191,7 +191,7 @@ public class ClusterResources {
             .minNodes(0)
             .maxNodes(0)
             .cpuTarget(0)
-            .overloadStep(Optional.ofNullable(0))
+            .overloadStep(Optional.of(0))
             .enabled(true)
             .loadDelta(0)
             .build();
@@ -223,7 +223,7 @@ public class ClusterResources {
             .minNodes(0)
             .maxNodes(0)
             .cpuTarget(0)
-            .overloadStep(Optional.ofNullable(0))
+            .overloadStep(Optional.of(0))
             .enabled(true)
             .loadDelta(loadDelta)
             .build();

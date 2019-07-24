@@ -18,11 +18,13 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.simulation;
 
 import static org.junit.Assert.assertTrue;
 
 import com.google.bigtable.admin.v2.Cluster;
+import com.spotify.autoscaler.AutoscaleJobITBase;
+import com.spotify.autoscaler.TimeSupplier;
 import com.spotify.autoscaler.db.BigtableCluster;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,7 +44,8 @@ import org.slf4j.LoggerFactory;
 public class SimulationIT extends AutoscaleJobITBase {
 
   private static final Logger logger = LoggerFactory.getLogger(SimulationIT.class);
-  private static final double CRITICAL_ADDITIONAL_CPU_THRESHOLD = 0.6d;
+  private static final double CRITICAL_ADDITIONAL_CPU_THRESHOLD = 0.3d;
+  private static final double IDEAL_CPU_INTERVAL = 0.25d;
 
   public SimulationIT(final FakeBTCluster fakeBTCluster) {
     super(fakeBTCluster);
@@ -58,9 +61,9 @@ public class SimulationIT extends AutoscaleJobITBase {
           path -> {
             final BigtableCluster cluster =
                 FakeBTCluster.getClusterBuilderForFilePath(path)
-                    .minNodes(5)
-                    .maxNodes(1000)
-                    .cpuTarget(0.1)
+                    .minNodes(3)
+                    .maxNodes(2000)
+                    .cpuTarget(0.6)
                     .build();
             data.add(new Object[] {new FakeBTCluster(new TimeSupplier(), cluster)});
           });
@@ -92,6 +95,7 @@ public class SimulationIT extends AutoscaleJobITBase {
         1400,
         fakeBTCluster::getCPU,
         fakeBTCluster::getStorage,
+        ignored -> assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + IDEAL_CPU_INTERVAL),
         ignored -> {
           logger.warn(
               "Instant: {}, cpu: {}, nodeCount: {}, status: {}",

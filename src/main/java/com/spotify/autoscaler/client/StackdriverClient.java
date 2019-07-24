@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import javax.validation.constraints.NotNull;
 
 public class StackdriverClient implements Closeable {
 
@@ -90,7 +91,12 @@ public class StackdriverClient implements Closeable {
     return max;
   }
 
-  private TimeInterval interval(final Duration duration) {
+  public static TimeInterval interval(final Duration duration) {
+    return getTimeInterval(duration);
+  }
+
+  @NotNull
+  private static TimeInterval getTimeInterval(final Duration duration) {
     final long currentTimeSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
 
     final Timestamp pastTimestamp =

@@ -18,7 +18,7 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.simulation;
 
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -111,7 +111,14 @@ public class FakeBTCluster {
     throw new RuntimeException("Invalid file: " + path.toString());
   }
 
+  // DONTLIKEIT
+  // make it clear that we return a modified version of the cluster, like simulating a read from the
+  // database
   public BigtableCluster getCluster() {
+    this.cluster =
+        BigtableClusterBuilder.from(cluster)
+            .loadDelta(getMetricsForNow().loadDelta.intValue())
+            .build();
     return this.cluster;
   }
 
@@ -119,11 +126,13 @@ public class FakeBTCluster {
     return this.timeSource;
   }
 
-  int getNumberOfNodes() {
+  public int getNumberOfNodes() {
     return this.nodes;
   }
 
-  void setNumberOfNodes(final int nodes) {
+  // DONTLIKEIT
+  // make it clear that we are simulating a write to the database
+  public void setNumberOfNodes(final int nodes) {
     this.cluster = BigtableClusterBuilder.from(cluster).lastChange(timeSource.get()).build();
     this.nodes = nodes;
   }
@@ -139,7 +148,7 @@ public class FakeBTCluster {
     return metricsForNow.diskUtilization() * metricsForNow.nodeCount() / nodes;
   }
 
-  ClusterMetricsData getMetricsForNow() {
+  public ClusterMetricsData getMetricsForNow() {
     final Instant now = timeSource.get();
     final Instant nowMinute = now.truncatedTo(ChronoUnit.MINUTES);
     return metrics.get(nowMinute);
