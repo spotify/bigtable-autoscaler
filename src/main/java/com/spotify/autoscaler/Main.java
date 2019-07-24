@@ -130,7 +130,6 @@ public final class Main {
 
     autoscaler =
         new Autoscaler(
-            new AutoscaleJobFactory() {},
             Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
             stackdriverClient,
             db,
