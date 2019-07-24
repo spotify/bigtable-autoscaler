@@ -51,15 +51,10 @@ public interface Database extends AutoCloseable {
 
   boolean updateLastChecked(BigtableCluster cluster);
 
-  boolean clearFailureCount(String projectId, String instanceId, String clusterId);
+  boolean clearFailureCount(BigtableCluster cluster);
 
   boolean increaseFailureCount(
-      String projectId,
-      String instanceId,
-      String clusterId,
-      Instant lastFailure,
-      String lastFailureMessage,
-      ErrorCode errorCode);
+      BigtableCluster cluster, Instant lastFailure, String lastFailureMessage, ErrorCode errorCode);
 
   default Set<String> getActiveClusterKeys() {
     return getBigtableClusters()

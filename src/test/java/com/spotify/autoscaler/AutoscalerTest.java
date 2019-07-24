@@ -200,12 +200,7 @@ public class AutoscalerTest {
 
     verify(database)
         .increaseFailureCount(
-            eq(cluster1.projectId()),
-            eq(cluster1.instanceId()),
-            eq(cluster1.clusterId()),
-            any(),
-            contains("cluster1 exception"),
-            eq(ErrorCode.AUTOSCALER_INTERNAL));
+            eq(cluster1), any(), contains("cluster1 exception"), eq(ErrorCode.AUTOSCALER_INTERNAL));
   }
 
   @Test
@@ -217,9 +212,7 @@ public class AutoscalerTest {
 
     verify(database)
         .increaseFailureCount(
-            eq(cluster1.projectId()),
-            eq(cluster1.instanceId()),
-            eq(cluster1.clusterId()),
+            eq(cluster1),
             any(),
             contains("An autoscale job should only be run once!"),
             eq(ErrorCode.AUTOSCALER_INTERNAL));

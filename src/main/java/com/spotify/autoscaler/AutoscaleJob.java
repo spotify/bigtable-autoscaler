@@ -383,7 +383,7 @@ public class AutoscaleJob {
       LOGGER.info("No need to resize");
     }
     LOGGER.info("Finished running autoscale job");
-    database.clearFailureCount(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
+    database.clearFailureCount(cluster);
   }
 
   private ClusterResizeLogBuilder resizeLogBuilder(final BigtableCluster cluster) {

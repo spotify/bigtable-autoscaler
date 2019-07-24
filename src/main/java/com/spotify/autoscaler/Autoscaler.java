@@ -22,6 +22,7 @@ package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
 
+import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
@@ -29,6 +30,7 @@ import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -99,25 +101,26 @@ public class Autoscaler implements Runnable {
       final BigtableCluster cluster, final ConcurrentHashMap<String, Boolean> hasRun) {
     BigtableUtil.pushContext(cluster);
     LOGGER.info("Autoscaling cluster!");
+    BigtableSession session = null;
     try {
       if (hasRun.putIfAbsent(cluster.clusterName(), true) == null) {
-        autoscaleJob.run(
-            cluster,
-            BigtableUtil.createSession(cluster.instanceId(), cluster.projectId()),
-            Instant::now);
+        session = BigtableUtil.createSession(cluster.instanceId(), cluster.projectId());
+        autoscaleJob.run(cluster, session, Instant::now);
       } else {
         throw new RuntimeException("An autoscale job should only be run once!");
       }
     } catch (final Exception e) {
       final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
       LOGGER.error("Failed to autoscale cluster!", e);
-      db.increaseFailureCount(
-          cluster.projectId(),
-          cluster.instanceId(),
-          cluster.clusterId(),
-          Instant.now(),
-          e.toString(),
-          errorCode);
+      db.increaseFailureCount(cluster, Instant.now(), e.toString(), errorCode);
+    } finally {
+      if (session != null) {
+        try {
+          session.close();
+        } catch (IOException e) {
+          LOGGER.error("Exception while closing BigtableSession", e);
+        }
+      }
     }
     BigtableUtil.clearContext();
   }
