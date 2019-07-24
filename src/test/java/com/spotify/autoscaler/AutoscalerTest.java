@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -44,7 +45,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Supplier;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -60,9 +60,9 @@ public class AutoscalerTest {
 
   @Mock private AutoscaleJob autoscaleJob;
 
-  private ExecutorService executorService = MoreExecutors.newDirectExecutorService();
+  private final ExecutorService executorService = MoreExecutors.newDirectExecutorService();
 
-  private BigtableCluster cluster1 =
+  private final BigtableCluster cluster1 =
       new BigtableClusterBuilder()
           .projectId("project")
           .instanceId("instance1")
@@ -74,7 +74,7 @@ public class AutoscalerTest {
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 
-  private BigtableCluster cluster2 =
+  private final BigtableCluster cluster2 =
       new BigtableClusterBuilder()
           .projectId("project")
           .instanceId("instance2")
@@ -87,23 +87,13 @@ public class AutoscalerTest {
           .build();
 
   private Autoscaler getAutoscaler(final ClusterFilter cluster) {
-    AutoscaleJobFactory autoscaleJobFactory =
-        new AutoscaleJobFactory() {
-          @Override
-          public AutoscaleJob createAutoscaleJob(
-              Supplier<StackdriverClient> stackdriverClient,
-              Database database,
-              AutoscalerMetrics autoscalerMetrics1) {
-            return autoscaleJob;
-          }
-        };
-    return new Autoscaler(
-        autoscaleJobFactory,
-        executorService,
-        stackDriverClient,
-        database,
-        autoscalerMetrics,
-        cluster);
+    final Autoscaler autoscaler =
+        spy(
+            new Autoscaler(
+                executorService, stackDriverClient, database, autoscalerMetrics, cluster));
+    when(autoscaler.makeAutoscaleJob(stackDriverClient, database, autoscalerMetrics))
+        .thenReturn(autoscaleJob);
+    return autoscaler;
   }
 
   @Before

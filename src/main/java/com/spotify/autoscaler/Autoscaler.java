@@ -38,29 +38,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Autoscaler implements Runnable {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(Autoscaler.class);
 
-  private final Database db;
+  private final StackdriverClient stackDriverClient;
+  private final Database database;
   private final AutoscalerMetrics autoscalerMetrics;
   private final ClusterFilter filter;
 
   private final ExecutorService executorService;
-  private final AutoscaleJob autoscaleJob;
 
   public Autoscaler(
-      final AutoscaleJobFactory autoscaleJobFactory,
       final ExecutorService executorService,
       final StackdriverClient stackDriverClient,
       final Database database,
       final AutoscalerMetrics autoscalerMetrics,
       final ClusterFilter filter) {
-    this.autoscaleJob =
-        autoscaleJobFactory.createAutoscaleJob(
-            () -> stackDriverClient, database, autoscalerMetrics);
     this.executorService = checkNotNull(executorService);
-    this.db = checkNotNull(database);
+    this.stackDriverClient = stackDriverClient;
+    this.database = checkNotNull(database);
     this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.filter = checkNotNull(filter);
+  }
+
+  public AutoscaleJob makeAutoscaleJob(
+      final StackdriverClient stackDriverClient,
+      final Database database,
+      final AutoscalerMetrics autoscalerMetrics) {
+    return new AutoscaleJob(stackDriverClient, database, autoscalerMetrics);
   }
 
   @Override
@@ -79,12 +84,13 @@ public class Autoscaler implements Runnable {
   private void runUnsafe() {
     autoscalerMetrics.markHeartBeat();
     final CompletableFuture[] futures =
-        db.getCandidateClusters()
+        database
+            .getCandidateClusters()
             .stream()
             // Order here is important - don't call updateLastChecked if a cluster is filtered.
             // That could lead to cluster starvation
             .filter(filter::match)
-            .filter(db::updateLastChecked)
+            .filter(database::updateLastChecked)
             .map(
                 cluster ->
                     CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
@@ -96,13 +102,14 @@ public class Autoscaler implements Runnable {
   private void runForCluster(final BigtableCluster cluster) {
     BigtableUtil.pushContext(cluster);
     LOGGER.info("Autoscaling cluster!");
-    try (BigtableSession session =
+    try (final BigtableSession session =
         BigtableUtil.createSession(cluster.instanceId(), cluster.projectId())) {
-      autoscaleJob.run(cluster, session, Instant::now);
+      makeAutoscaleJob(stackDriverClient, database, autoscalerMetrics)
+          .run(cluster, session, Instant::now);
     } catch (final Exception e) {
       final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
       LOGGER.error("Failed to autoscale cluster!", e);
-      db.increaseFailureCount(cluster, Instant.now(), e.toString(), errorCode);
+      database.increaseFailureCount(cluster, Instant.now(), e.toString(), errorCode);
     }
     BigtableUtil.clearContext();
   }
