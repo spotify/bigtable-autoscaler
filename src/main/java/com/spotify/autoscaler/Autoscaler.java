@@ -22,7 +22,6 @@ package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
 
-import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
@@ -30,45 +29,36 @@ import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Autoscaler implements Runnable {
+  private static final Logger LOGGER = LoggerFactory.getLogger(Autoscaler.class);
 
-  public interface SessionProvider {
-
-    BigtableSession apply(BigtableCluster in) throws IOException;
-  }
-
-  private static final Logger logger = LoggerFactory.getLogger(Autoscaler.class);
-
-  private final StackdriverClient stackDriverClient;
   private final Database db;
   private final AutoscalerMetrics autoscalerMetrics;
   private final ClusterFilter filter;
 
-  private final SessionProvider sessionProvider;
   private final ExecutorService executorService;
-  private final AutoscaleJobFactory autoscaleJobFactory;
+  private final AutoscaleJob autoscaleJob;
 
   public Autoscaler(
       final AutoscaleJobFactory autoscaleJobFactory,
       final ExecutorService executorService,
       final StackdriverClient stackDriverClient,
-      final Database db,
-      final SessionProvider sessionProvider,
+      final Database database,
       final AutoscalerMetrics autoscalerMetrics,
       final ClusterFilter filter) {
-    this.autoscaleJobFactory = checkNotNull(autoscaleJobFactory);
+    this.autoscaleJob =
+        autoscaleJobFactory.createAutoscaleJob(
+            () -> stackDriverClient, database, autoscalerMetrics);
     this.executorService = checkNotNull(executorService);
-    this.stackDriverClient = stackDriverClient;
-    this.db = checkNotNull(db);
-    this.sessionProvider = checkNotNull(sessionProvider);
+    this.db = checkNotNull(database);
     this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.filter = checkNotNull(filter);
   }
@@ -82,13 +72,13 @@ public class Autoscaler implements Runnable {
     try {
       runUnsafe();
     } catch (final Exception t) {
-      logger.error("Unexpected Exception!", t);
+      LOGGER.error("Unexpected Exception!", t);
     }
   }
 
   private void runUnsafe() {
     autoscalerMetrics.markHeartBeat();
-
+    ConcurrentHashMap<String, Boolean> hasRun = new ConcurrentHashMap<>();
     final CompletableFuture[] futures =
         db.getCandidateClusters()
             .stream()
@@ -98,23 +88,26 @@ public class Autoscaler implements Runnable {
             .filter(db::updateLastChecked)
             .map(
                 cluster ->
-                    CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
+                    CompletableFuture.runAsync(
+                        () -> runForCluster(cluster, hasRun), executorService))
             .toArray(CompletableFuture[]::new);
 
     CompletableFuture.allOf(futures).join();
   }
 
-  private void runForCluster(final BigtableCluster cluster) {
+  private void runForCluster(
+      final BigtableCluster cluster, final ConcurrentHashMap<String, Boolean> hasRun) {
     BigtableUtil.pushContext(cluster);
-    logger.info("Autoscaling cluster!");
-    try (final BigtableSession session = sessionProvider.apply(cluster);
-        final AutoscaleJob job =
-            autoscaleJobFactory.createAutoscaleJob(
-                session, () -> stackDriverClient, cluster, db, autoscalerMetrics, Instant::now)) {
-      job.run();
+    LOGGER.info("Autoscaling cluster!");
+    try {
+      if (hasRun.putIfAbsent(cluster.clusterName(), true) == null) {
+        autoscaleJob.run(cluster, Instant::now);
+      } else {
+        throw new RuntimeException("An autoscale job should only be run once!");
+      }
     } catch (final Exception e) {
       final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
-      logger.error("Failed to autoscale cluster!", e);
+      LOGGER.error("Failed to autoscale cluster!", e);
       db.increaseFailureCount(
           cluster.projectId(),
           cluster.instanceId(),

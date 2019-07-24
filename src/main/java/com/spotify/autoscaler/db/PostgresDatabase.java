@@ -347,7 +347,7 @@ public class PostgresDatabase implements Database {
     params.put("target_nodes", log.targetNodes());
     params.put("cpu_utilization", log.cpuUtilization());
     params.put("storage_utilization", log.storageUtilization());
-    params.put("detail", log.resizeReason());
+    params.put("detail", String.join("", log.resizeReasons()));
     params.put("success", log.success());
     params.put("error_message", log.errorMessage().orElse(null));
     params.put("load_delta", log.loadDelta());

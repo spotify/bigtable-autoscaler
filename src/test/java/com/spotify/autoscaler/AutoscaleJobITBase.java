@@ -131,15 +131,8 @@ public class AutoscaleJobITBase {
       AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
-      final AutoscaleJob job =
-          new AutoscaleJob(
-              bigtableSession,
-              stackdriverClient,
-              fakeBTCluster.getCluster(),
-              db,
-              autoscalerMetrics,
-              timeSupplier);
-      job.run();
+      final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
+      job.run(fakeBTCluster.getCluster(), bigtableSession, timeSupplier);
       assertionImmediatelyAfterAutoscaleJob.accept(null);
     }
   }

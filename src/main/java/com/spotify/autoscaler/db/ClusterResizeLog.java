@@ -22,7 +22,9 @@ package com.spotify.autoscaler.db;
 
 import io.norberg.automatter.AutoMatter;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 @AutoMatter
 public interface ClusterResizeLog {
@@ -55,7 +57,10 @@ public interface ClusterResizeLog {
 
   boolean success();
 
+  @Nullable
   String resizeReason();
+
+  List<String> resizeReasons();
 
   Optional<String> errorMessage();
 }

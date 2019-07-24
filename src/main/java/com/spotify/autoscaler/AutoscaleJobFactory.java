@@ -20,31 +20,17 @@
 
 package com.spotify.autoscaler;
 
-import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
-import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
-import java.io.IOException;
-import java.time.Instant;
 import java.util.function.Supplier;
 
-public class AutoscaleJobFactory {
+public interface AutoscaleJobFactory {
 
-  public AutoscaleJob createAutoscaleJob(
-      final BigtableSession bigtableSession,
-      final IOSupplier<StackdriverClient> stackdriverClient,
-      final BigtableCluster cluster,
-      final Database db,
-      final AutoscalerMetrics autoscalerMetrics,
-      final Supplier<Instant> timeSource)
-      throws IOException {
-    return new AutoscaleJob(
-        bigtableSession, stackdriverClient.get(), cluster, db, autoscalerMetrics, timeSource);
-  }
-
-  public interface IOSupplier<T> {
-
-    T get() throws IOException;
+  default AutoscaleJob createAutoscaleJob(
+      final Supplier<StackdriverClient> stackdriverClient,
+      final Database database,
+      final AutoscalerMetrics autoscalerMetrics) {
+    return new AutoscaleJob(stackdriverClient.get(), database, autoscalerMetrics);
   }
 }
