@@ -202,19 +202,4 @@ public class AutoscalerTest {
         .increaseFailureCount(
             eq(cluster1), any(), contains("cluster1 exception"), eq(ErrorCode.AUTOSCALER_INTERNAL));
   }
-
-  @Test
-  public void testJobCantRunTwice() {
-    when(database.getCandidateClusters()).thenReturn(Arrays.asList(cluster1, cluster1));
-    when(database.updateLastChecked(cluster1)).thenReturn(true);
-    final Autoscaler autoscaler = getAutoscaler(new AllowAllClusterFilter());
-    autoscaler.run();
-
-    verify(database)
-        .increaseFailureCount(
-            eq(cluster1),
-            any(),
-            contains("An autoscale job should only be run once!"),
-            eq(ErrorCode.AUTOSCALER_INTERNAL));
-  }
 }
