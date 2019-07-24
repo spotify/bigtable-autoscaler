@@ -33,6 +33,7 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.db.PostgresDatabaseTest;
+import com.spotify.autoscaler.simulation.FakeBTCluster;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.io.IOException;
 import java.time.Duration;
@@ -47,7 +48,7 @@ public class AutoscaleJobITBase {
 
   @Mock BigtableSession bigtableSession;
 
-  @Mock BigtableInstanceClient bigtableInstanceClient;
+  @Mock protected BigtableInstanceClient bigtableInstanceClient;
 
   @Mock StackdriverClient stackdriverClient;
 
@@ -57,7 +58,7 @@ public class AutoscaleJobITBase {
 
   PostgresDatabase db;
 
-  final FakeBTCluster fakeBTCluster;
+  protected final FakeBTCluster fakeBTCluster;
 
   public AutoscaleJobITBase(final FakeBTCluster fakeBTCluster) {
     this.fakeBTCluster = fakeBTCluster;
@@ -109,26 +110,29 @@ public class AutoscaleJobITBase {
 
   private PostgresDatabase initDatabase() {
     final PostgresDatabase database = PostgresDatabaseTest.getPostgresDatabase();
+    final TimeSupplier timeSupplier = (TimeSupplier) fakeBTCluster.getTimeSource();
+    timeSupplier.setTime(fakeBTCluster.getFirstValidMetricsInstant());
     final BigtableCluster cluster = fakeBTCluster.getCluster();
     database.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
     database.insertBigtableCluster(cluster);
     return database;
   }
 
-  void testThroughTime(
+  protected void testThroughTime(
       final TimeSupplier timeSupplier,
       final Duration period,
       final int repetition,
       final Supplier<Double> cpuSupplier,
       final Supplier<Double> diskUtilSupplier,
-      final Consumer<Void> assertion)
+      final Consumer<Void> assertionImmediatelyAfterAutoscaleJob,
+      final Consumer<Void> assertionAfterTime)
       throws IOException {
 
     Instant now = timeSupplier.get();
     for (int i = 0; i < repetition; ++i) {
       now = now.plus(period);
       timeSupplier.setTime(now);
-      assertion.accept(null);
+      assertionAfterTime.accept(null);
       AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
@@ -142,7 +146,7 @@ public class AutoscaleJobITBase {
               clusterStats,
               timeSupplier);
       job.run();
-      assertion.accept(null);
+      assertionImmediatelyAfterAutoscaleJob.accept(null);
     }
   }
 }
