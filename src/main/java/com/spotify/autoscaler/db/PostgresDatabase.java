@@ -27,6 +27,7 @@ import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.typesafe.config.Config;
 import com.zaxxer.hikari.HikariDataSource;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -45,6 +46,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 // DONTLIKEIT
@@ -431,24 +433,56 @@ public class PostgresDatabase implements Database {
       final int loadDelta,
       final int currentNodeCount) {
 
-    final String sql =
-        "UPDATE autoscale "
-            + "set load_delta = :new_load_delta, "
-            + "overridden_min_nodes = case "
-            + "                         when :new_load_delta = 0 then null"
-            + "                         when load_delta = :new_load_delta then overridden_min_nodes "
-            + "                         else :current_node_count + :new_load_delta - load_delta "
-            + "                       end "
-            + "WHERE project_id = :project_id AND instance_id = :instance_id AND cluster_id = "
-            + ":cluster_id";
+    final JdbcTemplate jdbcTemplate = jdbc.getJdbcTemplate();
+    try (final Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+      connection.setAutoCommit(false);
 
-    final Map<String, Object> params = new HashMap<String, Object>();
-    params.put("project_id", projectId);
-    params.put("instance_id", instanceId);
-    params.put("cluster_id", clusterId);
-    params.put("new_load_delta", loadDelta);
-    params.put("current_node_count", currentNodeCount);
-    final int numRowsUpdated = jdbc.update(sql, Collections.unmodifiableMap(params));
-    return numRowsUpdated == 1;
+      final Map<String, String> args = new TreeMap<>();
+      args.put("project_id", projectId);
+      args.put("instance_id", instanceId);
+      args.put("cluster_id", clusterId);
+
+      final String selectWithRowLock = selectClustersQuery(args) + " FOR UPDATE";
+
+      final List<BigtableCluster> result =
+          jdbcTemplate.query(
+              selectWithRowLock,
+              (rs, rowNum) -> buildClusterFromResultSet(rs),
+              args.values().toArray());
+
+      if (result.size() != 1) {
+        throw new IllegalStateException("No single cluster configuration found");
+      }
+
+      final BigtableCluster cluster = result.get(0);
+      final Optional<Integer> newOverriddenMinNodes =
+          cluster.calculateNewOverriddenMinNodes(currentNodeCount, loadDelta);
+
+      final String updateSql =
+          "UPDATE autoscale "
+              + "set load_delta = :new_load_delta, "
+              + "overridden_min_nodes = :new_overridden_min_nodes "
+              + "WHERE project_id = :project_id AND instance_id = :instance_id AND cluster_id = "
+              + ":cluster_id";
+
+      final Map<String, Object> params = new HashMap<String, Object>();
+      params.put("project_id", projectId);
+      params.put("instance_id", instanceId);
+      params.put("cluster_id", clusterId);
+      params.put("new_load_delta", loadDelta);
+      params.put("new_overridden_min_nodes", newOverriddenMinNodes.orElse(null));
+      final int numRowsUpdated = jdbc.update(updateSql, Collections.unmodifiableMap(params));
+
+      if (numRowsUpdated == 1) {
+        connection.commit();
+        return true;
+      } else {
+        connection.rollback();
+        return false;
+      }
+
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

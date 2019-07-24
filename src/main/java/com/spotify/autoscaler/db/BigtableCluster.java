@@ -79,4 +79,15 @@ public interface BigtableCluster {
     final ErrorCode errorCode = errorCode().orElse(ErrorCode.OK);
     return errorCode != ErrorCode.GRPC_NOT_FOUND && errorCode != ErrorCode.PROJECT_NOT_FOUND;
   }
+
+  default Optional<Integer> calculateNewOverriddenMinNodes(int currentNodeCount, int newLoadDelta) {
+
+    if (newLoadDelta == 0) {
+      return Optional.empty();
+    } else if (newLoadDelta == loadDelta()) {
+      return overriddenMinNodes();
+    } else {
+      return Optional.of(currentNodeCount + newLoadDelta - loadDelta());
+    }
+  }
 }
