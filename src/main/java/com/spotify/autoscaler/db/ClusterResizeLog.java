@@ -64,7 +64,7 @@ public interface ClusterResizeLog {
 
   Optional<String> errorMessage();
 
-  Optional<Integer> overriddenMinNodes();
+  Optional<Integer> minNodesOverride();
 
   static ClusterResizeLogBuilder builder(final BigtableCluster cluster) {
     return new ClusterResizeLogBuilder()
@@ -77,6 +77,6 @@ public interface ClusterResizeLog {
         .cpuTarget(cluster.cpuTarget())
         .overloadStep(cluster.overloadStep())
         .loadDelta(cluster.loadDelta())
-        .overriddenMinNodes(cluster.overriddenMinNodes());
+        .minNodesOverride(cluster.minNodesOverride());
   }
 }

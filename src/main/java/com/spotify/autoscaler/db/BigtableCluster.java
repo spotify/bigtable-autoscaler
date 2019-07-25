@@ -61,14 +61,14 @@ public interface BigtableCluster {
 
   Optional<ErrorCode> errorCode();
 
-  Optional<Integer> overriddenMinNodes();
+  Optional<Integer> minNodesOverride();
 
   default String clusterName() {
     return "projects/" + projectId() + "/instances/" + instanceId() + "/clusters/" + clusterId();
   }
 
   default int effectiveMinNodes() {
-    return Math.min(overriddenMinNodes().orElse(minNodes()), maxNodes());
+    return Math.min(minNodesOverride().orElse(minNodes()), maxNodes());
   }
 
   default boolean exists() {

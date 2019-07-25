@@ -54,7 +54,7 @@ public class AutoscalerMetricsTest {
             .minNodes(minNodes)
             .maxNodes(maxNodes)
             .loadDelta(loadDelta)
-            .overriddenMinNodes(loadDelta + currentNodes)
+            .minNodesOverride(loadDelta + currentNodes)
             .clusterId("cluster")
             .build();
     autoscalerMetrics.registerClusterDataMetrics(bigtableCluster1, currentNodes, db);
@@ -71,7 +71,7 @@ public class AutoscalerMetricsTest {
             .minNodes(minNodes + 10)
             .maxNodes(maxNodes + 10)
             .loadDelta(loadDelta + 10)
-            .overriddenMinNodes(currentNodes + 10)
+            .minNodesOverride(currentNodes + 10)
             .clusterId("cluster")
             .build();
     autoscalerMetrics.registerClusterDataMetrics(bigtableCluster2, currentNodes + 10, db);

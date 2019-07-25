@@ -276,7 +276,7 @@ public class PostgresDatabaseIT {
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(retrievedCluster.effectiveMinNodes(), retrievedCluster.minNodes());
-    assertEquals(retrievedCluster.overriddenMinNodes(), Optional.empty());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.empty());
   }
 
   @Test
@@ -300,8 +300,8 @@ public class PostgresDatabaseIT {
 
     assertEquals(
         retrievedCluster.effectiveMinNodes(),
-        retrievedCluster.overriddenMinNodes().get().longValue());
-    assertEquals(retrievedCluster.overriddenMinNodes(), Optional.of(currentNodeCount + loadDelta));
+        retrievedCluster.minNodesOverride().get().longValue());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.of(currentNodeCount + loadDelta));
   }
 
   @Test
@@ -335,9 +335,9 @@ public class PostgresDatabaseIT {
 
     assertEquals(
         retrievedCluster.effectiveMinNodes(),
-        retrievedCluster.overriddenMinNodes().get().longValue());
+        retrievedCluster.minNodesOverride().get().longValue());
     assertEquals(
-        retrievedCluster.overriddenMinNodes(),
+        retrievedCluster.minNodesOverride(),
         Optional.of(newCurrentNodeCount + (newloadDelta - loadDelta)));
   }
 
@@ -370,8 +370,8 @@ public class PostgresDatabaseIT {
 
     assertEquals(
         retrievedCluster.effectiveMinNodes(),
-        retrievedCluster.overriddenMinNodes().get().longValue());
-    assertEquals(retrievedCluster.overriddenMinNodes(), Optional.of(initialNodeCount + loadDelta));
+        retrievedCluster.minNodesOverride().get().longValue());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.of(initialNodeCount + loadDelta));
   }
 
   @Test
@@ -404,9 +404,9 @@ public class PostgresDatabaseIT {
 
     assertEquals(
         retrievedCluster.effectiveMinNodes(),
-        retrievedCluster.overriddenMinNodes().get().longValue());
+        retrievedCluster.minNodesOverride().get().longValue());
     assertEquals(
-        retrievedCluster.overriddenMinNodes(),
+        retrievedCluster.minNodesOverride(),
         Optional.of(newCurrentNodeCount + (newLoadDelta - loadDelta)));
   }
 
@@ -439,7 +439,7 @@ public class PostgresDatabaseIT {
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(retrievedCluster.effectiveMinNodes(), retrievedCluster.minNodes());
-    assertEquals(retrievedCluster.overriddenMinNodes(), Optional.empty());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.empty());
   }
 
   @Test
@@ -462,6 +462,6 @@ public class PostgresDatabaseIT {
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(retrievedCluster.effectiveMinNodes(), retrievedCluster.maxNodes());
-    assertEquals(retrievedCluster.overriddenMinNodes(), Optional.of(initialNodeCount + loadDelta));
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.of(initialNodeCount + loadDelta));
   }
 }
