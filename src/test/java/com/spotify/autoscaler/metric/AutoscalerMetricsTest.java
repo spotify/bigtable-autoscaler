@@ -31,31 +31,27 @@ import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
-import com.zaxxer.hikari.HikariDataSource;
-import com.zaxxer.hikari.HikariPoolMXBean;
+import java.util.Collections;
 import org.junit.Test;
+import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class AutoscalerMetricsTest {
   private final SemanticMetricRegistry registry = new SemanticMetricRegistry();
 
-  private PostgresDatabase db = mock(PostgresDatabase.class);
+  private final PostgresDatabase db = mock(PostgresDatabase.class);
+  private final BigtableClusterBuilder clusterBuilder =
+      new BigtableClusterBuilder().projectId("project").instanceId("instance").clusterId("cluster");
+  private final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
 
   @Test
   public void testClusterDataMetrics() {
-    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
     int minNodes = 10;
     int maxNodes = 200;
     int loadDelta = 0;
     int currentNodes = 20;
+
     autoscalerMetrics.registerClusterDataMetrics(
-        new BigtableClusterBuilder()
-            .projectId("project")
-            .instanceId("instance")
-            .minNodes(minNodes)
-            .maxNodes(maxNodes)
-            .loadDelta(loadDelta)
-            .clusterId("cluster")
-            .build(),
+        clusterBuilder.minNodes(minNodes).maxNodes(maxNodes).loadDelta(loadDelta).build(),
         currentNodes,
         db);
     assertMetric(registry, "node-count", currentNodes);
@@ -65,13 +61,10 @@ public class AutoscalerMetricsTest {
 
     // verify changes are tracked in metrics properly
     autoscalerMetrics.registerClusterDataMetrics(
-        new BigtableClusterBuilder()
-            .projectId("project")
-            .instanceId("instance")
+        clusterBuilder
             .minNodes(minNodes + 10)
             .maxNodes(maxNodes + 10)
             .loadDelta(loadDelta + 10)
-            .clusterId("cluster")
             .build(),
         currentNodes + 10,
         db);
@@ -83,13 +76,7 @@ public class AutoscalerMetricsTest {
 
   @Test
   public void testClusterLoadMetrics() {
-    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
-    BigtableCluster bigtableCluster =
-        new BigtableClusterBuilder()
-            .projectId("project")
-            .instanceId("instance")
-            .clusterId("cluster")
-            .build();
+    BigtableCluster bigtableCluster = clusterBuilder.build();
 
     // Needs to be called before calling load Metrics
     autoscalerMetrics.registerClusterDataMetrics(bigtableCluster, 20, db);
@@ -109,16 +96,9 @@ public class AutoscalerMetricsTest {
 
   @Test
   public void testErrorMetrics() {
-    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
     ErrorCode errorCode = ErrorCode.PROJECT_NOT_FOUND;
     BigtableCluster bigtableCluster =
-        new BigtableClusterBuilder()
-            .errorCode(errorCode)
-            .projectId("project")
-            .instanceId("instance")
-            .clusterId("cluster")
-            .consecutiveFailureCount(10)
-            .build();
+        clusterBuilder.errorCode(errorCode).consecutiveFailureCount(10).build();
     autoscalerMetrics.registerClusterDataMetrics(bigtableCluster, 10, db);
     assertMetric(registry, errorCode.name(), 10);
 
@@ -130,19 +110,42 @@ public class AutoscalerMetricsTest {
 
   @Test
   public void testDatabaseMetrics() {
-    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
-    HikariDataSource hikariDataSource = mock(HikariDataSource.class);
-    HikariPoolMXBean mxBean = mock(HikariPoolMXBean.class);
-    when(mxBean.getTotalConnections()).thenReturn(10);
-    when(hikariDataSource.getHikariPoolMXBean()).thenReturn(mxBean);
-    autoscalerMetrics.registerMetricActiveConnections(hikariDataSource);
+    when(db.getTotalConnections()).thenReturn(10);
+    autoscalerMetrics.registerOpenDatabaseConnections(db);
 
     assertMetric(registry, "open-db-connections", 10);
 
     // verify changes are tracked in metrics properly
-    when(mxBean.getTotalConnections()).thenReturn(20);
-    autoscalerMetrics.registerMetricActiveConnections(hikariDataSource);
+    when(db.getTotalConnections()).thenReturn(20);
     assertMetric(registry, "open-db-connections", 20);
+  }
+
+  @Test
+  public void testClusterStatus() {
+    when(db.getBigtableClusters())
+        .thenReturn(
+            ImmutableList.of(
+                clusterBuilder.enabled(true).build(), clusterBuilder.enabled(false).build()));
+
+    autoscalerMetrics.registerActiveClusters(db);
+
+    assertMetric(registry, "enabled-clusters", 1L);
+    assertMetric(registry, "disabled-clusters", 1L);
+
+    when(db.getBigtableClusters()).thenReturn(Collections.emptyList());
+
+    assertMetric(registry, "enabled-clusters", 0L);
+    assertMetric(registry, "disabled-clusters", 0L);
+  }
+
+  @Test
+  public void testDailyResizeCount() {
+    when(db.getDailyResizeCount()).thenReturn(100L);
+    autoscalerMetrics.registerDailyResizeCount(db);
+
+    assertMetric(registry, "daily-resize-count", 100L);
+    when(db.getDailyResizeCount()).thenReturn(110L);
+    assertMetric(registry, "daily-resize-count", 110L);
   }
 
   private <T> void assertMetric(

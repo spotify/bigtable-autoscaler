@@ -26,9 +26,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.spotify.autoscaler.util.ErrorCode;
-import com.spotify.metrics.core.SemanticMetricRegistry;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -40,11 +37,10 @@ import org.junit.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class PostgresDatabaseIT {
-  SemanticMetricRegistry registry;
-  PostgresDatabase db;
-  String projectId = "test-project";
-  String instanceId = "test-instance";
-  String clusterId = "test-cluster";
+  private PostgresDatabase db;
+  private String projectId = "test-project";
+  private String instanceId = "test-instance";
+  private String clusterId = "test-cluster";
 
   private BigtableCluster testCluster() {
     return new BigtableClusterBuilder()
@@ -75,7 +71,7 @@ public class PostgresDatabaseIT {
   }
 
   @Before
-  public void setup() throws SQLException, IOException {
+  public void setup() {
     // insert a test cluster
     db = PostgresDatabaseTest.getPostgresDatabase();
   }
@@ -83,7 +79,6 @@ public class PostgresDatabaseIT {
   @After
   public void tearDown() {
     db.getBigtableClusters()
-        .stream()
         .forEach(
             cluster ->
                 db.deleteBigtableCluster(

@@ -23,7 +23,6 @@ package com.spotify.autoscaler.db;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.spotify.autoscaler.AutoscaleJob;
-import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.typesafe.config.Config;
 import com.zaxxer.hikari.HikariDataSource;
@@ -73,14 +72,11 @@ public class PostgresDatabase implements Database {
   private static final String SELECT_ALL_COLUMNS = "SELECT " + ALL_COLUMNS + " FROM autoscale";
 
   private final HikariDataSource dataSource;
-  private AutoscalerMetrics autoscalerMetrics;
   private final NamedParameterJdbcTemplate jdbc;
 
-  public PostgresDatabase(final Config config, final AutoscalerMetrics autoscalerMetrics) {
+  public PostgresDatabase(final Config config) {
     this.dataSource = dataSource(config);
-    this.autoscalerMetrics = autoscalerMetrics;
     this.jdbc = new NamedParameterJdbcTemplate(dataSource);
-    autoscalerMetrics.registerMetricActiveConnections(dataSource);
   }
 
   private HikariDataSource dataSource(final Config config) {
@@ -95,7 +91,6 @@ public class PostgresDatabase implements Database {
 
   @Override
   public void close() {
-    autoscalerMetrics.registerMetricActiveConnections(this.dataSource);
     this.dataSource.close();
   }
 
@@ -429,5 +424,10 @@ public class PostgresDatabase implements Database {
     final int numRowsUpdated =
         jdbc.getJdbcOperations().update(sql, loadDelta, projectId, instanceId, clusterId);
     return numRowsUpdated == 1;
+  }
+
+  @Override
+  public int getTotalConnections() {
+    return dataSource.getHikariPoolMXBean().getTotalConnections();
   }
 }
