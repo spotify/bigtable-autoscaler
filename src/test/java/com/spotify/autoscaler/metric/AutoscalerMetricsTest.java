@@ -47,38 +47,38 @@ public class AutoscalerMetricsTest {
     int maxNodes = 200;
     int loadDelta = 0;
     int currentNodes = 20;
-    autoscalerMetrics.registerClusterDataMetrics(
+    final BigtableCluster bigtableCluster1 =
         new BigtableClusterBuilder()
             .projectId("project")
             .instanceId("instance")
             .minNodes(minNodes)
             .maxNodes(maxNodes)
             .loadDelta(loadDelta)
+            .minNodesOverride(loadDelta + currentNodes)
             .clusterId("cluster")
-            .build(),
-        currentNodes,
-        db);
+            .build();
+    autoscalerMetrics.registerClusterDataMetrics(bigtableCluster1, currentNodes, db);
     assertMetric(registry, "node-count", currentNodes);
     assertMetric(registry, "max-node-count", maxNodes);
     assertMetric(registry, "min-node-count", minNodes);
-    assertMetric(registry, "effective-min-node-count", minNodes + loadDelta);
+    assertMetric(registry, "effective-min-node-count", bigtableCluster1.effectiveMinNodes());
 
     // verify changes are tracked in metrics properly
-    autoscalerMetrics.registerClusterDataMetrics(
+    final BigtableCluster bigtableCluster2 =
         new BigtableClusterBuilder()
             .projectId("project")
             .instanceId("instance")
             .minNodes(minNodes + 10)
             .maxNodes(maxNodes + 10)
             .loadDelta(loadDelta + 10)
+            .minNodesOverride(currentNodes + 10)
             .clusterId("cluster")
-            .build(),
-        currentNodes + 10,
-        db);
+            .build();
+    autoscalerMetrics.registerClusterDataMetrics(bigtableCluster2, currentNodes + 10, db);
     assertMetric(registry, "node-count", currentNodes + 10);
     assertMetric(registry, "max-node-count", maxNodes + 10);
     assertMetric(registry, "min-node-count", minNodes + 10);
-    assertMetric(registry, "effective-min-node-count", minNodes + loadDelta + 20);
+    assertMetric(registry, "effective-min-node-count", bigtableCluster2.effectiveMinNodes());
   }
 
   @Test

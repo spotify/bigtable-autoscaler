@@ -30,6 +30,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -115,9 +116,18 @@ public class FakeBTCluster {
   // make it clear that we return a modified version of the cluster, like simulating a read from the
   // database
   public BigtableCluster getCluster() {
+    final int loadDelta = getMetricsForNow().loadDelta.intValue();
+    final int loadDeltaDiff = loadDelta - cluster.loadDelta();
+    final Optional<Integer> minNodesOverride =
+        loadDelta == 0
+            ? Optional.empty()
+            : loadDeltaDiff == 0
+                ? cluster.minNodesOverride()
+                : Optional.of(nodes + (loadDelta - cluster.loadDelta()));
     this.cluster =
         BigtableClusterBuilder.from(cluster)
-            .loadDelta(getMetricsForNow().loadDelta.intValue())
+            .loadDelta(loadDelta)
+            .minNodesOverride(minNodesOverride)
             .build();
     return this.cluster;
   }

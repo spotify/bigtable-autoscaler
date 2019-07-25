@@ -23,11 +23,15 @@ package com.spotify.autoscaler.api;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import com.google.bigtable.admin.v2.Cluster;
+import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
+import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.collect.ImmutableList;
 import com.spotify.autoscaler.AutoscaleResourceConfig;
 import com.spotify.autoscaler.db.BigtableCluster;
@@ -48,29 +52,46 @@ import org.mockito.Mock;
 public class ClusterResourcesTest extends JerseyTest implements ApiTestResources {
 
   @Mock private Database db;
+  @Mock private BigtableSession bigtableSession;
+  @Mock private BigtableInstanceClient bigtableInstanceClient;
 
   private boolean insertBigtableClusterResult;
   private boolean updateBigtableClusterResult;
   private boolean deleteBigtableClusterResult;
   private boolean updateLoadDeltaResult;
   private Collection<BigtableCluster> getBigtableClustersResult;
+  private static final int NODE_COUNT = 20;
 
   @Override
   protected Application configure() {
     initMocks(this);
+    try {
+      when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    when(bigtableInstanceClient.getCluster(any()))
+        .thenReturn(
+            Cluster.newBuilder()
+                .setName(ApiTestResources.CLUSTER.clusterName())
+                .setServeNodes(NODE_COUNT)
+                .build());
     when(db.insertBigtableCluster(any())).thenAnswer(invocation -> insertBigtableClusterResult);
     when(db.updateBigtableCluster(any())).thenAnswer(invocation -> updateBigtableClusterResult);
     when(db.deleteBigtableCluster(any(), any(), any()))
         .thenAnswer(invocation -> deleteBigtableClusterResult);
     when(db.getBigtableClusters(any(), any(), any()))
         .thenAnswer(invocation -> getBigtableClustersResult);
-    when(db.updateLoadDelta(any(), any(), any(), any()))
+    when(db.updateLoadDelta(any(), any(), any(), anyInt(), anyInt()))
         .thenAnswer(invocation -> updateLoadDeltaResult);
 
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
     final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
-            ApiTestResources.SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
+            ApiTestResources.SERVICE_NAME,
+            config,
+            new ClusterResources(db, c -> bigtableSession),
+            new HealthCheck(db));
 
     return resourceConfig;
   }
@@ -150,6 +171,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
             ApiTestResources.CLUSTER.projectId(),
             ApiTestResources.CLUSTER.instanceId(),
             ApiTestResources.CLUSTER.clusterId(),
-            ApiTestResources.CLUSTER.loadDelta());
+            ApiTestResources.CLUSTER.loadDelta(),
+            NODE_COUNT);
   }
 }

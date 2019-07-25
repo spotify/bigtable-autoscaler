@@ -29,6 +29,7 @@ import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
+import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
@@ -109,7 +110,12 @@ public final class Main {
     final URI uri = new URI("http://0.0.0.0:" + port);
     final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
-            SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
+            SERVICE_NAME,
+            config,
+            new ClusterResources(
+                db,
+                cluster -> BigtableUtil.createSession(cluster.instanceId(), cluster.projectId())),
+            new HealthCheck(db));
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
     ClusterFilter clusterFilter = new AllowAllClusterFilter();
