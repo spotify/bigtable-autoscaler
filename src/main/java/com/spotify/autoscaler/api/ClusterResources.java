@@ -29,7 +29,6 @@ import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.spotify.autoscaler.Autoscaler;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
@@ -37,6 +36,7 @@ import com.spotify.autoscaler.util.BigtableUtil;
 import io.norberg.automatter.jackson.AutoMatterModule;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.validation.constraints.Size;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -59,11 +59,12 @@ public class ClusterResources {
   private static final Logger logger = LoggerFactory.getLogger(ClusterResources.class);
 
   private final Database db;
-  private final Autoscaler.SessionProvider sessionProvider;
+  private final Function<BigtableCluster, BigtableSession> sessionProvider;
   private static final ObjectMapper mapper =
       new ObjectMapper().registerModule(new AutoMatterModule()).registerModule(new Jdk8Module());
 
-  public ClusterResources(final Database db, final Autoscaler.SessionProvider sessionProvider) {
+  public ClusterResources(
+      final Database db, final Function<BigtableCluster, BigtableSession> sessionProvider) {
     this.db = checkNotNull(db);
     this.sessionProvider = checkNotNull(sessionProvider);
   }

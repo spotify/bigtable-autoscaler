@@ -67,10 +67,6 @@ public interface BigtableCluster {
     return "projects/" + projectId() + "/instances/" + instanceId() + "/clusters/" + clusterId();
   }
 
-  default String description() {
-    return String.format("%s/%s/%s", projectId(), instanceId(), clusterId());
-  }
-
   default int effectiveMinNodes() {
     return Math.min(overriddenMinNodes().orElse(minNodes()), maxNodes());
   }

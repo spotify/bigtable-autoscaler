@@ -26,37 +26,31 @@ import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
+import com.google.common.annotations.VisibleForTesting;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
+import com.spotify.autoscaler.db.ClusterResizeLog;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.metric.ClusterLoadGauges;
-import java.io.Closeable;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Date;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AutoscaleJob implements Closeable {
+public class AutoscaleJob {
 
-  private static final Logger logger = LoggerFactory.getLogger(AutoscaleJob.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AutoscaleJob.class);
 
-  private final BigtableSession bigtableSession;
   private final StackdriverClient stackdriverClient;
-  private final BigtableCluster cluster;
-  private final Supplier<Instant> timeSource;
-  private final Database db;
+  private final Database database;
   private final AutoscalerMetrics autoscalerMetrics;
 
   public static final Duration CHECK_INTERVAL = Duration.ofSeconds(30);
-  private boolean hasRun = false;
-  private final ClusterResizeLogBuilder log;
-  private final StringBuilder resizeReason = new StringBuilder();
 
   // CPU related constants
   private static final double MAX_REDUCTION_RATIO = 0.7;
@@ -81,90 +75,69 @@ public class AutoscaleJob implements Closeable {
   // but a twenty percent change can happen as often as every 48 minutes.
   private static final double MINIMUM_DOWNSCALE_WEIGHT = 57600;
 
-  // Storage related constants
-
   public AutoscaleJob(
-      final BigtableSession bigtableSession,
       final StackdriverClient stackdriverClient,
-      final BigtableCluster cluster,
-      final Database db,
-      final AutoscalerMetrics autoscalerMetrics,
-      final Supplier<Instant> timeSource) {
-    this.bigtableSession = checkNotNull(bigtableSession);
+      final Database database,
+      final AutoscalerMetrics autoscalerMetrics) {
     this.stackdriverClient = checkNotNull(stackdriverClient);
-    this.cluster = checkNotNull(cluster);
     this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
-    this.timeSource = checkNotNull(timeSource);
-    this.db = checkNotNull(db);
-    this.log =
-        new ClusterResizeLogBuilder()
-            .timestamp(new Date())
-            .projectId(cluster.projectId())
-            .instanceId(cluster.instanceId())
-            .clusterId(cluster.clusterId())
-            .minNodes(cluster.minNodes())
-            .maxNodes(cluster.maxNodes())
-            .cpuTarget(cluster.cpuTarget())
-            .overloadStep(cluster.overloadStep())
-            .loadDelta(cluster.loadDelta());
+    this.database = checkNotNull(database);
   }
 
   private int getSize(final Cluster clusterInfo) {
     autoscalerMetrics.markCallToGetSize();
-    final int currentNodes = clusterInfo.getServeNodes();
-    log.currentNodes(currentNodes);
-    return currentNodes;
+    return clusterInfo.getServeNodes();
   }
 
-  private Cluster getClusterInfo() throws IOException {
-    final BigtableInstanceClient adminClient = bigtableSession.getInstanceAdminClient();
-    return adminClient.getCluster(
-        GetClusterRequest.newBuilder().setName(cluster.clusterName()).build());
-  }
-
-  private void setSize(final int newSize) {
-    final Cluster cluster =
-        Cluster.newBuilder().setName(this.cluster.clusterName()).setServeNodes(newSize).build();
+  private void setSize(
+      final BigtableSession bigtableSession,
+      final String clusterName,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final int newSize) {
+    final Cluster newSizeCluster =
+        Cluster.newBuilder().setName(clusterName).setServeNodes(newSize).build();
 
     // two separate metrics here;
     // clusters-changed would only reflect the ones that are successfully changed, while
     // call-to-set-size would reflect the number of API calls, to monitor if we are reaching the
     // daily limit
-    autoscalerMetrics.markCallToSetSize();
     try {
-      log.targetNodes(newSize);
-      bigtableSession.getInstanceAdminClient().updateCluster(cluster);
-      log.success(true);
+      autoscalerMetrics.markCallToSetSize();
+      clusterResizeLogBuilder.targetNodes(newSize);
+      bigtableSession.getInstanceAdminClient().updateCluster(newSizeCluster);
+      clusterResizeLogBuilder.success(true);
       autoscalerMetrics.markClusterChanged();
     } catch (final IOException e) {
-      logger.error("Failed to set cluster size", e);
-      log.errorMessage(Optional.of(e.toString()));
-      log.success(false);
+      LOGGER.error("Failed to set cluster size", e);
+      clusterResizeLogBuilder.errorMessage(Optional.of(e.toString()));
+      clusterResizeLogBuilder.success(false);
       autoscalerMetrics.markSetSizeError();
     } catch (final Throwable t) {
-      log.errorMessage(Optional.of(t.toString()));
-      log.success(false);
+      clusterResizeLogBuilder.errorMessage(Optional.of(t.toString()));
+      clusterResizeLogBuilder.success(false);
       throw t;
     } finally {
-      log.resizeReason(resizeReason.toString());
-      db.logResize(log.build());
+      database.logResize(clusterResizeLogBuilder.build());
     }
   }
 
-  private Duration getDurationSinceLastChange() {
+  private Duration getDurationSinceLastChange(
+      final BigtableCluster cluster, final Supplier<Instant> timeSupplier) {
     // the database always stores UTC time
     // so remember to use UTC time as well when comparing with the database
     // for example Instant.now() returns UTC time
-    final Instant now = timeSource.get();
+    final Instant now = timeSupplier.get();
     final Instant lastChange = cluster.lastChange().orElse(Instant.EPOCH);
     return Duration.between(lastChange, now);
   }
 
-  private Duration getSamplingDuration() {
-    final Duration timeSinceLastChange = getDurationSinceLastChange();
+  private Duration getSamplingDuration(
+      final BigtableCluster cluster, final Supplier<Instant> timeSupplier) {
+    final Duration timeSinceLastChange = getDurationSinceLastChange(cluster, timeSupplier);
     return computeSamplingDuration(timeSinceLastChange);
   }
 
+  @VisibleForTesting
   Duration computeSamplingDuration(final Duration timeSinceLastChange) {
     final Duration reducedTimeSinceLastChange =
         timeSinceLastChange.minus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
@@ -179,20 +152,24 @@ public class AutoscaleJob implements Closeable {
    * quickly scaling up on load increases. Basically, we want to scale up optimistically
    * but scale down pessimistically.
    */
-  private double getCurrentCpu(final Duration samplingDuration) {
+  private double getCurrentCpu(final BigtableCluster cluster, final Duration samplingDuration) {
     return stackdriverClient.getCpuLoad(cluster, samplingDuration);
   }
 
-  private int cpuStrategy(final Duration samplingDuration, final int nodes) {
+  private int cpuStrategy(
+      final BigtableCluster cluster,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final Duration samplingDuration,
+      final int nodes) {
     double currentCpu = 0d;
 
     try {
-      currentCpu = getCurrentCpu(samplingDuration);
+      currentCpu = getCurrentCpu(cluster, samplingDuration);
     } finally {
       autoscalerMetrics.registerClusterLoadMetrics(cluster, currentCpu, ClusterLoadGauges.CPU);
     }
 
-    logger.info(
+    LOGGER.info(
         "Running autoscale job. Nodes: {} (min={}, max={}, effectiveMinNodes={}), CPU: {} (target={})",
         nodes,
         cluster.minNodes(),
@@ -220,18 +197,20 @@ public class AutoscaleJob implements Closeable {
     }
 
     final int roundedDesiredNodes = (int) Math.ceil(desiredNodes);
-    logger.info(
+    LOGGER.info(
         "Ideal node count: {}. Revised nodes: {}. Reason: {}.",
         initialDesiredNodes,
         desiredNodes,
         path);
-    log.cpuUtilization(currentCpu);
-    addResizeReason("CPU strategy: " + path);
+    clusterResizeLogBuilder.cpuUtilization(currentCpu);
+    clusterResizeLogBuilder.addResizeReason(" >>CPU strategy: " + path);
     return roundedDesiredNodes;
   }
 
-  boolean shouldExponentialBackoff() {
-    final Instant now = timeSource.get();
+  @VisibleForTesting
+  boolean shouldExponentialBackoff(
+      final BigtableCluster cluster, final Supplier<Instant> timeSupplier) {
+    final Instant now = timeSupplier.get();
 
     if (cluster.lastFailure().isPresent() && cluster.consecutiveFailureCount() > 0) {
       // Last try resulted in a failure. Exponential backoff further tries.
@@ -251,7 +230,7 @@ public class AutoscaleJob implements Closeable {
 
       final Instant nextTry = cluster.lastFailure().get().plus(nextTryDuration);
       if (nextTry.isAfter(now)) {
-        logger.info(
+        LOGGER.info(
             "Skipping autoscale check due to earlier failures; exponential backoff - next try at {}",
             nextTry);
         return true;
@@ -262,7 +241,11 @@ public class AutoscaleJob implements Closeable {
   }
 
   private int storageConstraints(
-      final Duration samplingDuration, final int desiredNodes, final int currentNodes) {
+      final BigtableCluster cluster,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final Duration samplingDuration,
+      final int desiredNodes,
+      final int currentNodes) {
     Double storageUtilization = 0.0;
     try {
       storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
@@ -275,43 +258,51 @@ public class AutoscaleJob implements Closeable {
     }
     final int minNodesRequiredForStorage =
         (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
-    logger.info(
+    LOGGER.info(
         "Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
         minNodesRequiredForStorage,
         storageUtilization.toString(),
         currentNodes);
-    log.storageUtilization(storageUtilization);
+    clusterResizeLogBuilder.storageUtilization(storageUtilization);
     if (minNodesRequiredForStorage > desiredNodes) {
       autoscalerMetrics.markStorageConstraint(cluster, desiredNodes, minNodesRequiredForStorage);
-      addResizeReason(
+      clusterResizeLogBuilder.addResizeReason(
           String.format(
-              "Storage strategy: Target node count overridden(%d -> %d).",
+              " >>Storage strategy: Target node count overridden(%d -> %d).",
               desiredNodes, minNodesRequiredForStorage));
     }
     return Math.max(minNodesRequiredForStorage, desiredNodes);
   }
 
-  private int sizeConstraints(final int desiredNodes) {
+  private int sizeConstraints(
+      final BigtableCluster cluster,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final int desiredNodes) {
     // the desired size should be inside the autoscale boundaries
     final int finalNodes =
         Math.max(cluster.effectiveMinNodes(), Math.min(cluster.maxNodes(), desiredNodes));
     if (desiredNodes != finalNodes) {
       autoscalerMetrics.markSizeConstraint(desiredNodes, finalNodes, cluster);
-      addResizeReason(
+      clusterResizeLogBuilder.addResizeReason(
           String.format(
-              "Size strategy: Target count overridden(%d -> %d)", desiredNodes, finalNodes));
+              " >>Size strategy: Target count overridden(%d -> %d)", desiredNodes, finalNodes));
     }
     return finalNodes;
   }
 
-  private boolean isTooEarlyToFetchMetrics() {
-    final Duration timeSinceLastChange = getDurationSinceLastChange();
+  private boolean isTooEarlyToFetchMetrics(
+      final BigtableCluster cluster, final Supplier<Instant> timeSupplier) {
+    final Duration timeSinceLastChange = getDurationSinceLastChange(cluster, timeSupplier);
     return timeSinceLastChange.minus(MINIMUM_CHANGE_INTERVAL).isNegative();
   }
 
   // Implements a strategy to avoid autoscaling too often
-  private int frequencyConstraints(final int nodes, final int currentNodes) {
-    final Duration timeSinceLastChange = getDurationSinceLastChange();
+  private int frequencyConstraints(
+      final BigtableCluster cluster,
+      final Supplier<Instant> timeSupplier,
+      final int nodes,
+      final int currentNodes) {
+    final Duration timeSinceLastChange = getDurationSinceLastChange(cluster, timeSupplier);
     int desiredNodes = nodes;
     // It's OK to do large changes often if needed, but only do small changes very rarely to avoid
     // too much oscillation
@@ -332,66 +323,69 @@ public class AutoscaleJob implements Closeable {
       desiredNodes = currentNodes;
     }
 
-    logger.info("Ideal node count: {}. Revised nodes: {}. Reason: {}.", nodes, desiredNodes, path);
+    LOGGER.info("Ideal node count: {}. Revised nodes: {}. Reason: {}.", nodes, desiredNodes, path);
     return desiredNodes;
   }
 
-  void run() throws IOException {
+  void run(
+      final BigtableCluster cluster,
+      final BigtableSession session,
+      final Supplier<Instant> timeSupplier)
+      throws IOException {
 
-    if (hasRun) {
-      throw new RuntimeException("An autoscale job should only be run once!");
-    }
-
-    hasRun = true;
-
-    if (shouldExponentialBackoff()) {
-      logger.info("Exponential backoff");
+    if (shouldExponentialBackoff(cluster, timeSupplier)) {
+      LOGGER.info("Exponential backoff");
       return;
     }
-
-    final Cluster clusterInfo = getClusterInfo();
+    final BigtableInstanceClient instanceAdminClient = session.getInstanceAdminClient();
+    final Cluster clusterInfo =
+        instanceAdminClient.getCluster(
+            GetClusterRequest.newBuilder().setName(cluster.clusterName()).build());
     final int currentNodes = getSize(clusterInfo);
-    autoscalerMetrics.registerClusterDataMetrics(cluster, currentNodes, db);
+    final ClusterResizeLogBuilder clusterResizeLogBuilder = ClusterResizeLog.builder(cluster);
+    clusterResizeLogBuilder.currentNodes(currentNodes);
+    autoscalerMetrics.registerClusterDataMetrics(cluster, currentNodes, database);
     autoscalerMetrics.markClusterCheck();
 
-    if (isTooEarlyToFetchMetrics()) {
-      final int newNodeCount = sizeConstraints(currentNodes);
+    if (isTooEarlyToFetchMetrics(cluster, timeSupplier)) {
+      final int newNodeCount = sizeConstraints(cluster, clusterResizeLogBuilder, currentNodes);
       if (newNodeCount == currentNodes) {
-        logger.info("Too early to autoscale");
+        LOGGER.info("Too early to autoscale");
         return;
       } else {
-        updateNodeCount(newNodeCount, currentNodes);
+        updateNodeCount(
+            session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);
         return;
       }
     }
-    final Duration samplingDuration = getSamplingDuration();
-    int newNodeCount = cpuStrategy(samplingDuration, currentNodes);
-    newNodeCount = storageConstraints(samplingDuration, newNodeCount, currentNodes);
-    newNodeCount = frequencyConstraints(newNodeCount, currentNodes);
-    newNodeCount = sizeConstraints(newNodeCount);
-    updateNodeCount(newNodeCount, currentNodes);
+    final Duration samplingDuration = getSamplingDuration(cluster, timeSupplier);
+    int newNodeCount =
+        cpuStrategy(cluster, clusterResizeLogBuilder, samplingDuration, currentNodes);
+    newNodeCount =
+        storageConstraints(
+            cluster, clusterResizeLogBuilder, samplingDuration, newNodeCount, currentNodes);
+    newNodeCount = frequencyConstraints(cluster, timeSupplier, newNodeCount, currentNodes);
+    newNodeCount = sizeConstraints(cluster, clusterResizeLogBuilder, newNodeCount);
+    updateNodeCount(
+        session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);
   }
 
-  private void updateNodeCount(final int desiredNodes, final int currentNodes) {
+  private void updateNodeCount(
+      final BigtableSession bigtableSession,
+      final BigtableCluster cluster,
+      final Supplier<Instant> timeSupplier,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final int desiredNodes,
+      final int currentNodes) {
     if (desiredNodes != currentNodes) {
-      setSize(desiredNodes);
-      db.setLastChange(
-          cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSource.get());
-      logger.info("Changing nodes from {} to {}", currentNodes, desiredNodes);
+      setSize(bigtableSession, cluster.clusterName(), clusterResizeLogBuilder, desiredNodes);
+      database.setLastChange(
+          cluster.projectId(), cluster.instanceId(), cluster.clusterId(), timeSupplier.get());
+      LOGGER.info("Changing nodes from {} to {}", currentNodes, desiredNodes);
     } else {
-      logger.info("No need to resize");
+      LOGGER.info("No need to resize");
     }
-    logger.info("Finished running autoscale job");
-    db.clearFailureCount(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
-  }
-
-  private void addResizeReason(final String reason) {
-    resizeReason.insert(0, reason);
-    resizeReason.insert(0, " >>");
-  }
-
-  @Override
-  public void close() throws IOException {
-    bigtableSession.close();
+    LOGGER.info("Finished running autoscale job");
+    database.clearFailureCount(cluster);
   }
 }
