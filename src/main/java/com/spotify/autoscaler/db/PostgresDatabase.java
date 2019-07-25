@@ -439,7 +439,8 @@ public class PostgresDatabase implements Database {
             + "min_nodes_override = case "
             + "                         when :new_load_delta = 0 then null"
             + "                         when load_delta = :new_load_delta then min_nodes_override "
-            + "                         else :current_node_count + :new_load_delta - load_delta "
+            + "                         else GREATEST(min_nodes_override, :current_node_count) + "
+            + ":new_load_delta - load_delta "
             + "                       end "
             + "WHERE project_id = :project_id AND instance_id = :instance_id AND cluster_id = "
             + ":cluster_id";

@@ -123,7 +123,9 @@ public class FakeBTCluster {
             ? Optional.empty()
             : loadDeltaDiff == 0
                 ? cluster.minNodesOverride()
-                : Optional.of(nodes + (loadDelta - cluster.loadDelta()));
+                : Optional.of(
+                    Math.max(nodes, cluster.minNodesOverride().orElse(nodes))
+                        + (loadDelta - cluster.loadDelta()));
     this.cluster =
         BigtableClusterBuilder.from(cluster)
             .loadDelta(loadDelta)
