@@ -24,12 +24,9 @@ import com.spotify.metrics.core.SemanticMetricRegistry;
 import dagger.Module;
 import dagger.Provides;
 
-import javax.inject.Singleton;
-
 @Module
 public class MetricsRegistryModule {
   @Provides
-  @Singleton
   public SemanticMetricRegistry registry() {
     return new SemanticMetricRegistry();
   }

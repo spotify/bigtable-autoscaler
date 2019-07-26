@@ -27,17 +27,17 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 /** Application entry point. */
 public final class Main {
 
-    public static final String SERVICE_NAME = "bigtable-autoscaler";
+  public static final String SERVICE_NAME = "bigtable-autoscaler";
 
-    /**
-     * Runs the application.
-     *
-     * @param args command-line arguments
-     */
-    public static void main(final String... args) throws Exception {
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
-        SLF4JBridgeHandler.install();
-        AutoscalerComponent autoscalerComponent = DaggerAutoscalerComponent.builder().build();
-        autoscalerComponent.configure().start();
-    }
+  /**
+   * Runs the application.
+   *
+   * @param args command-line arguments
+   */
+  public static void main(final String... args) throws Exception {
+    SLF4JBridgeHandler.removeHandlersForRootLogger();
+    SLF4JBridgeHandler.install();
+    AutoscalerComponent autoscalerComponent = DaggerAutoscalerComponent.builder().build();
+    autoscalerComponent.configure().start();
+  }
 }

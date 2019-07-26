@@ -26,9 +26,6 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.spotify.autoscaler.util.ErrorCode;
-import com.spotify.metrics.core.SemanticMetricRegistry;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
@@ -40,11 +37,10 @@ import org.junit.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class PostgresDatabaseIT {
-  SemanticMetricRegistry registry;
-  PostgresDatabase db;
-  String projectId = "test-project";
-  String instanceId = "test-instance";
-  String clusterId = "test-cluster";
+  private PostgresDatabase db;
+  private String projectId = "test-project";
+  private String instanceId = "test-instance";
+  private String clusterId = "test-cluster";
 
   private BigtableCluster testCluster() {
     return new BigtableClusterBuilder()
@@ -75,7 +71,7 @@ public class PostgresDatabaseIT {
   }
 
   @Before
-  public void setup() throws SQLException, IOException {
+  public void setup() {
     // insert a test cluster
     db = PostgresDatabaseTest.getPostgresDatabase();
   }
@@ -83,7 +79,6 @@ public class PostgresDatabaseIT {
   @After
   public void tearDown() {
     db.getBigtableClusters()
-        .stream()
         .forEach(
             cluster ->
                 db.deleteBigtableCluster(
@@ -255,5 +250,213 @@ public class PostgresDatabaseIT {
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(cluster, retrievedCluster);
+  }
+
+  @Test
+  public void testEffectiveMinNodesIsEqualToMinNodesWhenNoLoad() {
+
+    db.insertBigtableCluster(testCluster());
+    final int loadDelta = 0;
+    final int currentNodeCount = 3;
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        currentNodeCount);
+
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(retrievedCluster.effectiveMinNodes(), retrievedCluster.minNodes());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.empty());
+  }
+
+  @Test
+  public void testEffectiveMinNodesWhenFirstLoadIsAdded() {
+
+    db.insertBigtableCluster(testCluster());
+    final int loadDelta = 10;
+    final int currentNodeCount = 3;
+
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        currentNodeCount);
+
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(
+        retrievedCluster.effectiveMinNodes(),
+        retrievedCluster.minNodesOverride().get().longValue());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.of(currentNodeCount + loadDelta));
+  }
+
+  @Test
+  public void testEffectiveMinNodesWhenSecondLoadIsAdded() {
+
+    db.insertBigtableCluster(testCluster());
+    final int loadDelta = 10;
+    final int currentNodeCount = 3;
+
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        currentNodeCount);
+
+    final int newloadDelta = 10;
+    final int newCurrentNodeCount = 13;
+
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        newloadDelta,
+        newCurrentNodeCount);
+
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(
+        retrievedCluster.effectiveMinNodes(),
+        retrievedCluster.minNodesOverride().get().longValue());
+    assertEquals(
+        retrievedCluster.minNodesOverride(),
+        Optional.of(newCurrentNodeCount + (newloadDelta - loadDelta)));
+  }
+
+  @Test
+  public void testEffectiveMinNodesDoesNotChangeWhenSameLoadIsAdded() {
+
+    db.insertBigtableCluster(testCluster());
+    final int loadDelta = 10;
+    final int initialNodeCount = 3;
+
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        initialNodeCount);
+
+    final int newCurrentNodeCount = 13;
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        newCurrentNodeCount);
+
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(
+        retrievedCluster.effectiveMinNodes(),
+        retrievedCluster.minNodesOverride().get().longValue());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.of(initialNodeCount + loadDelta));
+  }
+
+  @Test
+  public void testEffectiveMinNodesWhenLoadDecrease() {
+
+    db.insertBigtableCluster(testCluster());
+    final int loadDelta = 10;
+    final int initialNodeCount = 3;
+
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        initialNodeCount);
+
+    final int newCurrentNodeCount = 13;
+    final int newLoadDelta = 5;
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        newLoadDelta,
+        newCurrentNodeCount);
+
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(
+        retrievedCluster.effectiveMinNodes(),
+        retrievedCluster.minNodesOverride().get().longValue());
+    assertEquals(
+        retrievedCluster.minNodesOverride(),
+        Optional.of(newCurrentNodeCount + (newLoadDelta - loadDelta)));
+  }
+
+  @Test
+  public void testEffectiveMinNodesWhenLoadDisappears() {
+
+    db.insertBigtableCluster(testCluster());
+    final int loadDelta = 10;
+    final int initialNodeCount = 3;
+
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        initialNodeCount);
+
+    final int newCurrentNodeCount = 13;
+    final int newLoadDelta = 0;
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        newLoadDelta,
+        newCurrentNodeCount);
+
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(retrievedCluster.effectiveMinNodes(), retrievedCluster.minNodes());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.empty());
+  }
+
+  @Test
+  public void testEffectiveMinNodesDoesNotExceedMaxNodes() {
+
+    db.insertBigtableCluster(testCluster());
+    final int loadDelta = testCluster().maxNodes();
+    final int initialNodeCount = 3;
+
+    db.updateLoadDelta(
+        testCluster().projectId(),
+        testCluster().instanceId(),
+        testCluster().clusterId(),
+        loadDelta,
+        initialNodeCount);
+
+    BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(retrievedCluster.effectiveMinNodes(), retrievedCluster.maxNodes());
+    assertEquals(retrievedCluster.minNodesOverride(), Optional.of(initialNodeCount + loadDelta));
   }
 }

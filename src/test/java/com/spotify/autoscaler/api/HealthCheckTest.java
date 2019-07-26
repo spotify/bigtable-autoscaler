@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.AutoscaleResourceConfig;
 import com.spotify.autoscaler.db.Database;
 import com.typesafe.config.Config;
@@ -39,6 +40,7 @@ import org.mockito.Mock;
 public class HealthCheckTest extends JerseyTest implements ApiTestResources {
 
   @Mock private Database db;
+  @Mock private BigtableSession bigtableSession;
 
   private Runnable healthCheck;
 
@@ -56,7 +58,10 @@ public class HealthCheckTest extends JerseyTest implements ApiTestResources {
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
     final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
-            ApiTestResources.SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
+            ApiTestResources.SERVICE_NAME,
+            config,
+            new ClusterResources(db, c -> bigtableSession),
+            new HealthCheck(db));
     return resourceConfig;
   }
 

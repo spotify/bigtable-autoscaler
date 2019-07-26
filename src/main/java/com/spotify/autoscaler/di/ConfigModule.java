@@ -27,13 +27,10 @@ import com.typesafe.config.ConfigFactory;
 import dagger.Module;
 import dagger.Provides;
 
-import javax.inject.Singleton;
-
 @Module
 public class ConfigModule {
 
   @Provides
-  @Singleton
   public Config config() {
     return ConfigFactory.load(SERVICE_NAME);
   }
