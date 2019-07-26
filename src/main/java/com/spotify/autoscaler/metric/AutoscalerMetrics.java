@@ -29,7 +29,8 @@ import com.spotify.autoscaler.util.BigtableUtil;
 import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
-import com.zaxxer.hikari.HikariDataSource;
+import com.sun.management.UnixOperatingSystemMXBean;
+import java.lang.management.ManagementFactory;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,14 +92,14 @@ public class AutoscalerMetrics {
     }
   }
 
-  public void scheduleCleanup(Database db) {
+  public void scheduleCleanup(final Database database) {
     final ScheduledExecutorService cleanupExecutor =
         new ScheduledThreadPoolExecutor(1, r -> new Thread(r, "Cluster-Metrics-Cleaner"));
     cleanupExecutor.scheduleAtFixedRate(
         () -> {
           try {
             LOG.info("Cleanup running");
-            unregisterInactiveClustersMetrics(registry, db);
+            unregisterInactiveClustersMetrics(registry, database);
           } catch (final Throwable t) {
             LOG.error("Cleanup task failed", t);
           }
@@ -109,8 +110,8 @@ public class AutoscalerMetrics {
   }
 
   private void unregisterInactiveClustersMetrics(
-      final SemanticMetricRegistry registry, final Database db) {
-    final Set<String> bigtableClusters = db.getActiveClusterKeys();
+      final SemanticMetricRegistry registry, final Database database) {
+    final Set<String> bigtableClusters = database.getActiveClusterKeys();
     for (final Map.Entry<String, ClusterData> entry : registeredClusters.entrySet()) {
       if (!bigtableClusters.contains(entry.getKey())) {
         registeredClusters.remove(entry.getKey());
@@ -157,7 +158,7 @@ public class AutoscalerMetrics {
     }
   }
 
-  private MetricId baseMetric(BigtableCluster cluster) {
+  private MetricId baseMetric(final BigtableCluster cluster) {
     return APP_PREFIX
         .tagged("project-id", cluster.projectId())
         .tagged("cluster-id", cluster.clusterId())
@@ -172,7 +173,8 @@ public class AutoscalerMetrics {
     return metrics;
   }
 
-  public void markStorageConstraint(BigtableCluster cluster, int desiredNodes, int targetNodes) {
+  public void markStorageConstraint(
+      final BigtableCluster cluster, final int desiredNodes, final int targetNodes) {
     registry
         .meter(
             constraintMetric(cluster, desiredNodes, targetNodes)
@@ -180,7 +182,8 @@ public class AutoscalerMetrics {
         .mark();
   }
 
-  public void markSizeConstraint(int desiredNodes, int finalNodes, BigtableCluster cluster) {
+  public void markSizeConstraint(
+      final int desiredNodes, final int finalNodes, final BigtableCluster cluster) {
     final MetricId metric = constraintMetric(cluster, desiredNodes, finalNodes);
 
     if (cluster.minNodes() > desiredNodes) {
@@ -196,7 +199,8 @@ public class AutoscalerMetrics {
     }
   }
 
-  private MetricId constraintMetric(BigtableCluster cluster, int desiredNodes, int targetNodes) {
+  private MetricId constraintMetric(
+      final BigtableCluster cluster, final int desiredNodes, final int targetNodes) {
     return baseMetric(cluster)
         .tagged("what", "overridden-desired-node-count")
         .tagged("desired-nodes", String.valueOf(desiredNodes))
@@ -229,11 +233,52 @@ public class AutoscalerMetrics {
     registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
   }
 
-  public void registerMetricActiveConnections(HikariDataSource dataSource) {
-    final MetricId metricId = APP_PREFIX.tagged("what", "open-db-connections");
-    if (!registry.getGauges().containsKey(metricId)) {
+  public void registerOpenDatabaseConnections(final Database database) {
+    registry.register(
+        APP_PREFIX.tagged("what", "open-db-connections"),
+        (Gauge<Integer>) database::getTotalConnections);
+  }
+
+  public void registerActiveClusters(final Database database) {
+    registry.register(
+        APP_PREFIX.tagged("what", "enabled-clusters"),
+        (Gauge<Long>)
+            () -> database.getBigtableClusters().stream().filter(BigtableCluster::enabled).count());
+
+    registry.register(
+        APP_PREFIX.tagged("what", "disabled-clusters"),
+        (Gauge<Long>)
+            () -> database.getBigtableClusters().stream().filter(p -> !p.enabled()).count());
+  }
+
+  public void registerOpenFileDescriptors() {
+    registry.register(
+        APP_PREFIX.tagged("what", "open-file-descriptors"),
+        (Gauge<Long>)
+            () ->
+                ((UnixOperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean())
+                    .getOpenFileDescriptorCount());
+  }
+
+  public void registerDailyResizeCount(final Database database) {
+    registry.register(
+        APP_PREFIX.tagged("what", "daily-resize-count"),
+        (Gauge<Long>) database::getDailyResizeCount);
+  }
+
+  public void registerFailureCount(final Database database) {
+    for (final ErrorCode code : ErrorCode.values()) {
       registry.register(
-          metricId, (Gauge<Integer>) () -> dataSource.getHikariPoolMXBean().getTotalConnections());
+          APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
+          (Gauge<Long>)
+              () ->
+                  database
+                      .getBigtableClusters()
+                      .stream()
+                      .filter(BigtableCluster::enabled)
+                      .filter(p -> p.errorCode().orElse(ErrorCode.OK) == code)
+                      .filter(p -> p.consecutiveFailureCount() > 0)
+                      .count());
     }
   }
 }

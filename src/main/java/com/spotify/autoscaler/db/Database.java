@@ -76,4 +76,6 @@ public interface Database extends AutoCloseable {
 
   boolean updateLoadDelta(
       String projectId, String instanceId, String clusterId, int loadDelta, int currentNodeCount);
+
+  int getTotalConnections();
 }

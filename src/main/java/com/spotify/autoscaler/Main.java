@@ -20,7 +20,6 @@
 
 package com.spotify.autoscaler;
 
-import com.codahale.metrics.Gauge;
 import com.spotify.autoscaler.api.ClusterResources;
 import com.spotify.autoscaler.api.HealthCheck;
 import com.spotify.autoscaler.client.StackdriverClient;
@@ -30,15 +29,12 @@ import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.util.BigtableUtil;
-import com.spotify.autoscaler.util.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
-import com.sun.management.UnixOperatingSystemMXBean;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -58,7 +54,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 /** Application entry point. */
 public final class Main {
 
-  private static final Logger logger = LoggerFactory.getLogger(Main.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
   public static final String SERVICE_NAME = "bigtable-autoscaler";
   public static final MetricId APP_PREFIX = MetricId.build("key", SERVICE_NAME);
 
@@ -67,7 +63,7 @@ public final class Main {
 
   private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
   private final Autoscaler autoscaler;
-  private final Database db;
+  private final Database database;
   private final HttpServer server;
   private final FastForwardReporter reporter;
   private final StackdriverClient stackdriverClient = new StackdriverClient();
@@ -91,7 +87,7 @@ public final class Main {
     final int ffwdPort = config.getInt("ffwd.port");
 
     if (!ffwdHost.isEmpty()) {
-      logger.info("Connecting to ffwd at {}:{}", ffwdHost, ffwdPort);
+      LOGGER.info("Connecting to ffwd at {}:{}", ffwdHost, ffwdPort);
       reporter =
           FastForwardReporter.forRegistry(registry)
               .prefix(APP_PREFIX)
@@ -105,17 +101,16 @@ public final class Main {
     }
 
     final int port = config.getConfig("http").getConfig("server").getInt("port");
-    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
-    db = new PostgresDatabase(config.getConfig("database"), autoscalerMetrics);
+    database = new PostgresDatabase(config.getConfig("database"));
     final URI uri = new URI("http://0.0.0.0:" + port);
     final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
             SERVICE_NAME,
             config,
             new ClusterResources(
-                db,
+                database,
                 cluster -> BigtableUtil.createSession(cluster.instanceId(), cluster.projectId())),
-            new HealthCheck(db));
+            new HealthCheck(database));
     server = GrizzlyHttpServerFactory.createHttpServer(uri, resourceConfig, false);
 
     ClusterFilter clusterFilter = new AllowAllClusterFilter();
@@ -130,73 +125,49 @@ public final class Main {
           | IllegalAccessException
           | NoSuchMethodException
           | InvocationTargetException e) {
-        logger.error("Failed to create new instance of cluster filter " + clusterFilterClass, e);
+        LOGGER.error("Failed to create new instance of cluster filter " + clusterFilterClass, e);
       }
     }
-
+    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
+    configureMetrics(autoscalerMetrics, database);
     autoscaler =
         new Autoscaler(
             Executors.newFixedThreadPool(CONCURRENCY_LIMIT),
             stackdriverClient,
-            db,
+            database,
             autoscalerMetrics,
             clusterFilter);
 
     executor.scheduleWithFixedDelay(
         autoscaler, RUN_INTERVAL.toMillis(), RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
 
-    autoscalerMetrics.scheduleCleanup(db);
     Runtime.getRuntime()
         .addShutdownHook(
             new Thread(
                 () -> {
                   try {
                     onShutdown();
-                  } catch (final IOException | InterruptedException | ExecutionException e) {
+                  } catch (final InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                   }
                 }));
-
-    registry.register(
-        APP_PREFIX.tagged("what", "enabled-clusters"),
-        (Gauge<Long>) () -> db.getBigtableClusters().stream().filter(p -> p.enabled()).count());
-
-    registry.register(
-        APP_PREFIX.tagged("what", "disabled-clusters"),
-        (Gauge<Long>) () -> db.getBigtableClusters().stream().filter(p -> !p.enabled()).count());
-
-    registry.register(
-        APP_PREFIX.tagged("what", "open-file-descriptors"),
-        (Gauge<Long>)
-            () ->
-                ((UnixOperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean())
-                    .getOpenFileDescriptorCount());
-
-    registry.register(
-        APP_PREFIX.tagged("what", "daily-resize-count"),
-        (Gauge<Long>) () -> db.getDailyResizeCount());
-
-    for (final ErrorCode code : ErrorCode.values()) {
-      registry.register(
-          APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
-          (Gauge<Long>)
-              () ->
-                  db.getBigtableClusters()
-                      .stream()
-                      .filter(p -> p.enabled())
-                      .filter(p -> p.errorCode().orElse(ErrorCode.OK) == code)
-                      .filter(p -> p.consecutiveFailureCount() > 0)
-                      .count());
-    }
-
     server.start();
   }
 
-  private void onShutdown() throws IOException, ExecutionException, InterruptedException {
+  private void configureMetrics(AutoscalerMetrics autoscalerMetrics, Database database) {
+    autoscalerMetrics.registerActiveClusters(database);
+    autoscalerMetrics.registerOpenFileDescriptors();
+    autoscalerMetrics.registerDailyResizeCount(database);
+    autoscalerMetrics.registerFailureCount(database);
+    autoscalerMetrics.registerOpenDatabaseConnections(database);
+    autoscalerMetrics.scheduleCleanup(database);
+  }
+
+  private void onShutdown() throws ExecutionException, InterruptedException {
     try {
       stackdriverClient.close();
     } catch (final Exception e) {
-      logger.error("Exception while closing stackdriverClient", e);
+      LOGGER.error("Exception while closing stackdriverClient", e);
     }
     server.shutdown(10, TimeUnit.SECONDS).get();
     if (reporter != null) {
@@ -207,16 +178,16 @@ public final class Main {
     try {
       executor.awaitTermination(5, TimeUnit.SECONDS);
     } catch (final InterruptedException e) {
-      logger.error("Exception while awaiting executor termination", e);
+      LOGGER.error("Exception while awaiting executor termination", e);
     }
-    logger.info("ScheduledExecutor stopped");
+    LOGGER.info("ScheduledExecutor stopped");
     autoscaler.close();
-    logger.info("Bigtable sessions and Stackdriver sessions have been closed");
+    LOGGER.info("Bigtable sessions and Stackdriver sessions have been closed");
     try {
-      db.close();
+      database.close();
     } catch (final Exception e) {
       throw new RuntimeException(e);
     }
-    logger.info("Database connection closed");
+    LOGGER.info("Database connection closed");
   }
 }
