@@ -37,7 +37,8 @@ public class BigtableUtil {
   private static final int LONG_TIMEOUT = (int) Duration.ofSeconds(60).toMillis();
   private static final boolean USE_TIMEOUT = true;
 
-  public static BigtableSession createSession(final String instanceId, final String projectId) {
+  public static BigtableSession createSession(final String instanceId, final String projectId)
+      throws IOException {
     final BigtableInstanceName bigtableInstanceName =
         new BigtableInstanceName(projectId, instanceId);
 
@@ -55,11 +56,7 @@ public class BigtableUtil {
                     .build())
             .build();
 
-    try {
-      return new BigtableSession(options);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return new BigtableSession(options);
   }
 
   public static void pushContext(BigtableCluster cluster) {
