@@ -268,7 +268,6 @@ public class AutoscaleJobTest {
     final BigtableCluster cluster =
         BigtableClusterBuilder.from(this.cluster)
             .loadDelta(loadDelta)
-            .minNodesOverride(loadDelta + MIN_NODES)
             .lastChange(Instant.now())
             .build();
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES);
