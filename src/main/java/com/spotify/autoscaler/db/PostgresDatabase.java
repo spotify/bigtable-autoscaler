@@ -292,7 +292,7 @@ public class PostgresDatabase implements Database {
                 ErrorCode.OK.name(),
                 cluster.projectId(),
                 cluster.instanceId(),
-                cluster.instanceId())
+                cluster.clusterId())
         == 1;
   }
 
