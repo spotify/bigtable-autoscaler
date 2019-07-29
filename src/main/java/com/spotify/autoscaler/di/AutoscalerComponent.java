@@ -20,6 +20,7 @@
 
 package com.spotify.autoscaler.di;
 
+import com.spotify.autoscaler.ServiceInit;
 import dagger.Component;
 
 @Component(

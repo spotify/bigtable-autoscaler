@@ -18,9 +18,8 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.di;
+package com.spotify.autoscaler;
 
-import com.spotify.autoscaler.Autoscaler;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.metrics.ffwd.FastForwardReporter;

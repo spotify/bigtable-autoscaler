@@ -26,7 +26,6 @@ import com.spotify.autoscaler.AutoscaleResourceConfig;
 import com.spotify.autoscaler.api.ClusterResources;
 import com.spotify.autoscaler.api.HealthCheck;
 import com.spotify.autoscaler.db.Database;
-import com.spotify.autoscaler.util.BigtableUtil;
 import com.typesafe.config.Config;
 import dagger.Module;
 import dagger.Provides;
@@ -46,12 +45,7 @@ public class HttpServerModule {
   public HttpServer initializeServer(final Config config, final Database database) {
     final ResourceConfig resourceConfig =
         new AutoscaleResourceConfig(
-            SERVICE_NAME,
-            config,
-            new ClusterResources(
-                database,
-                cluster -> BigtableUtil.createSession(cluster.instanceId(), cluster.projectId())),
-            new HealthCheck(database));
+            SERVICE_NAME, config, new ClusterResources(database), new HealthCheck(database));
     final int port = config.getConfig("http").getConfig("server").getInt("port");
     try {
       return GrizzlyHttpServerFactory.createHttpServer(

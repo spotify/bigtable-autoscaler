@@ -5,7 +5,7 @@
     <name>bigtable-autoscaler</name>
     <artifactId>bigtable-autoscaler</artifactId>
 
-    <version>0.0.26-SNAPSHOT</version>
+    <version>0.0.28-SNAPSHOT</version>
 
     <parent>
         <groupId>com.spotify</groupId>
