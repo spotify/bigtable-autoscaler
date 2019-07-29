@@ -18,16 +18,7 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.di;
+package com.spotify.autoscaler.api;
 
-import com.spotify.metrics.core.SemanticMetricRegistry;
-import dagger.Module;
-import dagger.Provides;
-
-@Module
-public class MetricsRegistryModule {
-  @Provides
-  public SemanticMetricRegistry registry() {
-    return new SemanticMetricRegistry();
-  }
-}
+/* Marker Interface for Rest Endpoint classes.*/
+public interface Endpoint {}

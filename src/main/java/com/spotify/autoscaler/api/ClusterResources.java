@@ -24,13 +24,12 @@ import static com.google.api.client.util.Preconditions.checkNotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.util.BigtableUtil;
-import io.norberg.automatter.jackson.AutoMatterModule;
 import java.util.Optional;
+import javax.inject.Inject;
 import javax.validation.constraints.Size;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -48,16 +47,17 @@ import org.slf4j.LoggerFactory;
 // Support two different paths for the moment while switching from instances->clusters
 @Path("/{ignored:instances|clusters}")
 @Produces(MediaType.APPLICATION_JSON)
-public class ClusterResources {
+public class ClusterResources implements Endpoint {
 
-  private static final Logger logger = LoggerFactory.getLogger(ClusterResources.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ClusterResources.class);
 
-  private final Database db;
-  private static final ObjectMapper mapper =
-      new ObjectMapper().registerModule(new AutoMatterModule()).registerModule(new Jdk8Module());
+  private final Database database;
+  private final ObjectMapper mapper;
 
-  public ClusterResources(final Database db) {
-    this.db = checkNotNull(db);
+  @Inject
+  public ClusterResources(final Database database, final ObjectMapper mapper) {
+    this.database = checkNotNull(database);
+    this.mapper = mapper;
   }
 
   @GET
@@ -67,7 +67,8 @@ public class ClusterResources {
       @QueryParam("clusterId") @Size(min = 1) final String clusterId) {
     try {
       return Response.ok(
-              mapper.writeValueAsString(db.getBigtableClusters(projectId, instanceId, clusterId)))
+              mapper.writeValueAsString(
+                  database.getBigtableClusters(projectId, instanceId, clusterId)))
           .build();
     } catch (final JsonProcessingException e) {
       return Response.serverError().build();
@@ -81,7 +82,7 @@ public class ClusterResources {
       @QueryParam("instanceId") @Size(min = 1) final String instanceId,
       @QueryParam("clusterId") @Size(min = 1) final String clusterId) {
     final Optional<BigtableCluster> cluster =
-        db.getBigtableCluster(projectId, instanceId, clusterId);
+        database.getBigtableCluster(projectId, instanceId, clusterId);
     try {
       if (cluster.isPresent()) {
         return Response.ok(mapper.writeValueAsString(cluster.get().enabled())).build();
@@ -101,7 +102,8 @@ public class ClusterResources {
       @QueryParam("clusterId") @Size(min = 1) final String clusterId) {
     try {
       return Response.ok(
-              mapper.writeValueAsString(db.getLatestResizeEvents(projectId, instanceId, clusterId)))
+              mapper.writeValueAsString(
+                  database.getLatestResizeEvents(projectId, instanceId, clusterId)))
           .build();
     } catch (final JsonProcessingException e) {
       return Response.serverError().build();
@@ -133,8 +135,8 @@ public class ClusterResources {
             .build();
     try {
       BigtableUtil.pushContext(cluster);
-      if (db.insertBigtableCluster(cluster)) {
-        logger.info(String.format("cluster created: %s", cluster.toString()));
+      if (database.insertBigtableCluster(cluster)) {
+        LOGGER.info(String.format("cluster created: %s", cluster.toString()));
         return Response.ok().build();
       } else {
         return Response.serverError().build();
@@ -167,8 +169,8 @@ public class ClusterResources {
             .build();
     try {
       BigtableUtil.pushContext(cluster);
-      if (db.updateBigtableCluster(cluster)) {
-        logger.info(String.format("cluster updated: %s", cluster.toString()));
+      if (database.updateBigtableCluster(cluster)) {
+        LOGGER.info(String.format("cluster updated: %s", cluster.toString()));
         return Response.ok().build();
       } else {
         return Response.serverError().build();
@@ -197,8 +199,8 @@ public class ClusterResources {
             .build();
     try {
       BigtableUtil.pushContext(cluster);
-      if (db.deleteBigtableCluster(projectId, instanceId, clusterId)) {
-        logger.info(String.format("cluster deleted: %s/%s/%s", projectId, instanceId, clusterId));
+      if (database.deleteBigtableCluster(projectId, instanceId, clusterId)) {
+        LOGGER.info(String.format("cluster deleted: %s/%s/%s", projectId, instanceId, clusterId));
         return Response.ok().build();
       } else {
         return Response.serverError().build();
@@ -229,8 +231,8 @@ public class ClusterResources {
             .build();
     try {
       BigtableUtil.pushContext(cluster);
-      if (db.updateLoadDelta(projectId, instanceId, clusterId, loadDelta)) {
-        logger.info("cluster loadDelta updated to {}", loadDelta);
+      if (database.updateLoadDelta(projectId, instanceId, clusterId, loadDelta)) {
+        LOGGER.info("cluster loadDelta updated to {}", loadDelta);
         return Response.ok().build();
       } else {
         return Response.serverError().build();

@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,9 +46,9 @@ public class Autoscaler implements Runnable {
   private final Database database;
   private final AutoscalerMetrics autoscalerMetrics;
   private final ClusterFilter filter;
-
   private final ExecutorService executorService;
 
+  @Inject
   public Autoscaler(
       final ExecutorService executorService,
       final StackdriverClient stackDriverClient,
@@ -114,7 +115,9 @@ public class Autoscaler implements Runnable {
     BigtableUtil.clearContext();
   }
 
-  public void close() {
+  public void close() throws Exception {
+    database.close();
+    stackDriverClient.close();
     executorService.shutdown();
   }
 }

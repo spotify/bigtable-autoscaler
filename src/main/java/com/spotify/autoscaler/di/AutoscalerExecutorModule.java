@@ -20,21 +20,17 @@
 
 package com.spotify.autoscaler.di;
 
-import com.spotify.autoscaler.ServiceInit;
-import dagger.Component;
+import dagger.Module;
+import dagger.Provides;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-@Component(
-    modules = {
-      ConfigModule.class,
-      DatabaseModule.class,
-      StackdriverModule.class,
-      HttpServerModule.class,
-      MetricsRegistryModule.class,
-      AutoscalerMetricsModule.class,
-      FastForwardReporterModule.class,
-      ClusterFilterModule.class,
-      AutoscalerModule.class,
-    })
-public interface AutoscalerComponent {
-  ServiceInit configure();
+@Module
+public class AutoscalerExecutorModule {
+  private static final int CONCURRENCY_LIMIT = 5;
+
+  @Provides
+  public ExecutorService autoscalerExecutorService() {
+    return Executors.newFixedThreadPool(CONCURRENCY_LIMIT);
+  }
 }

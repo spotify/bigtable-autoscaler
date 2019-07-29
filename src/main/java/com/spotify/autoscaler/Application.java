@@ -20,11 +20,10 @@
 
 package com.spotify.autoscaler;
 
-import com.spotify.autoscaler.client.StackdriverClient;
-import com.spotify.autoscaler.db.Database;
 import com.spotify.metrics.ffwd.FastForwardReporter;
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -33,34 +32,27 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServiceInit {
-  private static final Logger LOGGER = LoggerFactory.getLogger(ServiceInit.class);
+public class Application {
+  public static final String SERVICE_NAME = "bigtable-autoscaler";
+  private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
   private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
   private final Autoscaler autoscaler;
-  private final Database database;
   private final HttpServer server;
-  private final FastForwardReporter reporter;
-  private final StackdriverClient stackdriverClient;
+  private final Optional<FastForwardReporter> reporter;
   private static final Duration RUN_INTERVAL = Duration.ofSeconds(5);
 
   @Inject
-  public ServiceInit(
+  public Application(
       final Autoscaler autoscaler,
-      final Database database,
       final HttpServer server,
-      final FastForwardReporter reporter,
-      final StackdriverClient stackdriverClient) {
+      final Optional<FastForwardReporter> reporter) {
     this.autoscaler = autoscaler;
-    this.database = database;
     this.server = server;
     this.reporter = reporter;
-    this.stackdriverClient = stackdriverClient;
   }
 
   public void start() throws IOException {
-    if (reporter != null) {
-      reporter.start();
-    }
+    reporter.ifPresent(FastForwardReporter::start);
     executor.scheduleWithFixedDelay(
         autoscaler, RUN_INTERVAL.toMillis(), RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
     server.start();
@@ -83,14 +75,10 @@ public class ServiceInit {
   }
 
   private void onShutdown() throws Exception {
-    stackdriverClient.close();
     server.shutdown(10, TimeUnit.SECONDS).get();
-    if (reporter != null) {
-      reporter.stop();
-    }
+    reporter.ifPresent(FastForwardReporter::stop);
     executor.shutdown();
     executor.awaitTermination(5, TimeUnit.SECONDS);
     autoscaler.close();
-    database.close();
   }
 }

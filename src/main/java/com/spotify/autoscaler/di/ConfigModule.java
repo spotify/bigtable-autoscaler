@@ -20,18 +20,19 @@
 
 package com.spotify.autoscaler.di;
 
-import static com.spotify.autoscaler.Main.SERVICE_NAME;
-
+import com.spotify.autoscaler.Application;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Singleton;
 
 @Module
 public class ConfigModule {
 
   @Provides
-  public Config config() {
-    return ConfigFactory.load(SERVICE_NAME);
+  @Singleton
+  public static Config config() {
+    return ConfigFactory.load(Application.SERVICE_NAME);
   }
 }

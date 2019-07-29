@@ -22,6 +22,8 @@ package com.spotify.autoscaler.di;
 
 import static com.spotify.autoscaler.metric.AutoscalerMetrics.APP_PREFIX;
 
+import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.spotify.metrics.ffwd.FastForwardReporter;
 import com.typesafe.config.Config;
@@ -29,12 +31,19 @@ import dagger.Module;
 import dagger.Provides;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Module
-public class FastForwardReporterModule {
-  private static final Logger LOGGER = LoggerFactory.getLogger(FastForwardReporterModule.class);
+public class MetricsModule {
+  private static final Logger LOGGER = LoggerFactory.getLogger(MetricsModule.class);
+
+  @Provides
+  @Singleton
+  public static SemanticMetricRegistry registry() {
+    return new SemanticMetricRegistry();
+  }
 
   @Provides
   public FastForwardReporter fastForwardReporter(
@@ -57,5 +66,18 @@ public class FastForwardReporterModule {
       }
     }
     return null;
+  }
+
+  @Provides
+  public AutoscalerMetrics initializeMetrics(
+      final SemanticMetricRegistry registry, final Database database) {
+    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
+    autoscalerMetrics.registerActiveClusters(database);
+    autoscalerMetrics.registerOpenFileDescriptors();
+    autoscalerMetrics.registerDailyResizeCount(database);
+    autoscalerMetrics.registerFailureCount(database);
+    autoscalerMetrics.registerOpenDatabaseConnections(database);
+    autoscalerMetrics.scheduleCleanup(database);
+    return autoscalerMetrics;
   }
 }

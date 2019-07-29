@@ -20,25 +20,21 @@
 
 package com.spotify.autoscaler.di;
 
-import com.spotify.autoscaler.db.Database;
-import com.spotify.autoscaler.metric.AutoscalerMetrics;
-import com.spotify.metrics.core.SemanticMetricRegistry;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import dagger.Module;
 import dagger.Provides;
+import io.norberg.automatter.jackson.AutoMatterModule;
+import javax.inject.Singleton;
 
 @Module
-public class AutoscalerMetricsModule {
+public class ObjectMapperModule {
 
   @Provides
-  public AutoscalerMetrics initializeMetrics(
-      final SemanticMetricRegistry registry, final Database database) {
-    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
-    autoscalerMetrics.registerActiveClusters(database);
-    autoscalerMetrics.registerOpenFileDescriptors();
-    autoscalerMetrics.registerDailyResizeCount(database);
-    autoscalerMetrics.registerFailureCount(database);
-    autoscalerMetrics.registerOpenDatabaseConnections(database);
-    autoscalerMetrics.scheduleCleanup(database);
-    return autoscalerMetrics;
+  @Singleton
+  public static ObjectMapper mapper() {
+    return new ObjectMapper()
+        .registerModule(new AutoMatterModule())
+        .registerModule(new Jdk8Module());
   }
 }

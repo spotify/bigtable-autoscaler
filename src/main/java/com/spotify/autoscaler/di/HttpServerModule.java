@@ -20,32 +20,26 @@
 
 package com.spotify.autoscaler.di;
 
-import static com.spotify.autoscaler.Main.SERVICE_NAME;
-
-import com.spotify.autoscaler.AutoscaleResourceConfig;
-import com.spotify.autoscaler.api.ClusterResources;
-import com.spotify.autoscaler.api.HealthCheck;
-import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.Application;
+import com.spotify.autoscaler.api.Endpoint;
 import com.typesafe.config.Config;
 import dagger.Module;
 import dagger.Provides;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Set;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Module
+@Module(includes = EndpointsModule.class)
 public class HttpServerModule {
   private static final Logger LOGGER = LoggerFactory.getLogger(HttpServerModule.class);
 
   @Provides
-  public HttpServer initializeServer(final Config config, final Database database) {
-    final ResourceConfig resourceConfig =
-        new AutoscaleResourceConfig(
-            SERVICE_NAME, config, new ClusterResources(database), new HealthCheck(database));
+  public HttpServer initializeServer(final Config config, final ResourceConfig resourceConfig) {
     final int port = config.getConfig("http").getConfig("server").getInt("port");
     try {
       return GrizzlyHttpServerFactory.createHttpServer(
@@ -54,5 +48,22 @@ public class HttpServerModule {
       LOGGER.error("Failed to initialize http server", e);
       throw new RuntimeException(e);
     }
+  }
+
+  @Provides
+  public ResourceConfig resourceConfig(final Config config, final Set<Endpoint> resources) {
+    ResourceConfig resourceConfig = new ResourceConfig();
+    resourceConfig.setApplicationName(Application.SERVICE_NAME);
+    for (final Endpoint resource : resources) {
+      resourceConfig.register(resource);
+    }
+    if (config.hasPath("additionalPackages")) {
+      resourceConfig.packages(config.getStringList("additionalPackages").toArray(new String[0]));
+    }
+    if (config.hasPath("additionalClasses")) {
+      resourceConfig.property(
+          "jersey.config.server.provider.classnames", config.getString("additionalClasses"));
+    }
+    return resourceConfig;
   }
 }

@@ -25,13 +25,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.spotify.autoscaler.AutoscaleResourceConfig;
+import com.google.common.collect.ImmutableSet;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.di.HttpServerModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -54,10 +54,9 @@ public class HealthCheckTest extends JerseyTest implements ApiTestResources {
         .healthCheck();
 
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
-    final ResourceConfig resourceConfig =
-        new AutoscaleResourceConfig(
-            ApiTestResources.SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
-    return resourceConfig;
+    return new HttpServerModule()
+        .resourceConfig(
+            config, ImmutableSet.of(new ClusterResources(db, MAPPER), new HealthCheck(db)));
   }
 
   @Test

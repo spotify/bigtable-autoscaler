@@ -20,14 +20,38 @@
 
 package com.spotify.autoscaler;
 
-import com.spotify.autoscaler.di.AutoscalerComponent;
-import com.spotify.autoscaler.di.DaggerAutoscalerComponent;
+import com.spotify.autoscaler.di.AutoscalerExecutorModule;
+import com.spotify.autoscaler.di.ClusterFilterModule;
+import com.spotify.autoscaler.di.ConfigModule;
+import com.spotify.autoscaler.di.DatabaseModule;
+import com.spotify.autoscaler.di.HttpServerModule;
+import com.spotify.autoscaler.di.MetricsModule;
+import com.spotify.autoscaler.di.ObjectMapperModule;
+import com.spotify.autoscaler.di.OptionalsModule;
+import com.spotify.autoscaler.di.StackdriverModule;
+import dagger.Component;
+import javax.inject.Singleton;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 /** Application entry point. */
 public final class Main {
 
-  public static final String SERVICE_NAME = "bigtable-autoscaler";
+  @Singleton
+  @Component(
+      modules = {
+        ConfigModule.class,
+        DatabaseModule.class,
+        StackdriverModule.class,
+        HttpServerModule.class,
+        MetricsModule.class,
+        ClusterFilterModule.class,
+        AutoscalerExecutorModule.class,
+        ObjectMapperModule.class,
+        OptionalsModule.class,
+      })
+  public interface AutoscalerComponent {
+    Application configure();
+  }
 
   /**
    * Runs the application.
@@ -37,7 +61,7 @@ public final class Main {
   public static void main(final String... args) throws Exception {
     SLF4JBridgeHandler.removeHandlersForRootLogger();
     SLF4JBridgeHandler.install();
-    AutoscalerComponent autoscalerComponent = DaggerAutoscalerComponent.builder().build();
-    autoscalerComponent.configure().start();
+    AutoscalerComponent autoscaler = DaggerMain_AutoscalerComponent.builder().build();
+    autoscaler.configure().start();
   }
 }

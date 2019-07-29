@@ -47,7 +47,7 @@ public class ClusterFilterModule {
           | IllegalAccessException
           | NoSuchMethodException
           | InvocationTargetException e) {
-        LOGGER.error("Failed to create new instance of cluster filter " + clusterFilterClass, e);
+        LOGGER.warn("Failed to create new instance of cluster filter " + clusterFilterClass, e);
       }
     }
     return clusterFilter;
