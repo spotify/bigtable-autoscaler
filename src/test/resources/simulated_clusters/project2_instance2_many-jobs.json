@@ -1809,7 +1809,7 @@
     "modifiedRows": 32482.0,
     "returnedRows": 37804.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:01:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1821,7 +1821,7 @@
     "modifiedRows": 41731.0,
     "returnedRows": 42053.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:02:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1833,7 +1833,7 @@
     "modifiedRows": 27962.0,
     "returnedRows": 35624.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:03:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1845,7 +1845,7 @@
     "modifiedRows": 7456.0,
     "returnedRows": 11530.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:04:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1857,7 +1857,7 @@
     "modifiedRows": 31507.0,
     "returnedRows": 28494.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:05:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1869,7 +1869,7 @@
     "modifiedRows": 42271.0,
     "returnedRows": 50123.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:06:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1881,7 +1881,7 @@
     "modifiedRows": 52868.0,
     "returnedRows": 54171.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:07:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1893,7 +1893,7 @@
     "modifiedRows": 41818.0,
     "returnedRows": 52838.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:08:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1905,7 +1905,7 @@
     "modifiedRows": 16814.0,
     "returnedRows": 22084.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:09:00Z": {
     "diskUtilization": 0.02779295489521246,
@@ -1917,7 +1917,7 @@
     "modifiedRows": 32490.0,
     "returnedRows": 29153.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:10:00Z": {
     "diskUtilization": 0.027792893743753665,
@@ -1929,7 +1929,7 @@
     "modifiedRows": 29131.0,
     "returnedRows": 37917.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:11:00Z": {
     "diskUtilization": 0.027792893743753665,
@@ -1941,7 +1941,7 @@
     "modifiedRows": 31430.0,
     "returnedRows": 30102.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:12:00Z": {
     "diskUtilization": 0.027792893743753665,
@@ -1953,7 +1953,7 @@
     "modifiedRows": 26419.0,
     "returnedRows": 32322.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:13:00Z": {
     "diskUtilization": 0.027792893743753665,
@@ -1965,7 +1965,7 @@
     "modifiedRows": 20486.0,
     "returnedRows": 23728.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:14:00Z": {
     "diskUtilization": 0.027792893743753665,
@@ -1977,7 +1977,7 @@
     "modifiedRows": 537111.0,
     "returnedRows": 44304.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:15:00Z": {
     "diskUtilization": 0.027795052724686683,
@@ -1989,7 +1989,7 @@
     "modifiedRows": 291446.0,
     "returnedRows": 35928.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:16:00Z": {
     "diskUtilization": 0.027795052724686683,
@@ -2001,7 +2001,7 @@
     "modifiedRows": 42867.0,
     "returnedRows": 37962.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:17:00Z": {
     "diskUtilization": 0.027795052724686683,
@@ -2013,7 +2013,7 @@
     "modifiedRows": 44220.0,
     "returnedRows": 53699.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:18:00Z": {
     "diskUtilization": 0.027795052724686683,
@@ -2025,7 +2025,7 @@
     "modifiedRows": 14737.0,
     "returnedRows": 21004.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:19:00Z": {
     "diskUtilization": 0.027795052724686683,
@@ -2037,7 +2037,7 @@
     "modifiedRows": 44243.0,
     "returnedRows": 33667.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:20:00Z": {
     "diskUtilization": 0.027788676367599692,
@@ -2049,7 +2049,7 @@
     "modifiedRows": 376888.0,
     "returnedRows": 140718.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:21:00Z": {
     "diskUtilization": 0.027788676367599692,
@@ -2061,7 +2061,7 @@
     "modifiedRows": 489943.0,
     "returnedRows": 176917.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:22:00Z": {
     "diskUtilization": 0.027788676367599692,
@@ -2073,7 +2073,7 @@
     "modifiedRows": 478567.0,
     "returnedRows": 205006.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:23:00Z": {
     "diskUtilization": 0.027788676367599692,
@@ -2085,7 +2085,7 @@
     "modifiedRows": 451389.0,
     "returnedRows": 222205.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:24:00Z": {
     "diskUtilization": 0.027788676367599692,
@@ -2097,7 +2097,7 @@
     "modifiedRows": 445386.0,
     "returnedRows": 255525.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:25:00Z": {
     "diskUtilization": 0.02778942003094926,
@@ -2109,7 +2109,7 @@
     "modifiedRows": 364030.0,
     "returnedRows": 434071.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:26:00Z": {
     "diskUtilization": 0.02778942003094926,
@@ -2121,7 +2121,7 @@
     "modifiedRows": 61043.0,
     "returnedRows": 109829.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:27:00Z": {
     "diskUtilization": 0.02778942003094926,
@@ -2133,7 +2133,7 @@
     "modifiedRows": 625685.0,
     "returnedRows": 389078.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:28:00Z": {
     "diskUtilization": 0.02778942003094926,
@@ -2145,7 +2145,7 @@
     "modifiedRows": 1357797.0,
     "returnedRows": 707247.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:29:00Z": {
     "diskUtilization": 0.02778942003094926,
@@ -2157,7 +2157,7 @@
     "modifiedRows": 111103.0,
     "returnedRows": 728129.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:30:00Z": {
     "diskUtilization": 0.027792100450660655,
@@ -2169,7 +2169,7 @@
     "modifiedRows": 63868.0,
     "returnedRows": 670563.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:31:00Z": {
     "diskUtilization": 0.027792100450660655,
@@ -2181,7 +2181,7 @@
     "modifiedRows": 23853.0,
     "returnedRows": 692134.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:32:00Z": {
     "diskUtilization": 0.027792100450660655,
@@ -2193,7 +2193,7 @@
     "modifiedRows": 19846.0,
     "returnedRows": 646416.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:33:00Z": {
     "diskUtilization": 0.027792100450660655,
@@ -2205,7 +2205,7 @@
     "modifiedRows": 43257.0,
     "returnedRows": 416932.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:34:00Z": {
     "diskUtilization": 0.027792100450660655,
@@ -2217,7 +2217,7 @@
     "modifiedRows": 38975.0,
     "returnedRows": 83519.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:35:00Z": {
     "diskUtilization": 0.027798193046528467,
@@ -2229,7 +2229,7 @@
     "modifiedRows": 29878.0,
     "returnedRows": 32707.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:36:00Z": {
     "diskUtilization": 0.027798193046528467,
@@ -2241,7 +2241,7 @@
     "modifiedRows": 30191.0,
     "returnedRows": 34751.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:37:00Z": {
     "diskUtilization": 0.027798193046528467,
@@ -2253,7 +2253,7 @@
     "modifiedRows": 27051.0,
     "returnedRows": 31754.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:38:00Z": {
     "diskUtilization": 0.027798193046528467,
@@ -2265,7 +2265,7 @@
     "modifiedRows": 8987.0,
     "returnedRows": 12812.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:39:00Z": {
     "diskUtilization": 0.027798193046528467,
@@ -2277,7 +2277,7 @@
     "modifiedRows": 16827.0,
     "returnedRows": 13862.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:40:00Z": {
     "diskUtilization": 0.027803114426005776,
@@ -2289,7 +2289,7 @@
     "modifiedRows": 26911.0,
     "returnedRows": 31430.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:41:00Z": {
     "diskUtilization": 0.027803114426005776,
@@ -2301,7 +2301,7 @@
     "modifiedRows": 32146.0,
     "returnedRows": 36532.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:42:00Z": {
     "diskUtilization": 0.027803114426005776,
@@ -2313,7 +2313,7 @@
     "modifiedRows": 42145.0,
     "returnedRows": 42754.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:43:00Z": {
     "diskUtilization": 0.027803114426005776,
@@ -2325,7 +2325,7 @@
     "modifiedRows": 37558.0,
     "returnedRows": 43716.0,
     "errorCount": 0.0,
-    "minNodesOverride": 10.0
+    "minNodesOverride": 13.0
   },
   "2019-07-22T14:44:00Z": {
     "diskUtilization": 0.027803114426005776,
@@ -8817,7 +8817,7 @@
     "modifiedRows": 8166.0,
     "returnedRows": 8305.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:45:00Z": {
     "diskUtilization": 0.027796494900267133,
@@ -8829,7 +8829,7 @@
     "modifiedRows": 14355.0,
     "returnedRows": 15133.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:46:00Z": {
     "diskUtilization": 0.027796494900267133,
@@ -8841,7 +8841,7 @@
     "modifiedRows": 18035.0,
     "returnedRows": 19338.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:47:00Z": {
     "diskUtilization": 0.027796494900267133,
@@ -8853,7 +8853,7 @@
     "modifiedRows": 23547.0,
     "returnedRows": 23798.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:48:00Z": {
     "diskUtilization": 0.027796494900267133,
@@ -8865,7 +8865,7 @@
     "modifiedRows": 16176.0,
     "returnedRows": 23634.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:49:00Z": {
     "diskUtilization": 0.027796494900267133,
@@ -8877,7 +8877,7 @@
     "modifiedRows": 11672.0,
     "returnedRows": 11002.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:50:00Z": {
     "diskUtilization": 0.027789660345915762,
@@ -8889,7 +8889,7 @@
     "modifiedRows": 18036.0,
     "returnedRows": 20926.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:51:00Z": {
     "diskUtilization": 0.027789660345915762,
@@ -8901,7 +8901,7 @@
     "modifiedRows": 21042.0,
     "returnedRows": 20920.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:52:00Z": {
     "diskUtilization": 0.027789660345915762,
@@ -8913,7 +8913,7 @@
     "modifiedRows": 36447.0,
     "returnedRows": 35633.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:53:00Z": {
     "diskUtilization": 0.027789660345915762,
@@ -8925,7 +8925,7 @@
     "modifiedRows": 14267.0,
     "returnedRows": 23073.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:54:00Z": {
     "diskUtilization": 0.027789660345915762,
@@ -8937,7 +8937,7 @@
     "modifiedRows": 7394.0,
     "returnedRows": 7658.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:55:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -8949,7 +8949,7 @@
     "modifiedRows": 18328.0,
     "returnedRows": 16593.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:56:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -8961,7 +8961,7 @@
     "modifiedRows": 20629.0,
     "returnedRows": 22715.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:57:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -8973,7 +8973,7 @@
     "modifiedRows": 25502.0,
     "returnedRows": 24536.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:58:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -8985,7 +8985,7 @@
     "modifiedRows": 25738.0,
     "returnedRows": 31436.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-22T23:59:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -8997,7 +8997,7 @@
     "modifiedRows": 11028.0,
     "returnedRows": 13375.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:00:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -9009,7 +9009,7 @@
     "modifiedRows": 16537.0,
     "returnedRows": 17841.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:01:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -9021,7 +9021,7 @@
     "modifiedRows": 19493.0,
     "returnedRows": 21212.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:02:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -9033,7 +9033,7 @@
     "modifiedRows": 30827.0,
     "returnedRows": 32461.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:03:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -9045,7 +9045,7 @@
     "modifiedRows": 17708.0,
     "returnedRows": 23779.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:04:00Z": {
     "diskUtilization": 0.02779154843883589,
@@ -9057,7 +9057,7 @@
     "modifiedRows": 20042.0,
     "returnedRows": 16230.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:05:00Z": {
     "diskUtilization": 0.027793431672416772,
@@ -9069,7 +9069,7 @@
     "modifiedRows": 30082.0,
     "returnedRows": 37203.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:06:00Z": {
     "diskUtilization": 0.027793431672416772,
@@ -9081,7 +9081,7 @@
     "modifiedRows": 24232.0,
     "returnedRows": 835349.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:07:00Z": {
     "diskUtilization": 0.027793431672416772,
@@ -9093,7 +9093,7 @@
     "modifiedRows": 32031.0,
     "returnedRows": 5.4705665E7,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:08:00Z": {
     "diskUtilization": 0.027793431672416772,
@@ -9105,7 +9105,7 @@
     "modifiedRows": 23964.0,
     "returnedRows": 1.00912559E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:09:00Z": {
     "diskUtilization": 0.027793431672416772,
@@ -9117,7 +9117,7 @@
     "modifiedRows": 19943.0,
     "returnedRows": 1.37760905E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:10:00Z": {
     "diskUtilization": 0.027795084588306054,
@@ -9129,7 +9129,7 @@
     "modifiedRows": 22307.0,
     "returnedRows": 1.24924406E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:11:00Z": {
     "diskUtilization": 0.027795084588306054,
@@ -9141,7 +9141,7 @@
     "modifiedRows": 28813.0,
     "returnedRows": 1.47503092E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:12:00Z": {
     "diskUtilization": 0.027795084588306054,
@@ -9153,7 +9153,7 @@
     "modifiedRows": 34296.0,
     "returnedRows": 1.54728919E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:13:00Z": {
     "diskUtilization": 0.027795084588306054,
@@ -9165,7 +9165,7 @@
     "modifiedRows": 22009.0,
     "returnedRows": 1.65341082E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:14:00Z": {
     "diskUtilization": 0.027795084588306054,
@@ -9177,7 +9177,7 @@
     "modifiedRows": 26786.0,
     "returnedRows": 1.36725931E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:15:00Z": {
     "diskUtilization": 0.027799516316899826,
@@ -9189,7 +9189,7 @@
     "modifiedRows": 54212.0,
     "returnedRows": 1.49443429E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:16:00Z": {
     "diskUtilization": 0.027799516316899826,
@@ -9201,7 +9201,7 @@
     "modifiedRows": 23470.0,
     "returnedRows": 1.44455622E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:17:00Z": {
     "diskUtilization": 0.027799516316899826,
@@ -9213,7 +9213,7 @@
     "modifiedRows": 24139.0,
     "returnedRows": 1.52657988E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:18:00Z": {
     "diskUtilization": 0.027799516316899826,
@@ -9225,7 +9225,7 @@
     "modifiedRows": 11820.0,
     "returnedRows": 1.6894693E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:19:00Z": {
     "diskUtilization": 0.027799516316899826,
@@ -9237,7 +9237,7 @@
     "modifiedRows": 15323.0,
     "returnedRows": 1.4813453E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:20:00Z": {
     "diskUtilization": 0.02780005632497705,
@@ -9249,7 +9249,7 @@
     "modifiedRows": 20806.0,
     "returnedRows": 1.51859207E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:21:00Z": {
     "diskUtilization": 0.02780005632497705,
@@ -9261,7 +9261,7 @@
     "modifiedRows": 27375.0,
     "returnedRows": 1.66642033E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:22:00Z": {
     "diskUtilization": 0.02780005632497705,
@@ -9273,7 +9273,7 @@
     "modifiedRows": 37058.0,
     "returnedRows": 1.28342769E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:23:00Z": {
     "diskUtilization": 0.02780005632497705,
@@ -9285,7 +9285,7 @@
     "modifiedRows": 17462.0,
     "returnedRows": 1.2879661E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:24:00Z": {
     "diskUtilization": 0.02780005632497705,
@@ -9297,7 +9297,7 @@
     "modifiedRows": 8543.0,
     "returnedRows": 1.4121135E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:25:00Z": {
     "diskUtilization": 0.027801622754541313,
@@ -9309,7 +9309,7 @@
     "modifiedRows": 17454.0,
     "returnedRows": 1.4714055E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:26:00Z": {
     "diskUtilization": 0.027801622754541313,
@@ -9321,7 +9321,7 @@
     "modifiedRows": 21468.0,
     "returnedRows": 1.51700839E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:27:00Z": {
     "diskUtilization": 0.027801622754541313,
@@ -9333,7 +9333,7 @@
     "modifiedRows": 32012.0,
     "returnedRows": 1.55639565E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:28:00Z": {
     "diskUtilization": 0.027801622754541313,
@@ -9345,7 +9345,7 @@
     "modifiedRows": 8955.0,
     "returnedRows": 1.60361821E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:29:00Z": {
     "diskUtilization": 0.027801622754541313,
@@ -9357,7 +9357,7 @@
     "modifiedRows": 9463.0,
     "returnedRows": 1.71891565E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:30:00Z": {
     "diskUtilization": 0.02779373130782915,
@@ -9369,7 +9369,7 @@
     "modifiedRows": 24645.0,
     "returnedRows": 1.43056047E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:31:00Z": {
     "diskUtilization": 0.02779373130782915,
@@ -9381,7 +9381,7 @@
     "modifiedRows": 20144.0,
     "returnedRows": 1.49507125E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:32:00Z": {
     "diskUtilization": 0.02779373130782915,
@@ -9393,7 +9393,7 @@
     "modifiedRows": 23976.0,
     "returnedRows": 1.70830009E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:33:00Z": {
     "diskUtilization": 0.02779373130782915,
@@ -9405,7 +9405,7 @@
     "modifiedRows": 9114.0,
     "returnedRows": 1.67788294E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:34:00Z": {
     "diskUtilization": 0.02779373130782915,
@@ -9417,7 +9417,7 @@
     "modifiedRows": 13351.0,
     "returnedRows": 1.40329478E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:35:00Z": {
     "diskUtilization": 0.027794374834538758,
@@ -9429,7 +9429,7 @@
     "modifiedRows": 22581.0,
     "returnedRows": 1.2004784E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:36:00Z": {
     "diskUtilization": 0.027794374834538758,
@@ -9441,7 +9441,7 @@
     "modifiedRows": 18393.0,
     "returnedRows": 1.37871861E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:37:00Z": {
     "diskUtilization": 0.027794374834538758,
@@ -9453,7 +9453,7 @@
     "modifiedRows": 23254.0,
     "returnedRows": 1.60783286E8,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:38:00Z": {
     "diskUtilization": 0.027794374834538758,
@@ -9465,7 +9465,7 @@
     "modifiedRows": 15058.0,
     "returnedRows": 7.2584701E7,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:39:00Z": {
     "diskUtilization": 0.027794374834538758,
@@ -9477,7 +9477,7 @@
     "modifiedRows": 11326.0,
     "returnedRows": 3.2536131E7,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:40:00Z": {
     "diskUtilization": 0.027790396581531242,
@@ -9489,7 +9489,7 @@
     "modifiedRows": 20835.0,
     "returnedRows": 2772400.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:41:00Z": {
     "diskUtilization": 0.027790396581531242,
@@ -9501,7 +9501,7 @@
     "modifiedRows": 13995.0,
     "returnedRows": 16410.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:42:00Z": {
     "diskUtilization": 0.027790396581531242,
@@ -9513,7 +9513,7 @@
     "modifiedRows": 18504.0,
     "returnedRows": 17822.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:43:00Z": {
     "diskUtilization": 0.027790396581531242,
@@ -9525,7 +9525,7 @@
     "modifiedRows": 12202.0,
     "returnedRows": 16062.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:44:00Z": {
     "diskUtilization": 0.027790396581531242,
@@ -9537,7 +9537,7 @@
     "modifiedRows": 7098.0,
     "returnedRows": 6706.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:45:00Z": {
     "diskUtilization": 0.02779162809893023,
@@ -9549,7 +9549,7 @@
     "modifiedRows": 13209.0,
     "returnedRows": 14537.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:46:00Z": {
     "diskUtilization": 0.02779162809893023,
@@ -9561,7 +9561,7 @@
     "modifiedRows": 18599.0,
     "returnedRows": 15016.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:47:00Z": {
     "diskUtilization": 0.02779162809893023,
@@ -9573,7 +9573,7 @@
     "modifiedRows": 39573.0,
     "returnedRows": 42135.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:48:00Z": {
     "diskUtilization": 0.02779162809893023,
@@ -9585,7 +9585,7 @@
     "modifiedRows": 22643.0,
     "returnedRows": 28371.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:49:00Z": {
     "diskUtilization": 0.02779162809893023,
@@ -9597,7 +9597,7 @@
     "modifiedRows": 9960.0,
     "returnedRows": 10775.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:50:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9609,7 +9609,7 @@
     "modifiedRows": 16083.0,
     "returnedRows": 17817.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:51:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9621,7 +9621,7 @@
     "modifiedRows": 22300.0,
     "returnedRows": 23012.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:52:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9633,7 +9633,7 @@
     "modifiedRows": 27178.0,
     "returnedRows": 29562.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:53:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9645,7 +9645,7 @@
     "modifiedRows": 11061.0,
     "returnedRows": 14858.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:54:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9657,7 +9657,7 @@
     "modifiedRows": 9666.0,
     "returnedRows": 7813.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:55:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9669,7 +9669,7 @@
     "modifiedRows": 19276.0,
     "returnedRows": 20514.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:56:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9681,7 +9681,7 @@
     "modifiedRows": 26215.0,
     "returnedRows": 25571.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:57:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9693,7 +9693,7 @@
     "modifiedRows": 29424.0,
     "returnedRows": 33653.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:58:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9705,7 +9705,7 @@
     "modifiedRows": 9326.0,
     "returnedRows": 13862.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T00:59:00Z": {
     "diskUtilization": 0.027792199971445372,
@@ -9717,7 +9717,7 @@
     "modifiedRows": 10821.0,
     "returnedRows": 7900.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:00:00Z": {
     "diskUtilization": 0.027793592972975602,
@@ -9729,7 +9729,7 @@
     "modifiedRows": 25897.0,
     "returnedRows": 26608.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:01:00Z": {
     "diskUtilization": 0.027793592972975602,
@@ -9741,7 +9741,7 @@
     "modifiedRows": 33203.0,
     "returnedRows": 33675.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:02:00Z": {
     "diskUtilization": 0.027793592972975602,
@@ -9753,7 +9753,7 @@
     "modifiedRows": 30811.0,
     "returnedRows": 35837.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:03:00Z": {
     "diskUtilization": 0.027793592972975602,
@@ -9765,7 +9765,7 @@
     "modifiedRows": 10402.0,
     "returnedRows": 15499.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:04:00Z": {
     "diskUtilization": 0.027793592972975602,
@@ -9777,7 +9777,7 @@
     "modifiedRows": 9720.0,
     "returnedRows": 8252.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:05:00Z": {
     "diskUtilization": 0.027793478552357555,
@@ -9789,7 +9789,7 @@
     "modifiedRows": 20129.0,
     "returnedRows": 19669.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:06:00Z": {
     "diskUtilization": 0.027793478552357555,
@@ -9801,7 +9801,7 @@
     "modifiedRows": 71522.0,
     "returnedRows": 72516.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:07:00Z": {
     "diskUtilization": 0.027793478552357555,
@@ -9813,7 +9813,7 @@
     "modifiedRows": 46319.0,
     "returnedRows": 46762.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:08:00Z": {
     "diskUtilization": 0.027793478552357555,
@@ -9825,7 +9825,7 @@
     "modifiedRows": 30056.0,
     "returnedRows": 33641.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:09:00Z": {
     "diskUtilization": 0.027793478552357555,
@@ -9837,7 +9837,7 @@
     "modifiedRows": 78214.0,
     "returnedRows": 65580.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:10:00Z": {
     "diskUtilization": 0.02779466647451045,
@@ -9849,7 +9849,7 @@
     "modifiedRows": 54104.0,
     "returnedRows": 50786.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:11:00Z": {
     "diskUtilization": 0.02779466647451045,
@@ -9861,7 +9861,7 @@
     "modifiedRows": 66255.0,
     "returnedRows": 56929.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:12:00Z": {
     "diskUtilization": 0.02779466647451045,
@@ -9873,7 +9873,7 @@
     "modifiedRows": 76919.0,
     "returnedRows": 80959.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:13:00Z": {
     "diskUtilization": 0.02779466647451045,
@@ -9885,7 +9885,7 @@
     "modifiedRows": 73963.0,
     "returnedRows": 72953.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:14:00Z": {
     "diskUtilization": 0.02779466647451045,
@@ -9897,7 +9897,7 @@
     "modifiedRows": 163182.0,
     "returnedRows": 188334.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:15:00Z": {
     "diskUtilization": 0.027794727263626556,
@@ -9909,7 +9909,7 @@
     "modifiedRows": 82707.0,
     "returnedRows": 98607.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:16:00Z": {
     "diskUtilization": 0.027794727263626556,
@@ -9921,7 +9921,7 @@
     "modifiedRows": 82607.0,
     "returnedRows": 101958.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:17:00Z": {
     "diskUtilization": 0.027794727263626556,
@@ -9933,7 +9933,7 @@
     "modifiedRows": 95532.0,
     "returnedRows": 99121.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:18:00Z": {
     "diskUtilization": 0.027794727263626556,
@@ -9945,7 +9945,7 @@
     "modifiedRows": 72219.0,
     "returnedRows": 75905.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:19:00Z": {
     "diskUtilization": 0.027794727263626556,
@@ -9957,7 +9957,7 @@
     "modifiedRows": 83516.0,
     "returnedRows": 84410.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:20:00Z": {
     "diskUtilization": 0.027787156808808503,
@@ -9969,7 +9969,7 @@
     "modifiedRows": 90521.0,
     "returnedRows": 87620.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:21:00Z": {
     "diskUtilization": 0.027787156808808503,
@@ -9981,7 +9981,7 @@
     "modifiedRows": 102477.0,
     "returnedRows": 99699.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:22:00Z": {
     "diskUtilization": 0.027787156808808503,
@@ -9993,7 +9993,7 @@
     "modifiedRows": 139797.0,
     "returnedRows": 138637.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:23:00Z": {
     "diskUtilization": 0.027787156808808503,
@@ -10005,7 +10005,7 @@
     "modifiedRows": 101244.0,
     "returnedRows": 105954.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:24:00Z": {
     "diskUtilization": 0.027787156808808503,
@@ -10017,7 +10017,7 @@
     "modifiedRows": 81756.0,
     "returnedRows": 82789.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:25:00Z": {
     "diskUtilization": 0.027790480619278243,
@@ -10029,7 +10029,7 @@
     "modifiedRows": 103990.0,
     "returnedRows": 105509.0,
     "errorCount": 0.0,
-    "minNodesOverride": 20.0
+    "minNodesOverride": 23.0
   },
   "2019-07-23T01:26:00Z": {
     "diskUtilization": 0.027790480619278243,
@@ -11673,7 +11673,7 @@
     "modifiedRows": 15438.0,
     "returnedRows": 16596.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:43:00Z": {
     "diskUtilization": 0.027726925851420673,
@@ -11685,7 +11685,7 @@
     "modifiedRows": 12126.0,
     "returnedRows": 13401.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:44:00Z": {
     "diskUtilization": 0.027726925851420673,
@@ -11697,7 +11697,7 @@
     "modifiedRows": 7889.0,
     "returnedRows": 8307.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:45:00Z": {
     "diskUtilization": 0.0277279237329094,
@@ -11709,7 +11709,7 @@
     "modifiedRows": 16695.0,
     "returnedRows": 158671.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:46:00Z": {
     "diskUtilization": 0.0277279237329094,
@@ -11721,7 +11721,7 @@
     "modifiedRows": 16856.0,
     "returnedRows": 78863.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:47:00Z": {
     "diskUtilization": 0.0277279237329094,
@@ -11733,7 +11733,7 @@
     "modifiedRows": 15134.0,
     "returnedRows": 17826.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:48:00Z": {
     "diskUtilization": 0.0277279237329094,
@@ -11745,7 +11745,7 @@
     "modifiedRows": 11499.0,
     "returnedRows": 13688.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:49:00Z": {
     "diskUtilization": 0.0277279237329094,
@@ -11757,7 +11757,7 @@
     "modifiedRows": 11818.0,
     "returnedRows": 11944.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:50:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11769,7 +11769,7 @@
     "modifiedRows": 21671.0,
     "returnedRows": 24137.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:51:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11781,7 +11781,7 @@
     "modifiedRows": 15910.0,
     "returnedRows": 18572.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:52:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11793,7 +11793,7 @@
     "modifiedRows": 19551.0,
     "returnedRows": 19412.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:53:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11805,7 +11805,7 @@
     "modifiedRows": 10333.0,
     "returnedRows": 13621.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:54:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11817,7 +11817,7 @@
     "modifiedRows": 5700.0,
     "returnedRows": 6064.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:55:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11829,7 +11829,7 @@
     "modifiedRows": 15880.0,
     "returnedRows": 13981.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:56:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11841,7 +11841,7 @@
     "modifiedRows": 15853.0,
     "returnedRows": 19845.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:57:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11853,7 +11853,7 @@
     "modifiedRows": 22868.0,
     "returnedRows": 22199.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:58:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11865,7 +11865,7 @@
     "modifiedRows": 16362.0,
     "returnedRows": 23653.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T03:59:00Z": {
     "diskUtilization": 0.027728614303268843,
@@ -11877,7 +11877,7 @@
     "modifiedRows": 11966.0,
     "returnedRows": 11927.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:00:00Z": {
     "diskUtilization": 0.027730039944035525,
@@ -11889,7 +11889,7 @@
     "modifiedRows": 23264.0,
     "returnedRows": 23059.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:01:00Z": {
     "diskUtilization": 0.027730039944035525,
@@ -11901,7 +11901,7 @@
     "modifiedRows": 30083.0,
     "returnedRows": 35394.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:02:00Z": {
     "diskUtilization": 0.027730039944035525,
@@ -11913,7 +11913,7 @@
     "modifiedRows": 43511.0,
     "returnedRows": 44459.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:03:00Z": {
     "diskUtilization": 0.027730039944035525,
@@ -11925,7 +11925,7 @@
     "modifiedRows": 28863.0,
     "returnedRows": 38085.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:04:00Z": {
     "diskUtilization": 0.027730039944035525,
@@ -11937,7 +11937,7 @@
     "modifiedRows": 35391.0,
     "returnedRows": 24772.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:05:00Z": {
     "diskUtilization": 0.027731127679071505,
@@ -11949,7 +11949,7 @@
     "modifiedRows": 59125.0,
     "returnedRows": 68328.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:06:00Z": {
     "diskUtilization": 0.027731127679071505,
@@ -11961,7 +11961,7 @@
     "modifiedRows": 26850.0,
     "returnedRows": 5145171.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:07:00Z": {
     "diskUtilization": 0.027731127679071505,
@@ -11973,7 +11973,7 @@
     "modifiedRows": 43659.0,
     "returnedRows": 2.2640805E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:08:00Z": {
     "diskUtilization": 0.027731127679071505,
@@ -11985,7 +11985,7 @@
     "modifiedRows": 16740.0,
     "returnedRows": 3.6560035E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:09:00Z": {
     "diskUtilization": 0.027731127679071505,
@@ -11997,7 +11997,7 @@
     "modifiedRows": 33118.0,
     "returnedRows": 3.1302503E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:10:00Z": {
     "diskUtilization": 0.02773508217531344,
@@ -12009,7 +12009,7 @@
     "modifiedRows": 48354.0,
     "returnedRows": 4.6531054E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:11:00Z": {
     "diskUtilization": 0.02773508217531344,
@@ -12021,7 +12021,7 @@
     "modifiedRows": 13259.0,
     "returnedRows": 4.1925156E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:12:00Z": {
     "diskUtilization": 0.02773508217531344,
@@ -12033,7 +12033,7 @@
     "modifiedRows": 21753.0,
     "returnedRows": 2.7354092E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:13:00Z": {
     "diskUtilization": 0.02773508217531344,
@@ -12045,7 +12045,7 @@
     "modifiedRows": 26081.0,
     "returnedRows": 4.1923122E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:14:00Z": {
     "diskUtilization": 0.02773508217531344,
@@ -12057,7 +12057,7 @@
     "modifiedRows": 24249.0,
     "returnedRows": 4.7943857E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:15:00Z": {
     "diskUtilization": 0.027738139640005103,
@@ -12069,7 +12069,7 @@
     "modifiedRows": 65389.0,
     "returnedRows": 3.2691074E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:16:00Z": {
     "diskUtilization": 0.027738139640005103,
@@ -12081,7 +12081,7 @@
     "modifiedRows": 41137.0,
     "returnedRows": 5.1448277E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:17:00Z": {
     "diskUtilization": 0.027738139640005103,
@@ -12093,7 +12093,7 @@
     "modifiedRows": 35841.0,
     "returnedRows": 4.9872607E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:18:00Z": {
     "diskUtilization": 0.027738139640005103,
@@ -12105,7 +12105,7 @@
     "modifiedRows": 25734.0,
     "returnedRows": 3.1689206E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:19:00Z": {
     "diskUtilization": 0.027738139640005103,
@@ -12117,7 +12117,7 @@
     "modifiedRows": 20698.0,
     "returnedRows": 2.4730329E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:20:00Z": {
     "diskUtilization": 0.02773017621031613,
@@ -12129,7 +12129,7 @@
     "modifiedRows": 36167.0,
     "returnedRows": 2.3042571E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:21:00Z": {
     "diskUtilization": 0.02773017621031613,
@@ -12141,7 +12141,7 @@
     "modifiedRows": 36958.0,
     "returnedRows": 2.9023341E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:22:00Z": {
     "diskUtilization": 0.02773017621031613,
@@ -12153,7 +12153,7 @@
     "modifiedRows": 36633.0,
     "returnedRows": 2.3666618E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:23:00Z": {
     "diskUtilization": 0.02773017621031613,
@@ -12165,7 +12165,7 @@
     "modifiedRows": 27048.0,
     "returnedRows": 1.6173983E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:24:00Z": {
     "diskUtilization": 0.02773017621031613,
@@ -12177,7 +12177,7 @@
     "modifiedRows": 10503.0,
     "returnedRows": 1.9015772E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:25:00Z": {
     "diskUtilization": 0.027732146959406238,
@@ -12189,7 +12189,7 @@
     "modifiedRows": 19720.0,
     "returnedRows": 1.9246065E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:26:00Z": {
     "diskUtilization": 0.027732146959406238,
@@ -12201,7 +12201,7 @@
     "modifiedRows": 22118.0,
     "returnedRows": 1.8129558E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:27:00Z": {
     "diskUtilization": 0.027732146959406238,
@@ -12213,7 +12213,7 @@
     "modifiedRows": 24816.0,
     "returnedRows": 1.8413454E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:28:00Z": {
     "diskUtilization": 0.027732146959406238,
@@ -12225,7 +12225,7 @@
     "modifiedRows": 19253.0,
     "returnedRows": 2.3664554E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:29:00Z": {
     "diskUtilization": 0.027732146959406238,
@@ -12237,7 +12237,7 @@
     "modifiedRows": 11099.0,
     "returnedRows": 3.0527757E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:30:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12249,7 +12249,7 @@
     "modifiedRows": 35731.0,
     "returnedRows": 1.9715521E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:31:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12261,7 +12261,7 @@
     "modifiedRows": 29685.0,
     "returnedRows": 1.507115E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:32:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12273,7 +12273,7 @@
     "modifiedRows": 31586.0,
     "returnedRows": 2.5646716E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:33:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12285,7 +12285,7 @@
     "modifiedRows": 24212.0,
     "returnedRows": 1.7333882E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:34:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12297,7 +12297,7 @@
     "modifiedRows": 12149.0,
     "returnedRows": 1.4602092E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:35:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12309,7 +12309,7 @@
     "modifiedRows": 23537.0,
     "returnedRows": 1.692264E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:36:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12321,7 +12321,7 @@
     "modifiedRows": 21980.0,
     "returnedRows": 1.9144941E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:37:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12333,7 +12333,7 @@
     "modifiedRows": 28823.0,
     "returnedRows": 9321826.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:38:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12345,7 +12345,7 @@
     "modifiedRows": 30510.0,
     "returnedRows": 1.5347226E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:39:00Z": {
     "diskUtilization": 0.027735050368355586,
@@ -12357,7 +12357,7 @@
     "modifiedRows": 17216.0,
     "returnedRows": 1.1852292E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:40:00Z": {
     "diskUtilization": 0.027732473527667025,
@@ -12369,7 +12369,7 @@
     "modifiedRows": 26560.0,
     "returnedRows": 2.0574822E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:41:00Z": {
     "diskUtilization": 0.027732473527667025,
@@ -12381,7 +12381,7 @@
     "modifiedRows": 27391.0,
     "returnedRows": 2.4049264E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:42:00Z": {
     "diskUtilization": 0.027732473527667025,
@@ -12393,7 +12393,7 @@
     "modifiedRows": 22239.0,
     "returnedRows": 1.3363199E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:43:00Z": {
     "diskUtilization": 0.027732473527667025,
@@ -12405,7 +12405,7 @@
     "modifiedRows": 15696.0,
     "returnedRows": 2.4660811E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:44:00Z": {
     "diskUtilization": 0.027732473527667025,
@@ -12417,7 +12417,7 @@
     "modifiedRows": 12727.0,
     "returnedRows": 1.5175585E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:45:00Z": {
     "diskUtilization": 0.027734104637966085,
@@ -12429,7 +12429,7 @@
     "modifiedRows": 18286.0,
     "returnedRows": 1.4807342E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:46:00Z": {
     "diskUtilization": 0.027734104637966085,
@@ -12441,7 +12441,7 @@
     "modifiedRows": 19267.0,
     "returnedRows": 1.4728519E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:47:00Z": {
     "diskUtilization": 0.027734104637966085,
@@ -12453,7 +12453,7 @@
     "modifiedRows": 302887.0,
     "returnedRows": 1.7136898E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:48:00Z": {
     "diskUtilization": 0.027734104637966085,
@@ -12465,7 +12465,7 @@
     "modifiedRows": 228006.0,
     "returnedRows": 1.5948752E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:49:00Z": {
     "diskUtilization": 0.027734104637966085,
@@ -12477,7 +12477,7 @@
     "modifiedRows": 9755.0,
     "returnedRows": 2.5143644E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:50:00Z": {
     "diskUtilization": 0.02773388764280753,
@@ -12489,7 +12489,7 @@
     "modifiedRows": 14073.0,
     "returnedRows": 1.6030567E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:51:00Z": {
     "diskUtilization": 0.02773388764280753,
@@ -12501,7 +12501,7 @@
     "modifiedRows": 19486.0,
     "returnedRows": 2.3597115E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:52:00Z": {
     "diskUtilization": 0.02773388764280753,
@@ -12513,7 +12513,7 @@
     "modifiedRows": 27204.0,
     "returnedRows": 8356986.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:53:00Z": {
     "diskUtilization": 0.02773388764280753,
@@ -12525,7 +12525,7 @@
     "modifiedRows": 17855.0,
     "returnedRows": 1.3061887E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:54:00Z": {
     "diskUtilization": 0.02773388764280753,
@@ -12537,7 +12537,7 @@
     "modifiedRows": 10318.0,
     "returnedRows": 8622953.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:55:00Z": {
     "diskUtilization": 0.027736948437268438,
@@ -12549,7 +12549,7 @@
     "modifiedRows": 26552.0,
     "returnedRows": 1.436958E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:56:00Z": {
     "diskUtilization": 0.027736948437268438,
@@ -12561,7 +12561,7 @@
     "modifiedRows": 17504.0,
     "returnedRows": 1.0130525E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:57:00Z": {
     "diskUtilization": 0.027736948437268438,
@@ -12573,7 +12573,7 @@
     "modifiedRows": 21411.0,
     "returnedRows": 2.0994199E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:58:00Z": {
     "diskUtilization": 0.027736948437268438,
@@ -12585,7 +12585,7 @@
     "modifiedRows": 17304.0,
     "returnedRows": 7858159.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T04:59:00Z": {
     "diskUtilization": 0.027736948437268438,
@@ -12597,7 +12597,7 @@
     "modifiedRows": 8686.0,
     "returnedRows": 2.23216E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:00:00Z": {
     "diskUtilization": 0.027740957944024557,
@@ -12609,7 +12609,7 @@
     "modifiedRows": 17079.0,
     "returnedRows": 9000787.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:01:00Z": {
     "diskUtilization": 0.027740957944024557,
@@ -12621,7 +12621,7 @@
     "modifiedRows": 28614.0,
     "returnedRows": 8326772.0,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:02:00Z": {
     "diskUtilization": 0.027740957944024557,
@@ -12633,7 +12633,7 @@
     "modifiedRows": 28839.0,
     "returnedRows": 1.3604189E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:03:00Z": {
     "diskUtilization": 0.027740957944024557,
@@ -12645,7 +12645,7 @@
     "modifiedRows": 29429.0,
     "returnedRows": 7801457.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:04:00Z": {
     "diskUtilization": 0.027740957944024557,
@@ -12657,7 +12657,7 @@
     "modifiedRows": 16589.0,
     "returnedRows": 7480073.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:05:00Z": {
     "diskUtilization": 0.027739743373185775,
@@ -12669,7 +12669,7 @@
     "modifiedRows": 28250.0,
     "returnedRows": 1.5881548E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:06:00Z": {
     "diskUtilization": 0.027739743373185775,
@@ -12681,7 +12681,7 @@
     "modifiedRows": 33400.0,
     "returnedRows": 1.1584774E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:07:00Z": {
     "diskUtilization": 0.027739743373185775,
@@ -12693,7 +12693,7 @@
     "modifiedRows": 42061.0,
     "returnedRows": 1.5911145E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:08:00Z": {
     "diskUtilization": 0.027739743373185775,
@@ -12705,7 +12705,7 @@
     "modifiedRows": 25248.0,
     "returnedRows": 3.2246187E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:09:00Z": {
     "diskUtilization": 0.027739743373185775,
@@ -12717,7 +12717,7 @@
     "modifiedRows": 24345.0,
     "returnedRows": 1.484164E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:10:00Z": {
     "diskUtilization": 0.027726902620142938,
@@ -12729,7 +12729,7 @@
     "modifiedRows": 39474.0,
     "returnedRows": 2.7515902E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:11:00Z": {
     "diskUtilization": 0.027726902620142938,
@@ -12741,7 +12741,7 @@
     "modifiedRows": 24995.0,
     "returnedRows": 2.669458E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:12:00Z": {
     "diskUtilization": 0.027726902620142938,
@@ -12753,7 +12753,7 @@
     "modifiedRows": 30552.0,
     "returnedRows": 6.2429347E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:13:00Z": {
     "diskUtilization": 0.027726902620142938,
@@ -12765,7 +12765,7 @@
     "modifiedRows": 19907.0,
     "returnedRows": 3.0080935E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:14:00Z": {
     "diskUtilization": 0.027726902620142938,
@@ -12777,7 +12777,7 @@
     "modifiedRows": 17172.0,
     "returnedRows": 4.1651344E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:15:00Z": {
     "diskUtilization": 0.027723629427673587,
@@ -12789,7 +12789,7 @@
     "modifiedRows": 40239.0,
     "returnedRows": 7278418.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:16:00Z": {
     "diskUtilization": 0.027723629427673587,
@@ -12801,7 +12801,7 @@
     "modifiedRows": 27227.0,
     "returnedRows": 4777539.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:17:00Z": {
     "diskUtilization": 0.027723629427673587,
@@ -12813,7 +12813,7 @@
     "modifiedRows": 21150.0,
     "returnedRows": 1803339.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:18:00Z": {
     "diskUtilization": 0.027723629427673587,
@@ -12825,7 +12825,7 @@
     "modifiedRows": 21019.0,
     "returnedRows": 1367675.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:19:00Z": {
     "diskUtilization": 0.027723629427673587,
@@ -12837,7 +12837,7 @@
     "modifiedRows": 11512.0,
     "returnedRows": 1601492.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:20:00Z": {
     "diskUtilization": 0.027713441293744836,
@@ -12849,7 +12849,7 @@
     "modifiedRows": 55593.0,
     "returnedRows": 1.6114178E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:21:00Z": {
     "diskUtilization": 0.027713441293744836,
@@ -12861,7 +12861,7 @@
     "modifiedRows": 26516.0,
     "returnedRows": 1.3119154E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:22:00Z": {
     "diskUtilization": 0.027713441293744836,
@@ -12873,7 +12873,7 @@
     "modifiedRows": 24753.0,
     "returnedRows": 1794856.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:23:00Z": {
     "diskUtilization": 0.027713441293744836,
@@ -12885,7 +12885,7 @@
     "modifiedRows": 22051.0,
     "returnedRows": 1637387.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:24:00Z": {
     "diskUtilization": 0.027713441293744836,
@@ -12897,7 +12897,7 @@
     "modifiedRows": 15147.0,
     "returnedRows": 1334284.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:25:00Z": {
     "diskUtilization": 0.027710517576342682,
@@ -12909,7 +12909,7 @@
     "modifiedRows": 20239.0,
     "returnedRows": 5107846.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:26:00Z": {
     "diskUtilization": 0.027710517576342682,
@@ -12921,7 +12921,7 @@
     "modifiedRows": 21807.0,
     "returnedRows": 1.2458273E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:27:00Z": {
     "diskUtilization": 0.027710517576342682,
@@ -12933,7 +12933,7 @@
     "modifiedRows": 23474.0,
     "returnedRows": 1.3159139E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:28:00Z": {
     "diskUtilization": 0.027710517576342682,
@@ -12945,7 +12945,7 @@
     "modifiedRows": 20866.0,
     "returnedRows": 1.9116601E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:29:00Z": {
     "diskUtilization": 0.027710517576342682,
@@ -12957,7 +12957,7 @@
     "modifiedRows": 9546.0,
     "returnedRows": 1.6239365E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:30:00Z": {
     "diskUtilization": 0.02770504986934611,
@@ -12969,7 +12969,7 @@
     "modifiedRows": 17747.0,
     "returnedRows": 2.544582E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:31:00Z": {
     "diskUtilization": 0.02770504986934611,
@@ -12981,7 +12981,7 @@
     "modifiedRows": 19871.0,
     "returnedRows": 2.0679371E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:32:00Z": {
     "diskUtilization": 0.02770504986934611,
@@ -12993,7 +12993,7 @@
     "modifiedRows": 28585.0,
     "returnedRows": 2.3965479E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:33:00Z": {
     "diskUtilization": 0.02770504986934611,
@@ -13005,7 +13005,7 @@
     "modifiedRows": 17957.0,
     "returnedRows": 1.4001643E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:34:00Z": {
     "diskUtilization": 0.02770504986934611,
@@ -13017,7 +13017,7 @@
     "modifiedRows": 10508.0,
     "returnedRows": 1.5896784E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:35:00Z": {
     "diskUtilization": 0.02700645954359061,
@@ -13029,7 +13029,7 @@
     "modifiedRows": 17422.0,
     "returnedRows": 1.699338E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:36:00Z": {
     "diskUtilization": 0.02700645954359061,
@@ -13041,7 +13041,7 @@
     "modifiedRows": 18750.0,
     "returnedRows": 1.264594E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:37:00Z": {
     "diskUtilization": 0.02700645954359061,
@@ -13053,7 +13053,7 @@
     "modifiedRows": 22278.0,
     "returnedRows": 1.5521598E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:38:00Z": {
     "diskUtilization": 0.02700645954359061,
@@ -13065,7 +13065,7 @@
     "modifiedRows": 15336.0,
     "returnedRows": 2.1048768E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:39:00Z": {
     "diskUtilization": 0.02700645954359061,
@@ -13077,7 +13077,7 @@
     "modifiedRows": 8603.0,
     "returnedRows": 2.1241727E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:40:00Z": {
     "diskUtilization": 0.024953970750684677,
@@ -13089,7 +13089,7 @@
     "modifiedRows": 13757.0,
     "returnedRows": 1.4631512E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:41:00Z": {
     "diskUtilization": 0.024953970750684677,
@@ -13101,7 +13101,7 @@
     "modifiedRows": 17050.0,
     "returnedRows": 1.6664928E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:42:00Z": {
     "diskUtilization": 0.024953970750684677,
@@ -13113,7 +13113,7 @@
     "modifiedRows": 23225.0,
     "returnedRows": 1.6022499E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:43:00Z": {
     "diskUtilization": 0.024953970750684677,
@@ -13125,7 +13125,7 @@
     "modifiedRows": 14754.0,
     "returnedRows": 1.5235435E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:44:00Z": {
     "diskUtilization": 0.024953970750684677,
@@ -13137,7 +13137,7 @@
     "modifiedRows": 12494.0,
     "returnedRows": 1.9369169E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:45:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13149,7 +13149,7 @@
     "modifiedRows": 20400.0,
     "returnedRows": 1.3881526E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:46:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13161,7 +13161,7 @@
     "modifiedRows": 15658.0,
     "returnedRows": 1.895051E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:47:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13173,7 +13173,7 @@
     "modifiedRows": 20090.0,
     "returnedRows": 1.7410804E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:48:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13185,7 +13185,7 @@
     "modifiedRows": 16491.0,
     "returnedRows": 1.9207991E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:49:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13197,7 +13197,7 @@
     "modifiedRows": 8299.0,
     "returnedRows": 1.1223339E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:50:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13209,7 +13209,7 @@
     "modifiedRows": 15932.0,
     "returnedRows": 2.0903666E7,
     "errorCount": 1.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:51:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13221,7 +13221,7 @@
     "modifiedRows": 18316.0,
     "returnedRows": 1.2867853E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:52:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13233,7 +13233,7 @@
     "modifiedRows": 23350.0,
     "returnedRows": 1.6723617E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:53:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13245,7 +13245,7 @@
     "modifiedRows": 16760.0,
     "returnedRows": 1.3894223E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:54:00Z": {
     "diskUtilization": 0.02406679459007137,
@@ -13257,7 +13257,7 @@
     "modifiedRows": 10620.0,
     "returnedRows": 1.7360943E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:55:00Z": {
     "diskUtilization": 0.023747591810679296,
@@ -13269,7 +13269,7 @@
     "modifiedRows": 16896.0,
     "returnedRows": 1.2820245E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:56:00Z": {
     "diskUtilization": 0.023747591810679296,
@@ -13281,7 +13281,7 @@
     "modifiedRows": 18633.0,
     "returnedRows": 1.6082212E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:57:00Z": {
     "diskUtilization": 0.023747591810679296,
@@ -13293,7 +13293,7 @@
     "modifiedRows": 19637.0,
     "returnedRows": 1.1698821E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:58:00Z": {
     "diskUtilization": 0.023747591810679296,
@@ -13305,7 +13305,7 @@
     "modifiedRows": 7651523.0,
     "returnedRows": 1.7271425E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T05:59:00Z": {
     "diskUtilization": 0.023747591810679296,
@@ -13317,7 +13317,7 @@
     "modifiedRows": 1.2093171E7,
     "returnedRows": 8759347.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:00:00Z": {
     "diskUtilization": 0.023744615963059913,
@@ -13329,7 +13329,7 @@
     "modifiedRows": 1.2187745E7,
     "returnedRows": 7546636.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:01:00Z": {
     "diskUtilization": 0.023744615963059913,
@@ -13341,7 +13341,7 @@
     "modifiedRows": 1.1533109E7,
     "returnedRows": 1.4761853E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:02:00Z": {
     "diskUtilization": 0.01826508920235378,
@@ -13353,7 +13353,7 @@
     "modifiedRows": 1.232888E7,
     "returnedRows": 9891426.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:03:00Z": {
     "diskUtilization": 0.01826508920235378,
@@ -13365,7 +13365,7 @@
     "modifiedRows": 1.3943752E7,
     "returnedRows": 5994926.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:04:00Z": {
     "diskUtilization": 0.01826508920235378,
@@ -13377,7 +13377,7 @@
     "modifiedRows": 1.3680445E7,
     "returnedRows": 1.1273857E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:05:00Z": {
     "diskUtilization": 0.018842520718820966,
@@ -13389,7 +13389,7 @@
     "modifiedRows": 1.4436007E7,
     "returnedRows": 8983383.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:06:00Z": {
     "diskUtilization": 0.018842520718820966,
@@ -13401,7 +13401,7 @@
     "modifiedRows": 1.3030325E7,
     "returnedRows": 1.0658641E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:07:00Z": {
     "diskUtilization": 0.018842520718820966,
@@ -13413,7 +13413,7 @@
     "modifiedRows": 7720411.0,
     "returnedRows": 1.2186726E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:08:00Z": {
     "diskUtilization": 0.018842520718820966,
@@ -13425,7 +13425,7 @@
     "modifiedRows": 489117.0,
     "returnedRows": 1.528308E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:09:00Z": {
     "diskUtilization": 0.018842520718820966,
@@ -13437,7 +13437,7 @@
     "modifiedRows": 10443.0,
     "returnedRows": 1.6309439E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:10:00Z": {
     "diskUtilization": 0.02030681134261753,
@@ -13449,7 +13449,7 @@
     "modifiedRows": 22737.0,
     "returnedRows": 1.5110528E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:11:00Z": {
     "diskUtilization": 0.02030681134261753,
@@ -13461,7 +13461,7 @@
     "modifiedRows": 25098.0,
     "returnedRows": 1.5889167E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:12:00Z": {
     "diskUtilization": 0.02030681134261753,
@@ -13473,7 +13473,7 @@
     "modifiedRows": 24584.0,
     "returnedRows": 1.9531107E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:13:00Z": {
     "diskUtilization": 0.016499284215876743,
@@ -13485,7 +13485,7 @@
     "modifiedRows": 22932.0,
     "returnedRows": 9497338.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:14:00Z": {
     "diskUtilization": 0.016499284215876743,
@@ -13497,7 +13497,7 @@
     "modifiedRows": 16311.0,
     "returnedRows": 2.0222725E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:15:00Z": {
     "diskUtilization": 0.016604913795981703,
@@ -13509,7 +13509,7 @@
     "modifiedRows": 21833.0,
     "returnedRows": 1.1842034E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:16:00Z": {
     "diskUtilization": 0.016604913795981703,
@@ -13521,7 +13521,7 @@
     "modifiedRows": 23524.0,
     "returnedRows": 1.2360873E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:17:00Z": {
     "diskUtilization": 0.016604913795981703,
@@ -13533,7 +13533,7 @@
     "modifiedRows": 28509.0,
     "returnedRows": 1.511927E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:18:00Z": {
     "diskUtilization": 0.016604913795981703,
@@ -13545,7 +13545,7 @@
     "modifiedRows": 10770.0,
     "returnedRows": 2.0614856E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:19:00Z": {
     "diskUtilization": 0.016604913795981703,
@@ -13557,7 +13557,7 @@
     "modifiedRows": 10138.0,
     "returnedRows": 1.2505873E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:20:00Z": {
     "diskUtilization": 0.016608220501689176,
@@ -13569,7 +13569,7 @@
     "modifiedRows": 20110.0,
     "returnedRows": 1.5798554E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:21:00Z": {
     "diskUtilization": 0.016608220501689176,
@@ -13581,7 +13581,7 @@
     "modifiedRows": 16161.0,
     "returnedRows": 1.6879894E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:22:00Z": {
     "diskUtilization": 0.016608220501689176,
@@ -13593,7 +13593,7 @@
     "modifiedRows": 19885.0,
     "returnedRows": 1.4504923E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:23:00Z": {
     "diskUtilization": 0.016608220501689176,
@@ -13605,7 +13605,7 @@
     "modifiedRows": 12680.0,
     "returnedRows": 1.4040151E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:24:00Z": {
     "diskUtilization": 0.016608220501689176,
@@ -13617,7 +13617,7 @@
     "modifiedRows": 12467.0,
     "returnedRows": 1.4185147E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:25:00Z": {
     "diskUtilization": 0.016636026224796298,
@@ -13629,7 +13629,7 @@
     "modifiedRows": 16184.0,
     "returnedRows": 1.5271585E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:26:00Z": {
     "diskUtilization": 0.016636026224796298,
@@ -13641,7 +13641,7 @@
     "modifiedRows": 19812.0,
     "returnedRows": 1.6853802E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:27:00Z": {
     "diskUtilization": 0.016636026224796298,
@@ -13653,7 +13653,7 @@
     "modifiedRows": 23135.0,
     "returnedRows": 1.0221503E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:28:00Z": {
     "diskUtilization": 0.016636026224796298,
@@ -13665,7 +13665,7 @@
     "modifiedRows": 13455.0,
     "returnedRows": 2.0797179E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:29:00Z": {
     "diskUtilization": 0.016636026224796298,
@@ -13677,7 +13677,7 @@
     "modifiedRows": 15292.0,
     "returnedRows": 1.1012543E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:30:00Z": {
     "diskUtilization": 0.016674399035127862,
@@ -13689,7 +13689,7 @@
     "modifiedRows": 23826.0,
     "returnedRows": 1.2097245E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:31:00Z": {
     "diskUtilization": 0.016674399035127862,
@@ -13701,7 +13701,7 @@
     "modifiedRows": 22034.0,
     "returnedRows": 2.4449934E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:32:00Z": {
     "diskUtilization": 0.016674399035127862,
@@ -13713,7 +13713,7 @@
     "modifiedRows": 15176.0,
     "returnedRows": 1.3155853E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:33:00Z": {
     "diskUtilization": 0.016674399035127862,
@@ -13725,7 +13725,7 @@
     "modifiedRows": 11456.0,
     "returnedRows": 1.3509201E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:34:00Z": {
     "diskUtilization": 0.016674399035127862,
@@ -13737,7 +13737,7 @@
     "modifiedRows": 12110.0,
     "returnedRows": 1.1723201E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:35:00Z": {
     "diskUtilization": 0.016713132478980697,
@@ -13749,7 +13749,7 @@
     "modifiedRows": 21695.0,
     "returnedRows": 2.041354E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:36:00Z": {
     "diskUtilization": 0.016713132478980697,
@@ -13761,7 +13761,7 @@
     "modifiedRows": 20387.0,
     "returnedRows": 1.2950511E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:37:00Z": {
     "diskUtilization": 0.016713132478980697,
@@ -13773,7 +13773,7 @@
     "modifiedRows": 28656.0,
     "returnedRows": 1.8035383E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:38:00Z": {
     "diskUtilization": 0.016713132478980697,
@@ -13785,7 +13785,7 @@
     "modifiedRows": 26724.0,
     "returnedRows": 1.7135202E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:39:00Z": {
     "diskUtilization": 0.016713132478980697,
@@ -13797,7 +13797,7 @@
     "modifiedRows": 16633.0,
     "returnedRows": 1.2392239E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:40:00Z": {
     "diskUtilization": 0.01672258582731274,
@@ -13809,7 +13809,7 @@
     "modifiedRows": 22977.0,
     "returnedRows": 1.3452079E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:41:00Z": {
     "diskUtilization": 0.01672258582731274,
@@ -13821,7 +13821,7 @@
     "modifiedRows": 17544.0,
     "returnedRows": 1.8618704E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:42:00Z": {
     "diskUtilization": 0.01672258582731274,
@@ -13833,7 +13833,7 @@
     "modifiedRows": 21534.0,
     "returnedRows": 1.147462E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:43:00Z": {
     "diskUtilization": 0.01672258582731274,
@@ -13845,7 +13845,7 @@
     "modifiedRows": 10786.0,
     "returnedRows": 1.8360643E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:44:00Z": {
     "diskUtilization": 0.01672258582731274,
@@ -13857,7 +13857,7 @@
     "modifiedRows": 9017.0,
     "returnedRows": 1.2499282E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:45:00Z": {
     "diskUtilization": 0.01672258582731274,
@@ -13869,7 +13869,7 @@
     "modifiedRows": 15608.0,
     "returnedRows": 1.5785024E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:46:00Z": {
     "diskUtilization": 0.01672258582731274,
@@ -13881,7 +13881,7 @@
     "modifiedRows": 15167.0,
     "returnedRows": 1.4919062E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:47:00Z": {
     "diskUtilization": 0.023266206368435117,
@@ -13893,7 +13893,7 @@
     "modifiedRows": 21176.0,
     "returnedRows": 1.7007435E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:48:00Z": {
     "diskUtilization": 0.023266206368435117,
@@ -13905,7 +13905,7 @@
     "modifiedRows": 16949.0,
     "returnedRows": 1.3874691E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:49:00Z": {
     "diskUtilization": 0.023266206368435117,
@@ -13917,7 +13917,7 @@
     "modifiedRows": 8982.0,
     "returnedRows": 1.4730706E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:50:00Z": {
     "diskUtilization": 0.02326772444099808,
@@ -13929,7 +13929,7 @@
     "modifiedRows": 14307.0,
     "returnedRows": 1.6915958E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:51:00Z": {
     "diskUtilization": 0.02326772444099808,
@@ -13941,7 +13941,7 @@
     "modifiedRows": 15713.0,
     "returnedRows": 1.4062914E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:52:00Z": {
     "diskUtilization": 0.02326772444099808,
@@ -13953,7 +13953,7 @@
     "modifiedRows": 27323.0,
     "returnedRows": 1.5271418E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:53:00Z": {
     "diskUtilization": 0.02326772444099808,
@@ -13965,7 +13965,7 @@
     "modifiedRows": 19351.0,
     "returnedRows": 1.2415629E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:54:00Z": {
     "diskUtilization": 0.02326772444099808,
@@ -13977,7 +13977,7 @@
     "modifiedRows": 6281.0,
     "returnedRows": 1.9676564E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:55:00Z": {
     "diskUtilization": 0.023289534212839816,
@@ -13989,7 +13989,7 @@
     "modifiedRows": 19684.0,
     "returnedRows": 7810316.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:56:00Z": {
     "diskUtilization": 0.023289534212839816,
@@ -14001,7 +14001,7 @@
     "modifiedRows": 16136.0,
     "returnedRows": 1.5746053E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:57:00Z": {
     "diskUtilization": 0.023289534212839816,
@@ -14013,7 +14013,7 @@
     "modifiedRows": 17516.0,
     "returnedRows": 1.9227601E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:58:00Z": {
     "diskUtilization": 0.023289534212839816,
@@ -14025,7 +14025,7 @@
     "modifiedRows": 13892.0,
     "returnedRows": 1.6486523E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T06:59:00Z": {
     "diskUtilization": 0.023289534212839816,
@@ -14037,7 +14037,7 @@
     "modifiedRows": 9166.0,
     "returnedRows": 1.5801349E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:00:00Z": {
     "diskUtilization": 0.023300170213500993,
@@ -14049,7 +14049,7 @@
     "modifiedRows": 14580.0,
     "returnedRows": 1.3647407E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:01:00Z": {
     "diskUtilization": 0.023300170213500993,
@@ -14061,7 +14061,7 @@
     "modifiedRows": 27090.0,
     "returnedRows": 1.3273507E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:02:00Z": {
     "diskUtilization": 0.023300170213500993,
@@ -14073,7 +14073,7 @@
     "modifiedRows": 35319.0,
     "returnedRows": 1.5763798E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:03:00Z": {
     "diskUtilization": 0.023300170213500993,
@@ -14085,7 +14085,7 @@
     "modifiedRows": 45422.0,
     "returnedRows": 2.0379707E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:04:00Z": {
     "diskUtilization": 0.023300170213500993,
@@ -14097,7 +14097,7 @@
     "modifiedRows": 24714.0,
     "returnedRows": 1.3044682E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:05:00Z": {
     "diskUtilization": 0.023327330258325674,
@@ -14109,7 +14109,7 @@
     "modifiedRows": 51425.0,
     "returnedRows": 1.499389E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:06:00Z": {
     "diskUtilization": 0.023327330258325674,
@@ -14121,7 +14121,7 @@
     "modifiedRows": 58356.0,
     "returnedRows": 1.328714E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:07:00Z": {
     "diskUtilization": 0.023327330258325674,
@@ -14133,7 +14133,7 @@
     "modifiedRows": 53308.0,
     "returnedRows": 1.2603755E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:08:00Z": {
     "diskUtilization": 0.023327330258325674,
@@ -14145,7 +14145,7 @@
     "modifiedRows": 23033.0,
     "returnedRows": 1.3099364E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:09:00Z": {
     "diskUtilization": 0.023327330258325674,
@@ -14157,7 +14157,7 @@
     "modifiedRows": 11747.0,
     "returnedRows": 1.6287776E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:10:00Z": {
     "diskUtilization": 0.02334054435880756,
@@ -14169,7 +14169,7 @@
     "modifiedRows": 46391.0,
     "returnedRows": 1.2908715E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:11:00Z": {
     "diskUtilization": 0.02334054435880756,
@@ -14181,7 +14181,7 @@
     "modifiedRows": 26289.0,
     "returnedRows": 1.5603387E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:12:00Z": {
     "diskUtilization": 0.02334054435880756,
@@ -14193,7 +14193,7 @@
     "modifiedRows": 37872.0,
     "returnedRows": 1.108141E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:13:00Z": {
     "diskUtilization": 0.02334054435880756,
@@ -14205,7 +14205,7 @@
     "modifiedRows": 19549.0,
     "returnedRows": 1.7340077E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:14:00Z": {
     "diskUtilization": 0.02334054435880756,
@@ -14217,7 +14217,7 @@
     "modifiedRows": 10072.0,
     "returnedRows": 1.1249283E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:15:00Z": {
     "diskUtilization": 0.023352723487440254,
@@ -14229,7 +14229,7 @@
     "modifiedRows": 25701.0,
     "returnedRows": 1.2742107E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:16:00Z": {
     "diskUtilization": 0.023352723487440254,
@@ -14241,7 +14241,7 @@
     "modifiedRows": 27517.0,
     "returnedRows": 1.8552656E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:17:00Z": {
     "diskUtilization": 0.023352723487440254,
@@ -14253,7 +14253,7 @@
     "modifiedRows": 31477.0,
     "returnedRows": 1.2277064E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:18:00Z": {
     "diskUtilization": 0.023352723487440254,
@@ -14265,7 +14265,7 @@
     "modifiedRows": 15466.0,
     "returnedRows": 1.3915477E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:19:00Z": {
     "diskUtilization": 0.023352723487440254,
@@ -14277,7 +14277,7 @@
     "modifiedRows": 16654.0,
     "returnedRows": 1.6280605E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:20:00Z": {
     "diskUtilization": 0.023355062936562993,
@@ -14289,7 +14289,7 @@
     "modifiedRows": 25503.0,
     "returnedRows": 1.3919129E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:21:00Z": {
     "diskUtilization": 0.023355062936562993,
@@ -14301,7 +14301,7 @@
     "modifiedRows": 22966.0,
     "returnedRows": 1.3786381E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:22:00Z": {
     "diskUtilization": 0.023355062936562993,
@@ -14313,7 +14313,7 @@
     "modifiedRows": 18872.0,
     "returnedRows": 1.5856819E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:23:00Z": {
     "diskUtilization": 0.023355062936562993,
@@ -14325,7 +14325,7 @@
     "modifiedRows": 15384.0,
     "returnedRows": 1.4679054E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:24:00Z": {
     "diskUtilization": 0.023355062936562993,
@@ -14337,7 +14337,7 @@
     "modifiedRows": 10078.0,
     "returnedRows": 1.5522551E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:25:00Z": {
     "diskUtilization": 0.026876374423809465,
@@ -14349,7 +14349,7 @@
     "modifiedRows": 14764.0,
     "returnedRows": 1.1095997E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:26:00Z": {
     "diskUtilization": 0.026876374423809465,
@@ -14361,7 +14361,7 @@
     "modifiedRows": 65592.0,
     "returnedRows": 1.5530122E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:27:00Z": {
     "diskUtilization": 0.026876374423809465,
@@ -14373,7 +14373,7 @@
     "modifiedRows": 22042.0,
     "returnedRows": 1.9510766E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:28:00Z": {
     "diskUtilization": 0.026876374423809465,
@@ -14385,7 +14385,7 @@
     "modifiedRows": 10937.0,
     "returnedRows": 9055059.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:29:00Z": {
     "diskUtilization": 0.026876374423809465,
@@ -14397,7 +14397,7 @@
     "modifiedRows": 10611.0,
     "returnedRows": 2.0491728E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:30:00Z": {
     "diskUtilization": 0.02689383705785076,
@@ -14409,7 +14409,7 @@
     "modifiedRows": 15169.0,
     "returnedRows": 1.0957537E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:31:00Z": {
     "diskUtilization": 0.02689383705785076,
@@ -14421,7 +14421,7 @@
     "modifiedRows": 18807.0,
     "returnedRows": 1.4163191E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:32:00Z": {
     "diskUtilization": 0.02689383705785076,
@@ -14433,7 +14433,7 @@
     "modifiedRows": 19009.0,
     "returnedRows": 8694524.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:33:00Z": {
     "diskUtilization": 0.02689383705785076,
@@ -14445,7 +14445,7 @@
     "modifiedRows": 11796.0,
     "returnedRows": 1.9341256E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:34:00Z": {
     "diskUtilization": 0.02689383705785076,
@@ -14457,7 +14457,7 @@
     "modifiedRows": 9861.0,
     "returnedRows": 1.9115714E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:35:00Z": {
     "diskUtilization": 0.026896118467793714,
@@ -14469,7 +14469,7 @@
     "modifiedRows": 16526.0,
     "returnedRows": 1.3752055E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:36:00Z": {
     "diskUtilization": 0.026896118467793714,
@@ -14481,7 +14481,7 @@
     "modifiedRows": 18631.0,
     "returnedRows": 1.3717025E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:37:00Z": {
     "diskUtilization": 0.026896118467793714,
@@ -14493,7 +14493,7 @@
     "modifiedRows": 33250.0,
     "returnedRows": 1.9041748E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:38:00Z": {
     "diskUtilization": 0.026896118467793714,
@@ -14505,7 +14505,7 @@
     "modifiedRows": 22866.0,
     "returnedRows": 1.3707117E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:39:00Z": {
     "diskUtilization": 0.026896118467793714,
@@ -14517,7 +14517,7 @@
     "modifiedRows": 10858.0,
     "returnedRows": 1.7603321E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:40:00Z": {
     "diskUtilization": 0.026896850538287255,
@@ -14529,7 +14529,7 @@
     "modifiedRows": 16788.0,
     "returnedRows": 1.6415852E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:41:00Z": {
     "diskUtilization": 0.026896850538287255,
@@ -14541,7 +14541,7 @@
     "modifiedRows": 23667.0,
     "returnedRows": 1.4048462E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:42:00Z": {
     "diskUtilization": 0.026896850538287255,
@@ -14553,7 +14553,7 @@
     "modifiedRows": 22003.0,
     "returnedRows": 1.4544539E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:43:00Z": {
     "diskUtilization": 0.026896850538287255,
@@ -14565,7 +14565,7 @@
     "modifiedRows": 16038.0,
     "returnedRows": 1.3679012E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:44:00Z": {
     "diskUtilization": 0.026896850538287255,
@@ -14577,7 +14577,7 @@
     "modifiedRows": 10909.0,
     "returnedRows": 1.7831445E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:45:00Z": {
     "diskUtilization": 0.026896084172512928,
@@ -14589,7 +14589,7 @@
     "modifiedRows": 15095.0,
     "returnedRows": 1.4432038E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:46:00Z": {
     "diskUtilization": 0.026896084172512928,
@@ -14601,7 +14601,7 @@
     "modifiedRows": 19173.0,
     "returnedRows": 1.8191727E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:47:00Z": {
     "diskUtilization": 0.026896084172512928,
@@ -14613,7 +14613,7 @@
     "modifiedRows": 20518.0,
     "returnedRows": 1.4655807E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:48:00Z": {
     "diskUtilization": 0.026896084172512928,
@@ -14625,7 +14625,7 @@
     "modifiedRows": 11330.0,
     "returnedRows": 1.4560383E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:49:00Z": {
     "diskUtilization": 0.026896084172512928,
@@ -14637,7 +14637,7 @@
     "modifiedRows": 4298.0,
     "returnedRows": 1.4523321E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:50:00Z": {
     "diskUtilization": 0.02688984348638769,
@@ -14649,7 +14649,7 @@
     "modifiedRows": 15333.0,
     "returnedRows": 1.1385261E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:51:00Z": {
     "diskUtilization": 0.02688984348638769,
@@ -14661,7 +14661,7 @@
     "modifiedRows": 20925.0,
     "returnedRows": 1.8905397E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:52:00Z": {
     "diskUtilization": 0.02688984348638769,
@@ -14673,7 +14673,7 @@
     "modifiedRows": 17859.0,
     "returnedRows": 1.4421533E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:53:00Z": {
     "diskUtilization": 0.02688984348638769,
@@ -14685,7 +14685,7 @@
     "modifiedRows": 12237.0,
     "returnedRows": 1.4172028E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:54:00Z": {
     "diskUtilization": 0.02688984348638769,
@@ -14697,7 +14697,7 @@
     "modifiedRows": 8007.0,
     "returnedRows": 1.6942612E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:55:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14709,7 +14709,7 @@
     "modifiedRows": 11562.0,
     "returnedRows": 1.4127107E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:56:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14721,7 +14721,7 @@
     "modifiedRows": 13964.0,
     "returnedRows": 1.2539559E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:57:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14733,7 +14733,7 @@
     "modifiedRows": 16924.0,
     "returnedRows": 2.2239655E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:58:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14745,7 +14745,7 @@
     "modifiedRows": 12508.0,
     "returnedRows": 1.3449242E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T07:59:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14757,7 +14757,7 @@
     "modifiedRows": 4709.0,
     "returnedRows": 1.3694702E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:00:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14769,7 +14769,7 @@
     "modifiedRows": 16258.0,
     "returnedRows": 1.661216E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:01:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14781,7 +14781,7 @@
     "modifiedRows": 31199.0,
     "returnedRows": 1.1783421E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:02:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14793,7 +14793,7 @@
     "modifiedRows": 38029.0,
     "returnedRows": 1.9021432E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:03:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14805,7 +14805,7 @@
     "modifiedRows": 57780.0,
     "returnedRows": 1.6580578E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:04:00Z": {
     "diskUtilization": 0.026892151017018476,
@@ -14817,7 +14817,7 @@
     "modifiedRows": 25912.0,
     "returnedRows": 1.2720357E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:05:00Z": {
     "diskUtilization": 0.026893326845220146,
@@ -14829,7 +14829,7 @@
     "modifiedRows": 35797.0,
     "returnedRows": 1.6142366E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:06:00Z": {
     "diskUtilization": 0.026893326845220146,
@@ -14841,7 +14841,7 @@
     "modifiedRows": 35169.0,
     "returnedRows": 1.4622675E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:07:00Z": {
     "diskUtilization": 0.026893326845220146,
@@ -14853,7 +14853,7 @@
     "modifiedRows": 37137.0,
     "returnedRows": 1.4362274E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:08:00Z": {
     "diskUtilization": 0.026893326845220146,
@@ -14865,7 +14865,7 @@
     "modifiedRows": 25468.0,
     "returnedRows": 1.5542547E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:09:00Z": {
     "diskUtilization": 0.026893326845220146,
@@ -14877,7 +14877,7 @@
     "modifiedRows": 17245.0,
     "returnedRows": 1.7012683E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:10:00Z": {
     "diskUtilization": 0.026900986422369898,
@@ -14889,7 +14889,7 @@
     "modifiedRows": 33218.0,
     "returnedRows": 1.5878515E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:11:00Z": {
     "diskUtilization": 0.026900986422369898,
@@ -14901,7 +14901,7 @@
     "modifiedRows": 40071.0,
     "returnedRows": 1.5601767E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:12:00Z": {
     "diskUtilization": 0.026900986422369898,
@@ -14913,7 +14913,7 @@
     "modifiedRows": 28104.0,
     "returnedRows": 1.101276E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:13:00Z": {
     "diskUtilization": 0.026900986422369898,
@@ -14925,7 +14925,7 @@
     "modifiedRows": 19767.0,
     "returnedRows": 1.8055107E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:14:00Z": {
     "diskUtilization": 0.026900986422369898,
@@ -14937,7 +14937,7 @@
     "modifiedRows": 14290.0,
     "returnedRows": 1.5678886E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:15:00Z": {
     "diskUtilization": 0.02690287208017253,
@@ -14949,7 +14949,7 @@
     "modifiedRows": 14061.0,
     "returnedRows": 1.4742554E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:16:00Z": {
     "diskUtilization": 0.02690287208017253,
@@ -14961,7 +14961,7 @@
     "modifiedRows": 19196.0,
     "returnedRows": 1.5783715E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:17:00Z": {
     "diskUtilization": 0.02690287208017253,
@@ -14973,7 +14973,7 @@
     "modifiedRows": 23444.0,
     "returnedRows": 1.4493013E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:18:00Z": {
     "diskUtilization": 0.02690287208017253,
@@ -14985,7 +14985,7 @@
     "modifiedRows": 22849.0,
     "returnedRows": 1.6392736E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:19:00Z": {
     "diskUtilization": 0.02690287208017253,
@@ -14997,7 +14997,7 @@
     "modifiedRows": 17761.0,
     "returnedRows": 1.6379012E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:20:00Z": {
     "diskUtilization": 0.026908762320708775,
@@ -15009,7 +15009,7 @@
     "modifiedRows": 14543.0,
     "returnedRows": 1.2749096E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:21:00Z": {
     "diskUtilization": 0.026908762320708775,
@@ -15021,7 +15021,7 @@
     "modifiedRows": 11811.0,
     "returnedRows": 1.6775107E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:22:00Z": {
     "diskUtilization": 0.026908762320708775,
@@ -15033,7 +15033,7 @@
     "modifiedRows": 19595.0,
     "returnedRows": 1.2009391E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:23:00Z": {
     "diskUtilization": 0.026908762320708775,
@@ -15045,7 +15045,7 @@
     "modifiedRows": 10626.0,
     "returnedRows": 1.7948005E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:24:00Z": {
     "diskUtilization": 0.026908762320708775,
@@ -15057,7 +15057,7 @@
     "modifiedRows": 9100.0,
     "returnedRows": 1.4948009E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:25:00Z": {
     "diskUtilization": 0.02691204184360686,
@@ -15069,7 +15069,7 @@
     "modifiedRows": 14620.0,
     "returnedRows": 1.2647531E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:26:00Z": {
     "diskUtilization": 0.02691204184360686,
@@ -15081,7 +15081,7 @@
     "modifiedRows": 28373.0,
     "returnedRows": 1.7923158E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:27:00Z": {
     "diskUtilization": 0.02691204184360686,
@@ -15093,7 +15093,7 @@
     "modifiedRows": 28186.0,
     "returnedRows": 1.3884241E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:28:00Z": {
     "diskUtilization": 0.02691204184360686,
@@ -15105,7 +15105,7 @@
     "modifiedRows": 16927.0,
     "returnedRows": 1.3037186E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:29:00Z": {
     "diskUtilization": 0.02691204184360686,
@@ -15117,7 +15117,7 @@
     "modifiedRows": 18460.0,
     "returnedRows": 1.7231072E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:30:00Z": {
     "diskUtilization": 0.026913970256373432,
@@ -15129,7 +15129,7 @@
     "modifiedRows": 16203.0,
     "returnedRows": 1.6143859E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:31:00Z": {
     "diskUtilization": 0.026913970256373432,
@@ -15141,7 +15141,7 @@
     "modifiedRows": 23646.0,
     "returnedRows": 1.0871688E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:32:00Z": {
     "diskUtilization": 0.026913970256373432,
@@ -15153,7 +15153,7 @@
     "modifiedRows": 23538.0,
     "returnedRows": 2.1397938E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:33:00Z": {
     "diskUtilization": 0.026913970256373432,
@@ -15165,7 +15165,7 @@
     "modifiedRows": 16827.0,
     "returnedRows": 1.6070473E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:34:00Z": {
     "diskUtilization": 0.026913970256373432,
@@ -15177,7 +15177,7 @@
     "modifiedRows": 20966.0,
     "returnedRows": 1.0763142E7,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:35:00Z": {
     "diskUtilization": 0.02692206024332336,
@@ -15189,7 +15189,7 @@
     "modifiedRows": 27984.0,
     "returnedRows": 2420224.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:36:00Z": {
     "diskUtilization": 0.02692206024332336,
@@ -15201,7 +15201,7 @@
     "modifiedRows": 33687.0,
     "returnedRows": 38494.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:37:00Z": {
     "diskUtilization": 0.02692206024332336,
@@ -15213,7 +15213,7 @@
     "modifiedRows": 26629.0,
     "returnedRows": 33135.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:38:00Z": {
     "diskUtilization": 0.02692206024332336,
@@ -15225,7 +15225,7 @@
     "modifiedRows": 17291.0,
     "returnedRows": 23785.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:39:00Z": {
     "diskUtilization": 0.02692206024332336,
@@ -15237,7 +15237,7 @@
     "modifiedRows": 8351.0,
     "returnedRows": 7455.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:40:00Z": {
     "diskUtilization": 0.02692926509233075,
@@ -15249,7 +15249,7 @@
     "modifiedRows": 14244.0,
     "returnedRows": 15017.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:41:00Z": {
     "diskUtilization": 0.02692926509233075,
@@ -15261,7 +15261,7 @@
     "modifiedRows": 29625.0,
     "returnedRows": 28054.0,
     "errorCount": 0.0,
-    "minNodesOverride": 32.0
+    "minNodesOverride": 35.0
   },
   "2019-07-23T08:42:00Z": {
     "diskUtilization": 0.02692926509233075,
