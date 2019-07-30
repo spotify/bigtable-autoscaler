@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS autoscale (
     last_failure timestamp with time zone,
     consecutive_failure_count int default(0),
     last_failure_message text,
-    load_delta integer NOT NULL default(0),
+    min_nodes_override integer NOT NULL default(0),
     error_code error_code NOT NULL default('OK'),
     CONSTRAINT full_name PRIMARY KEY(project_id, instance_id, cluster_id),
     CONSTRAINT autoscale_cpu_target_check CHECK ((cpu_target > (0.0)::double precision)),
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS resize_log (
     detail text,
     success boolean,
     error_message text,
-    load_delta integer NOT NULL default(0)
+    min_nodes_override integer NOT NULL default(0)
 );
 
 CREATE INDEX ON resize_log(timestamp);

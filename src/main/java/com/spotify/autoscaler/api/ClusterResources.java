@@ -120,7 +120,7 @@ public class ClusterResources implements Endpoint {
       @QueryParam("cpuTarget") final Double cpuTarget,
       @QueryParam("overloadStep") final Integer overloadStep,
       @QueryParam("enabled") @DefaultValue("true") final Boolean enabled,
-      @QueryParam("loadDelta") @DefaultValue("0") final Integer loadDelta) {
+      @QueryParam("minNodesOverride") @DefaultValue("0") final Integer minNodesOverride) {
     final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
@@ -131,7 +131,7 @@ public class ClusterResources implements Endpoint {
             .cpuTarget(cpuTarget)
             .overloadStep(Optional.ofNullable(overloadStep))
             .enabled(enabled)
-            .loadDelta(loadDelta)
+            .minNodesOverride(minNodesOverride)
             .build();
     try {
       BigtableUtil.pushContext(cluster);
@@ -195,7 +195,7 @@ public class ClusterResources implements Endpoint {
             .cpuTarget(0)
             .overloadStep(Optional.of(0))
             .enabled(true)
-            .loadDelta(0)
+            .minNodesOverride(0)
             .build();
     try {
       BigtableUtil.pushContext(cluster);
@@ -211,28 +211,32 @@ public class ClusterResources implements Endpoint {
   }
 
   @PUT
-  @Path("load")
+  @Path("override-min-nodes")
   public Response setExtraLoad(
       @QueryParam("projectId") @Size(min = 1) final String projectId,
       @QueryParam("instanceId") @Size(min = 1) final String instanceId,
       @QueryParam("clusterId") @Size(min = 1) final String clusterId,
-      @QueryParam("loadDelta") final Integer loadDelta) {
+      @QueryParam("minNodesOverride") final Integer minNodesOverride) {
+
     final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
             .instanceId(instanceId)
             .clusterId(clusterId)
-            .minNodes(0)
-            .maxNodes(0)
-            .cpuTarget(0)
-            .overloadStep(Optional.of(0))
-            .enabled(true)
-            .loadDelta(loadDelta)
+            .minNodesOverride(minNodesOverride)
             .build();
     try {
       BigtableUtil.pushContext(cluster);
-      if (database.updateLoadDelta(projectId, instanceId, clusterId, loadDelta)) {
-        LOGGER.info("cluster loadDelta updated to {}", loadDelta);
+      final Optional<BigtableCluster> maybeCluster =
+          database.getBigtableCluster(projectId, instanceId, clusterId);
+      if (!maybeCluster.isPresent()) {
+        return Response.status(Response.Status.NOT_FOUND).build();
+      }
+      if (minNodesOverride > maybeCluster.get().maxNodes()) {
+        return Response.status(Response.Status.BAD_REQUEST).build();
+      }
+      if (database.setMinNodesOverride(projectId, instanceId, clusterId, minNodesOverride)) {
+        LOGGER.info("cluster minNodesOverride updated to {}", minNodesOverride);
         return Response.ok().build();
       } else {
         return Response.serverError().build();

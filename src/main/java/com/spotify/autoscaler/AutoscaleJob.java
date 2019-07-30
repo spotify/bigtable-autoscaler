@@ -170,11 +170,11 @@ public class AutoscaleJob {
     }
 
     LOGGER.info(
-        "Running autoscale job. Nodes: {} (min={}, max={}, loadDelta={}), CPU: {} (target={})",
+        "Running autoscale job. Nodes: {} (min={}, max={}, minNodesOverride={}), CPU: {} (target={})",
         nodes,
         cluster.minNodes(),
         cluster.maxNodes(),
-        cluster.loadDelta(),
+        cluster.minNodesOverride(),
         currentCpu,
         cluster.cpuTarget());
 

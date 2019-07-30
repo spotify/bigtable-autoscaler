@@ -23,6 +23,7 @@ package com.spotify.autoscaler.api;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,6 +39,7 @@ import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
@@ -52,7 +54,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   private boolean insertBigtableClusterResult;
   private boolean updateBigtableClusterResult;
   private boolean deleteBigtableClusterResult;
-  private boolean updateLoadDeltaResult;
+  private boolean minNodesOverrideResult;
   private Collection<BigtableCluster> getBigtableClustersResult;
 
   @Override
@@ -64,14 +66,18 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
         .thenAnswer(invocation -> deleteBigtableClusterResult);
     when(db.getBigtableClusters(any(), any(), any()))
         .thenAnswer(invocation -> getBigtableClustersResult);
-    when(db.updateLoadDelta(any(), any(), any(), any()))
-        .thenAnswer(invocation -> updateLoadDeltaResult);
+    when(db.getBigtableCluster(any(), any(), any()))
+        .thenAnswer(invocation -> Optional.of(ApiTestResources.CLUSTER));
+    when(db.setMinNodesOverride(any(), any(), any(), any()))
+        .thenAnswer(invocation -> minNodesOverrideResult);
 
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
 
     return new HttpServerModule()
         .resourceConfig(
-            config, ImmutableSet.of(new ClusterResources(db, MAPPER), new HealthCheck(db)));
+            config,
+            ImmutableSet.of(
+                new ClusterResources(db, ApiTestResources.MAPPER), new HealthCheck(db)));
   }
 
   @Test
@@ -133,22 +139,53 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
 
   @Test
   public void extraLoad() {
-    updateLoadDeltaResult = true;
+    minNodesOverrideResult = true;
     final Response response =
         target(ApiTestResources.LOAD)
             .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
             .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
             .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
-            .queryParam("loadDelta", ApiTestResources.CLUSTER.loadDelta())
+            .queryParam("minNodesOverride", ApiTestResources.CLUSTER.minNodesOverride())
             .request()
             .put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
     verify(db, times(1))
-        .updateLoadDelta(
+        .setMinNodesOverride(
             ApiTestResources.CLUSTER.projectId(),
             ApiTestResources.CLUSTER.instanceId(),
             ApiTestResources.CLUSTER.clusterId(),
-            ApiTestResources.CLUSTER.loadDelta());
+            ApiTestResources.CLUSTER.minNodesOverride());
+  }
+
+  @Test
+  public void testFailureIfMinNodesOverrideIsGreaterThanMaxNodes() {
+    minNodesOverrideResult = true;
+    final Response response =
+        target(ApiTestResources.LOAD)
+            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
+            .queryParam("minNodesOverride", ApiTestResources.CLUSTER.maxNodes() + 1)
+            .request()
+            .put(Entity.text(""));
+    assertThat(response.getStatusInfo(), equalTo(Response.Status.BAD_REQUEST));
+    verify(db, never()).setMinNodesOverride(any(), any(), any(), any());
+  }
+
+  @Test
+  public void testFailureIfClusterIfMissing() {
+    minNodesOverrideResult = true;
+    when(db.getBigtableCluster(any(), any(), any())).thenAnswer(invocation -> Optional.empty());
+    final Response response =
+        target(ApiTestResources.LOAD)
+            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
+            .queryParam("minNodesOverride", ApiTestResources.CLUSTER.minNodesOverride())
+            .request()
+            .put(Entity.text(""));
+    assertThat(response.getStatusInfo(), equalTo(Response.Status.NOT_FOUND));
+    verify(db, never()).setMinNodesOverride(any(), any(), any(), any());
   }
 }
