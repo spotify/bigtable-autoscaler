@@ -24,8 +24,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import org.junit.jupiter.params.provider.Arguments;
 
-public class FakeBTCluster implements Arguments {
+public class FakeBigtableCluster implements Arguments {
 
   private final Supplier<Instant> timeSource;
   private final Map<Instant, ClusterMetricsData> metrics;
@@ -42,21 +42,19 @@ public class FakeBTCluster implements Arguments {
   private BigtableCluster cluster;
   private int nodes;
 
-  public FakeBTCluster(
-      final Path path, final Supplier<Instant> timeSource, final BigtableCluster defaults) {
+  public FakeBigtableCluster(
+      final File path, final Supplier<Instant> timeSource, final BigtableCluster defaults) {
     this.timeSource = timeSource;
     this.cluster = defaults;
     this.metrics = getMetrics(path);
   }
 
-  private Map<Instant, ClusterMetricsData> getMetrics(final Path path) {
+  private Map<Instant, ClusterMetricsData> getMetrics(final File file) {
 
     final ObjectMapper jsonMapper = new ObjectMapper();
     final Map<String, ClusterMetricsData> tmp;
     try {
-      tmp =
-          jsonMapper.readValue(
-              path.toFile(), new TypeReference<Map<String, ClusterMetricsData>>() {});
+      tmp = jsonMapper.readValue(file, new TypeReference<Map<String, ClusterMetricsData>>() {});
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
@@ -69,7 +67,8 @@ public class FakeBTCluster implements Arguments {
   public Instant getFirstValidMetricsInstant() {
     // Sometimes Stackdriver returns empty metrics. Autoscaler should normally be able to handle
     // them gracefully.
-    // However, to be able to correctly initialize the FakeBTCluster with an initial node count, we
+    // However, to be able to correctly initialize the FakeBigtableCluster with an initial node
+    // count, we
     // need the
     // first metrics that will serve as the beginning instant for the test to have a valid node
     // count.

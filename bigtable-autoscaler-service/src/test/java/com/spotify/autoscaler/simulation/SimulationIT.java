@@ -24,8 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.bigtable.admin.v2.Cluster;
 import com.spotify.autoscaler.AutoscaleJobITBase;
-import com.spotify.autoscaler.FakeBTCluster;
-import com.spotify.autoscaler.SimulatedClusterLoader;
+import com.spotify.autoscaler.FakeBigtableCluster;
+import com.spotify.autoscaler.FakeBigtableClusterLoader;
 import com.spotify.autoscaler.TimeSupplier;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -53,21 +53,22 @@ public class SimulationIT extends AutoscaleJobITBase {
 
     @Override
     public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
-      return SimulatedClusterLoader.loadAll(SimulationIT.DEFAULTS).stream();
+      return FakeBigtableClusterLoader.all(SimulationIT.DEFAULTS).stream();
     }
   }
 
   @ParameterizedTest
   @ArgumentsSource(AllLoader.class)
-  public void simulateCluster(final FakeBTCluster fakeBTCluster) throws IOException {
-    setupMocksFor(fakeBTCluster);
+  // @FromFile(Loader.simpleCluster())
+  public void simulateCluster(final FakeBigtableCluster fakeBigtableCluster) throws IOException {
+    setupMocksFor(fakeBigtableCluster);
 
-    final TimeSupplier timeSupplier = (TimeSupplier) fakeBTCluster.getTimeSource();
-    timeSupplier.setTime(fakeBTCluster.getFirstValidMetricsInstant());
+    final TimeSupplier timeSupplier = (TimeSupplier) fakeBigtableCluster.getTimeSource();
+    timeSupplier.setTime(fakeBigtableCluster.getFirstValidMetricsInstant());
 
-    final BigtableCluster cluster = fakeBTCluster.getCluster();
-    final int initialNodeCount = fakeBTCluster.getMetricsForNow().nodeCount().intValue();
-    fakeBTCluster.setNumberOfNodes(initialNodeCount);
+    final BigtableCluster cluster = fakeBigtableCluster.getCluster();
+    final int initialNodeCount = fakeBigtableCluster.getMetricsForNow().nodeCount().intValue();
+    fakeBigtableCluster.setNumberOfNodes(initialNodeCount);
     bigtableInstanceClient.updateCluster(
         Cluster.newBuilder()
             .setName(cluster.clusterName())
@@ -75,25 +76,27 @@ public class SimulationIT extends AutoscaleJobITBase {
             .build());
 
     testThroughTime(
-        fakeBTCluster,
+        fakeBigtableCluster,
         timeSupplier,
         Duration.ofSeconds(60),
         1400,
-        fakeBTCluster::getCPU,
-        fakeBTCluster::getStorage,
-        ignored -> assertTrue(fakeBTCluster.getCPU() < cluster.cpuTarget() + IDEAL_CPU_INTERVAL),
+        fakeBigtableCluster::getCPU,
+        fakeBigtableCluster::getStorage,
+        ignored ->
+            assertTrue(fakeBigtableCluster.getCPU() < cluster.cpuTarget() + IDEAL_CPU_INTERVAL),
         ignored -> {
           logger.warn(
               "Instant: {}, cpu: {}, nodeCount: {}, status: {}",
               timeSupplier.get().toString(),
-              fakeBTCluster.getCPU(),
-              fakeBTCluster.getNumberOfNodes(),
-              fakeBTCluster.getCPU() > cluster.cpuTarget() + CRITICAL_ADDITIONAL_CPU_THRESHOLD
+              fakeBigtableCluster.getCPU(),
+              fakeBigtableCluster.getNumberOfNodes(),
+              fakeBigtableCluster.getCPU() > cluster.cpuTarget() + CRITICAL_ADDITIONAL_CPU_THRESHOLD
                   ? "CRITICAL"
-                  : fakeBTCluster.getCPU() > cluster.cpuTarget() ? "HIGH" : "NORMAL");
+                  : fakeBigtableCluster.getCPU() > cluster.cpuTarget() ? "HIGH" : "NORMAL");
 
           assertTrue(
-              fakeBTCluster.getCPU() < cluster.cpuTarget() + CRITICAL_ADDITIONAL_CPU_THRESHOLD);
+              fakeBigtableCluster.getCPU()
+                  < cluster.cpuTarget() + CRITICAL_ADDITIONAL_CPU_THRESHOLD);
         });
   }
 }

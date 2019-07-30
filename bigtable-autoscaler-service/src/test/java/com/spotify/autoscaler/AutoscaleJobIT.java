@@ -53,16 +53,17 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
 
     @Override
     public Stream<? extends Arguments> provideArguments(final ExtensionContext extensionContext) {
-      // TODO(emilio) fix
-      return Stream.of(SimulatedClusterLoader.loadAll(AutoscaleJobIT.DEFAULTS).get(3));
+      return Stream.of(
+          FakeBigtableClusterLoader.one(FakeBigtableClusterLoader.SIMPLE, AutoscaleJobIT.DEFAULTS));
     }
   }
 
   // DONTLIKEIT do these need all the features of a simulation test?
   @ParameterizedTest
   @ArgumentsSource(SimpleLoader.class)
-  public void testWeDontResizeTooOften(final FakeBTCluster fakeBTCluster) throws IOException {
-    setupMocksFor(fakeBTCluster);
+  public void testWeDontResizeTooOften(final FakeBigtableCluster fakeBigtableCluster)
+      throws IOException {
+    setupMocksFor(fakeBigtableCluster);
     // To give the cluster a chance to settle in, don't resize too often
 
     // first time we get the last event from the DB we get nothing
@@ -71,59 +72,59 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.7);
 
-    final BigtableCluster cluster = fakeBTCluster.getCluster();
-    runJobAndAssertNewSize(fakeBTCluster, cluster, 88, Instant::now);
+    final BigtableCluster cluster = fakeBigtableCluster.getCluster();
+    runJobAndAssertNewSize(fakeBigtableCluster, cluster, 88, Instant::now);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.5);
     final BigtableCluster updatedCluster =
         db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
 
     runJobAndAssertNewSize(
-        fakeBTCluster, updatedCluster, 88, () -> Instant.now().plus(Duration.ofMinutes(8)));
+        fakeBigtableCluster, updatedCluster, 88, () -> Instant.now().plus(Duration.ofMinutes(8)));
   }
 
   @ParameterizedTest
   @ArgumentsSource(SimpleLoader.class)
-  public void testSmallResizesDontHappenTooOften(final FakeBTCluster fakeBTCluster)
+  public void testSmallResizesDontHappenTooOften(final FakeBigtableCluster fakeBigtableCluster)
       throws IOException {
-    setupMocksFor(fakeBTCluster);
+    setupMocksFor(fakeBigtableCluster);
     // To avoid oscillating, don't do small size changes too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.7);
 
-    final BigtableCluster cluster = fakeBTCluster.getCluster();
-    runJobAndAssertNewSize(fakeBTCluster, cluster, 88, Instant::now);
+    final BigtableCluster cluster = fakeBigtableCluster.getCluster();
+    runJobAndAssertNewSize(fakeBigtableCluster, cluster, 88, Instant::now);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.78);
     final BigtableCluster updatedCluster =
         db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
 
     runJobAndAssertNewSize(
-        fakeBTCluster, updatedCluster, 88, () -> Instant.now().plus(Duration.ofMinutes(100)));
+        fakeBigtableCluster, updatedCluster, 88, () -> Instant.now().plus(Duration.ofMinutes(100)));
   }
 
   @ParameterizedTest
   @ArgumentsSource(SimpleLoader.class)
-  public void testSmallResizesHappenEventually(final FakeBTCluster fakeBTCluster)
+  public void testSmallResizesHappenEventually(final FakeBigtableCluster fakeBigtableCluster)
       throws IOException {
-    setupMocksFor(fakeBTCluster);
+    setupMocksFor(fakeBigtableCluster);
     // To avoid oscillating, don't do small size changes too often
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.7);
 
-    final BigtableCluster cluster = fakeBTCluster.getCluster();
-    runJobAndAssertNewSize(fakeBTCluster, cluster, 88, Instant::now);
+    final BigtableCluster cluster = fakeBigtableCluster.getCluster();
+    runJobAndAssertNewSize(fakeBigtableCluster, cluster, 88, Instant::now);
 
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.78);
     final BigtableCluster updatedCluster =
         db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId()).get();
 
     runJobAndAssertNewSize(
-        fakeBTCluster, updatedCluster, 86, () -> Instant.now().plus(Duration.ofMinutes(480)));
+        fakeBigtableCluster, updatedCluster, 86, () -> Instant.now().plus(Duration.ofMinutes(480)));
   }
 
   @ParameterizedTest
   @ArgumentsSource(SimpleLoader.class)
-  public void randomDataTest(final FakeBTCluster fakeBTCluster) throws IOException {
-    setupMocksFor(fakeBTCluster);
+  public void randomDataTest(final FakeBigtableCluster fakeBigtableCluster) throws IOException {
+    setupMocksFor(fakeBigtableCluster);
     // This test is useful to see that we don't get stuck at any point, for example
     // there is no Connection leak.
     final Random random = new Random();
@@ -133,7 +134,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
     timeSupplier.setTime(start);
 
     testThroughTime(
-        fakeBTCluster,
+        fakeBigtableCluster,
         timeSupplier,
         Duration.ofSeconds(300),
         512,
@@ -144,13 +145,13 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
   }
 
   private void runJobAndAssertNewSize(
-      final FakeBTCluster fakeBTCluster,
+      final FakeBigtableCluster fakeBigtableCluster,
       final BigtableCluster cluster,
       final int expectedSize,
       final Supplier<Instant> timeSource)
       throws IOException {
     final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
     job.run(cluster, bigtableSession, timeSource);
-    assertEquals(expectedSize, fakeBTCluster.getNumberOfNodes());
+    assertEquals(expectedSize, fakeBigtableCluster.getNumberOfNodes());
   }
 }

@@ -53,9 +53,9 @@ public class AutoscaleJobITBase {
 
   PostgresDatabase db;
 
-  public void setupMocksFor(final FakeBTCluster fakeBTCluster) throws IOException {
+  public void setupMocksFor(final FakeBigtableCluster fakeBigtableCluster) throws IOException {
     initMocks(this);
-    db = initDatabase(fakeBTCluster);
+    db = initDatabase(fakeBigtableCluster);
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
 
     when(bigtableInstanceClient.getCluster(any()))
@@ -64,8 +64,8 @@ public class AutoscaleJobITBase {
               final GetClusterRequest getClusterReq = invocationOnMock.getArgument(0);
               if (getClusterReq != null) {
                 return Cluster.newBuilder()
-                    .setName(fakeBTCluster.getCluster().clusterName())
-                    .setServeNodes(fakeBTCluster.getNumberOfNodes())
+                    .setName(fakeBigtableCluster.getCluster().clusterName())
+                    .setServeNodes(fakeBigtableCluster.getNumberOfNodes())
                     .build();
               } else {
                 return Cluster.newBuilder().build();
@@ -77,10 +77,10 @@ public class AutoscaleJobITBase {
             invocationOnMock -> {
               final Cluster cluster = invocationOnMock.getArgument(0);
               final int newSize = cluster.getServeNodes();
-              fakeBTCluster.setNumberOfNodes(newSize);
+              fakeBigtableCluster.setNumberOfNodes(newSize);
               return null;
             });
-    fakeBTCluster.setNumberOfNodes(100);
+    fakeBigtableCluster.setNumberOfNodes(100);
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
   }
 
@@ -94,18 +94,18 @@ public class AutoscaleJobITBase {
     db.close();
   }
 
-  private PostgresDatabase initDatabase(final FakeBTCluster fakeBTCluster) {
+  private PostgresDatabase initDatabase(final FakeBigtableCluster fakeBigtableCluster) {
     final PostgresDatabase database = PostgresDatabaseTest.getPostgresDatabase();
-    final TimeSupplier timeSupplier = (TimeSupplier) fakeBTCluster.getTimeSource();
-    timeSupplier.setTime(fakeBTCluster.getFirstValidMetricsInstant());
-    final BigtableCluster cluster = fakeBTCluster.getCluster();
+    final TimeSupplier timeSupplier = (TimeSupplier) fakeBigtableCluster.getTimeSource();
+    timeSupplier.setTime(fakeBigtableCluster.getFirstValidMetricsInstant());
+    final BigtableCluster cluster = fakeBigtableCluster.getCluster();
     database.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
     database.insertBigtableCluster(cluster);
     return database;
   }
 
   protected void testThroughTime(
-      final FakeBTCluster fakeBTCluster,
+      final FakeBigtableCluster fakeBigtableCluster,
       final TimeSupplier timeSupplier,
       final Duration period,
       final int repetition,
@@ -124,7 +124,7 @@ public class AutoscaleJobITBase {
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
       final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
-      job.run(fakeBTCluster.getCluster(), bigtableSession, timeSupplier);
+      job.run(fakeBigtableCluster.getCluster(), bigtableSession, timeSupplier);
       assertionImmediatelyAfterAutoscaleJob.accept(null);
     }
   }
