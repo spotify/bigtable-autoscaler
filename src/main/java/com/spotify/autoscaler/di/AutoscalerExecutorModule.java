@@ -18,27 +18,19 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.api;
+package com.spotify.autoscaler.di;
 
-import com.spotify.autoscaler.db.Database;
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import dagger.Module;
+import dagger.Provides;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-@Path("/health")
-public class HealthCheck implements Endpoint {
+@Module
+public class AutoscalerExecutorModule {
+  private static final int CONCURRENCY_LIMIT = 5;
 
-  private final Database database;
-
-  @Inject
-  public HealthCheck(final Database database) {
-    this.database = database;
-  }
-
-  @GET
-  public Response healthCheck() {
-    database.healthCheck();
-    return Response.ok().build();
+  @Provides
+  public ExecutorService autoscalerExecutorService() {
+    return Executors.newFixedThreadPool(CONCURRENCY_LIMIT);
   }
 }

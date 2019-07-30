@@ -18,24 +18,21 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.di;
 
+import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.db.PostgresDatabase;
 import com.typesafe.config.Config;
-import org.glassfish.jersey.server.ResourceConfig;
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Singleton;
 
-public class AutoscaleResourceConfig extends ResourceConfig {
+@Module
+public class DatabaseModule {
 
-  public AutoscaleResourceConfig(
-      final String serviceName, final Config config, final Object... resources) {
-    setApplicationName(serviceName);
-    for (final Object o : resources) {
-      register(o);
-    }
-    if (config.hasPath("additionalPackages")) {
-      packages(config.getStringList("additionalPackages").toArray(new String[0]));
-    }
-    if (config.hasPath("additionalClasses")) {
-      property("jersey.config.server.provider.classnames", config.getString("additionalClasses"));
-    }
+  @Provides
+  @Singleton
+  public static Database database(final Config config) {
+    return new PostgresDatabase(config.getConfig("database"));
   }
 }

@@ -18,27 +18,23 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.api;
+package com.spotify.autoscaler.di;
 
-import com.spotify.autoscaler.db.Database;
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import com.spotify.autoscaler.api.ClusterResources;
+import com.spotify.autoscaler.api.Endpoint;
+import com.spotify.autoscaler.api.HealthCheck;
+import dagger.Binds;
+import dagger.Module;
+import dagger.multibindings.IntoSet;
 
-@Path("/health")
-public class HealthCheck implements Endpoint {
+@Module
+public abstract class EndpointsModule {
 
-  private final Database database;
+  @Binds
+  @IntoSet
+  public abstract Endpoint clusterResources(ClusterResources clusterResources);
 
-  @Inject
-  public HealthCheck(final Database database) {
-    this.database = database;
-  }
-
-  @GET
-  public Response healthCheck() {
-    database.healthCheck();
-    return Response.ok().build();
-  }
+  @Binds
+  @IntoSet
+  public abstract Endpoint healthCheck(HealthCheck healthCheck);
 }

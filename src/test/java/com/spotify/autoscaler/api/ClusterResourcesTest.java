@@ -29,9 +29,10 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.google.common.collect.ImmutableList;
-import com.spotify.autoscaler.AutoscaleResourceConfig;
+import com.google.common.collect.ImmutableSet;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.di.HttpServerModule;
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import java.io.IOException;
@@ -40,7 +41,6 @@ import java.util.List;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Response;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -68,11 +68,10 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
         .thenAnswer(invocation -> updateLoadDeltaResult);
 
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
-    final ResourceConfig resourceConfig =
-        new AutoscaleResourceConfig(
-            ApiTestResources.SERVICE_NAME, config, new ClusterResources(db), new HealthCheck(db));
 
-    return resourceConfig;
+    return new HttpServerModule()
+        .resourceConfig(
+            config, ImmutableSet.of(new ClusterResources(db, MAPPER), new HealthCheck(db)));
   }
 
   @Test

@@ -20,9 +20,8 @@
 
 package com.spotify.autoscaler.metric;
 
-import static com.spotify.autoscaler.Main.APP_PREFIX;
-
 import com.codahale.metrics.Gauge;
+import com.spotify.autoscaler.Application;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.util.BigtableUtil;
@@ -47,6 +46,7 @@ import org.slf4j.LoggerFactory;
 /*Helper class containing methods to register and measure autoscaler metrics.*/
 public class AutoscalerMetrics {
 
+  public static final MetricId APP_PREFIX = MetricId.build("key", Application.SERVICE_NAME);
   private static final Logger LOG = LoggerFactory.getLogger(AutoscalerMetrics.class);
 
   private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
