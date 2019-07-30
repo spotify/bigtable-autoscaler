@@ -24,18 +24,21 @@ import com.spotify.autoscaler.client.StackdriverClient;
 import dagger.Module;
 import dagger.Provides;
 import java.io.IOException;
+import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Module
 public class StackdriverModule {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(StackdriverModule.class);
 
   @Provides
-  public StackdriverClient stackdriverClient() {
+  @Singleton
+  public static StackdriverClient stackdriverClient() {
     try {
       return new StackdriverClient();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       LOGGER.error("Failed to initialize Stackdriver client", e);
       throw new RuntimeException(e);
     }

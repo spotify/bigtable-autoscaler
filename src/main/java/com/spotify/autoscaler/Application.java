@@ -35,7 +35,8 @@ import org.slf4j.LoggerFactory;
 public class Application {
   public static final String SERVICE_NAME = "bigtable-autoscaler";
   private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
-  private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
+  private final ScheduledExecutorService scheduledExecutorService =
+      new ScheduledThreadPoolExecutor(1);
   private final Autoscaler autoscaler;
   private final HttpServer server;
   private final Optional<FastForwardReporter> reporter;
@@ -53,7 +54,7 @@ public class Application {
 
   public void start() throws IOException {
     reporter.ifPresent(FastForwardReporter::start);
-    executor.scheduleWithFixedDelay(
+    scheduledExecutorService.scheduleWithFixedDelay(
         autoscaler, RUN_INTERVAL.toMillis(), RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
     server.start();
     addShutdownHooks();
@@ -77,8 +78,8 @@ public class Application {
   private void onShutdown() throws Exception {
     server.shutdown(10, TimeUnit.SECONDS).get();
     reporter.ifPresent(FastForwardReporter::stop);
-    executor.shutdown();
-    executor.awaitTermination(5, TimeUnit.SECONDS);
+    scheduledExecutorService.shutdown();
+    scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS);
     autoscaler.close();
   }
 }

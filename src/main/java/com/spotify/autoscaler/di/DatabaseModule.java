@@ -25,12 +25,14 @@ import com.spotify.autoscaler.db.PostgresDatabase;
 import com.typesafe.config.Config;
 import dagger.Module;
 import dagger.Provides;
+import javax.inject.Singleton;
 
 @Module
 public class DatabaseModule {
 
   @Provides
-  public Database database(Config config) {
+  @Singleton
+  public static Database database(final Config config) {
     return new PostgresDatabase(config.getConfig("database"));
   }
 }
