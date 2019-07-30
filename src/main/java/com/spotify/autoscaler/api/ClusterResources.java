@@ -232,9 +232,6 @@ public class ClusterResources implements Endpoint {
       if (!maybeCluster.isPresent()) {
         return Response.status(Response.Status.NOT_FOUND).build();
       }
-      if (minNodesOverride > maybeCluster.get().maxNodes()) {
-        return Response.status(Response.Status.BAD_REQUEST).build();
-      }
       if (database.setMinNodesOverride(projectId, instanceId, clusterId, minNodesOverride)) {
         LOGGER.info("cluster minNodesOverride updated to {}", minNodesOverride);
         return Response.ok().build();

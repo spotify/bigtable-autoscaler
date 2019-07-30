@@ -119,7 +119,8 @@ public class ClusterMetricsDataGenerator {
             instant,
             (unused, current) ->
                 ClusterMetricsData.ClusterMetricsDataBuilder.from(current)
-                    .minNodesOverride(current.minNodesOverride() + job.dataJobMinNodesOverride)
+                    .minNodesOverride(
+                        Math.max(current.minNodesOverride(), job.dataJobMinNodesOverride))
                     .build());
       }
     }

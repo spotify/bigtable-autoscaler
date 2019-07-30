@@ -264,7 +264,7 @@ public class AutoscaleJobTest {
 
   @Test
   public void testWeResizeIfSizeConstraintsAreNotMet() throws IOException {
-    final int minNodesOverride = 10;
+    final int minNodesOverride = MIN_NODES + 10;
     final BigtableCluster cluster =
         BigtableClusterBuilder.from(this.cluster)
             .minNodesOverride(minNodesOverride)
@@ -274,7 +274,7 @@ public class AutoscaleJobTest {
     job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run(cluster, bigtableSession, Instant::now);
-    assertEquals(Optional.of(Math.max(MIN_NODES, minNodesOverride)), newSize);
+    assertEquals(Optional.of(minNodesOverride), newSize);
   }
 
   @Test
