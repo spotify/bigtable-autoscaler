@@ -65,7 +65,7 @@ public interface BigtableCluster {
   }
 
   default int effectiveMinNodes() {
-    return Math.max(minNodes(), minNodesOverride());
+    return Math.min(Math.max(minNodes(), minNodesOverride()), maxNodes());
   }
 
   default boolean exists() {
