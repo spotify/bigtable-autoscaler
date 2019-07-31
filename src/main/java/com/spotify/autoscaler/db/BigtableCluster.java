@@ -50,14 +50,13 @@ public interface BigtableCluster {
 
   Optional<Instant> lastFailure();
 
-  Optional<String>
-      lastFailureMessage(); // Old failure messages will still be kept even if the last attempt
-  // worked
+  // Old failure messages will still be kept even if the last attempt worked
+  Optional<String> lastFailureMessage();
 
-  int consecutiveFailureCount(); // 0 means last autoscale attempt succeeded
+  // 0 means last autoscale attempt succeeded
+  int consecutiveFailureCount();
 
-  int loadDelta(); // 0 means no extra load to consider, gt 0 means minNodes is effectively
-  // minNodes+loadDelta
+  int minNodesOverride();
 
   Optional<ErrorCode> errorCode();
 
@@ -66,7 +65,7 @@ public interface BigtableCluster {
   }
 
   default int effectiveMinNodes() {
-    return Math.min(minNodes() + loadDelta(), maxNodes());
+    return Math.min(Math.max(minNodes(), minNodesOverride()), maxNodes());
   }
 
   default boolean exists() {

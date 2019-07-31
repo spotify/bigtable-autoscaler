@@ -37,10 +37,11 @@ import org.junit.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class PostgresDatabaseIT {
+
   private PostgresDatabase db;
-  private String projectId = "test-project";
-  private String instanceId = "test-instance";
-  private String clusterId = "test-cluster";
+  private final String projectId = "test-project";
+  private final String instanceId = "test-instance";
+  private final String clusterId = "test-cluster";
 
   private BigtableCluster testCluster() {
     return new BigtableClusterBuilder()
@@ -67,6 +68,7 @@ public class PostgresDatabaseIT {
         .overloadStep(10)
         .enabled(true)
         .errorCode(Optional.of(ErrorCode.OK))
+        .minNodesOverride(10)
         .build();
   }
 
@@ -95,11 +97,12 @@ public class PostgresDatabaseIT {
   public void setLastChangeTest() {
     db.insertBigtableCluster(testCluster());
 
-    Instant now = Instant.now();
+    final Instant now = Instant.now();
     db.setLastChange(projectId, instanceId, clusterId, now);
-    Optional<BigtableCluster> btcluster = db.getBigtableCluster(projectId, instanceId, clusterId);
+    final Optional<BigtableCluster> btcluster =
+        db.getBigtableCluster(projectId, instanceId, clusterId);
     assertTrue(btcluster.isPresent());
-    Optional<Instant> alsoNow = btcluster.get().lastChange();
+    final Optional<Instant> alsoNow = btcluster.get().lastChange();
     assertTrue(alsoNow.isPresent());
     assertEquals(now, alsoNow.get());
   }
@@ -136,26 +139,26 @@ public class PostgresDatabaseIT {
 
   @Test
   public void getCandidateClusters() {
-    BigtableCluster c1 =
+    final BigtableCluster c1 =
         BigtableClusterBuilder.from(testCluster())
             .clusterId("c1")
             .lastCheck(Instant.ofEpochSecond(1000))
             .build();
-    BigtableCluster c2 = BigtableClusterBuilder.from(testCluster()).clusterId("c2").build();
-    BigtableCluster c3 =
+    final BigtableCluster c2 = BigtableClusterBuilder.from(testCluster()).clusterId("c2").build();
+    final BigtableCluster c3 =
         BigtableClusterBuilder.from(testCluster())
             .clusterId("c3")
             .lastCheck(Instant.now().minus(Duration.ofSeconds(3)))
             .build();
-    BigtableCluster c4 =
+    final BigtableCluster c4 =
         BigtableClusterBuilder.from(testCluster())
             .clusterId("c4")
             .lastCheck(Instant.ofEpochSecond(500))
             .build();
-    BigtableCluster c5 =
+    final BigtableCluster c5 =
         BigtableClusterBuilder.from(testCluster()).clusterId("c5").enabled(false).build();
 
-    for (BigtableCluster cluster : Arrays.asList(c1, c2, c3, c4, c5)) {
+    for (final BigtableCluster cluster : Arrays.asList(c1, c2, c3, c4, c5)) {
       db.insertBigtableCluster(cluster);
 
       cluster
@@ -167,7 +170,7 @@ public class PostgresDatabaseIT {
     }
 
     // Verify that the order is as expected
-    List<BigtableCluster> clusters = db.getCandidateClusters();
+    final List<BigtableCluster> clusters = db.getCandidateClusters();
     assertEquals(3, clusters.size());
     assertEquals(c2, clusters.get(0));
     assertEquals(c4, clusters.get(1));
@@ -176,7 +179,7 @@ public class PostgresDatabaseIT {
 
   @Test
   public void updateLastCheckedSetIfMatches() {
-    BigtableCluster c1 =
+    final BigtableCluster c1 =
         BigtableClusterBuilder.from(testCluster()).lastCheck(Instant.ofEpochSecond(1000)).build();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
     db.setLastCheck(c1.projectId(), c1.instanceId(), c1.clusterId(), c1.lastCheck().get());
@@ -184,32 +187,32 @@ public class PostgresDatabaseIT {
     assertTrue(db.updateLastChecked(c1));
 
     // Verify that the database object actually got updated
-    BigtableCluster updated =
+    final BigtableCluster updated =
         db.getBigtableCluster(c1.projectId(), c1.instanceId(), c1.clusterId()).get();
     assertTrue(updated.lastCheck().get().isAfter(c1.lastCheck().get()));
   }
 
   @Test
   public void updateLastCheckedSetIfFirstTime() {
-    BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
+    final BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
 
     // Slight sanity check here
-    BigtableCluster notUpdated =
+    final BigtableCluster notUpdated =
         db.getBigtableCluster(c1.projectId(), c1.instanceId(), c1.clusterId()).get();
     assertFalse(notUpdated.lastCheck().isPresent());
 
     assertTrue(db.updateLastChecked(c1));
 
     // Verify that the database object actually got updated
-    BigtableCluster updated =
+    final BigtableCluster updated =
         db.getBigtableCluster(c1.projectId(), c1.instanceId(), c1.clusterId()).get();
     assertTrue(updated.lastCheck().isPresent());
   }
 
   @Test
   public void updateLastCheckedNoSetIfNotMatches() {
-    BigtableCluster c1 =
+    final BigtableCluster c1 =
         BigtableClusterBuilder.from(testCluster()).lastCheck(Instant.ofEpochSecond(1000)).build();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
     db.setLastCheck(c1.projectId(), c1.instanceId(), c1.clusterId(), Instant.ofEpochSecond(2000));
@@ -217,38 +220,52 @@ public class PostgresDatabaseIT {
     assertFalse(db.updateLastChecked(c1));
 
     // Verify that the database object did not get updated
-    BigtableCluster updated =
+    final BigtableCluster updated =
         db.getBigtableCluster(c1.projectId(), c1.instanceId(), c1.clusterId()).get();
     assertEquals(Instant.ofEpochSecond(2000), updated.lastCheck().get());
   }
 
   @Test
   public void updateLastCheckedNoSetIfFirstTimeButNoMatch() {
-    BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
+    final BigtableCluster c1 = BigtableClusterBuilder.from(testCluster()).build();
     db.insertBigtableCluster(testCluster()); // This doesn't set lastCheck!
     db.setLastCheck(c1.projectId(), c1.instanceId(), c1.clusterId(), Instant.ofEpochSecond(2000));
 
     assertFalse(db.updateLastChecked(c1));
 
     // Verify that the database object did not get updated
-    BigtableCluster updated =
+    final BigtableCluster updated =
         db.getBigtableCluster(c1.projectId(), c1.instanceId(), c1.clusterId()).get();
     assertEquals(Instant.ofEpochSecond(2000), updated.lastCheck().get());
   }
 
   @Test
-  public void testInsertedAndRetrievedClustersAreEquivalent() throws Exception {
+  public void testInsertedAndRetrievedClustersAreEquivalent() {
 
-    BigtableCluster cluster =
+    final BigtableCluster cluster =
         BigtableClusterBuilder.from(testCluster()).overloadStep(Optional.ofNullable(null)).build();
 
     db.insertBigtableCluster(cluster);
     db.insertBigtableCluster(anotherTestCluster());
 
-    BigtableCluster retrievedCluster =
+    final BigtableCluster retrievedCluster =
         db.getBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId())
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(cluster, retrievedCluster);
+  }
+
+  @Test
+  public void testSetMinNodesOverride() {
+    db.insertBigtableCluster(testCluster());
+    db.setMinNodesOverride(
+        testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId(), 42);
+
+    final BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(42, retrievedCluster.minNodesOverride());
   }
 }
