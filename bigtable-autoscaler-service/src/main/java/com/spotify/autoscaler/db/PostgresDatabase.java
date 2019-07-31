@@ -63,7 +63,7 @@ public class PostgresDatabase implements Database {
         "last_failure",
         "consecutive_failure_count",
         "last_failure_message",
-        "load_delta",
+        "min_nodes_override",
         "error_code"
       };
 
@@ -125,7 +125,7 @@ public class PostgresDatabase implements Database {
         .lastFailure(Optional.ofNullable(rs.getTimestamp("last_failure")).map(Timestamp::toInstant))
         .lastFailureMessage(Optional.ofNullable(rs.getString("last_failure_message")))
         .consecutiveFailureCount(rs.getInt("consecutive_failure_count"))
-        .loadDelta(rs.getInt("load_delta"))
+        .minNodesOverride(rs.getInt("min_nodes_override"))
         .errorCode(Optional.of(ErrorCode.valueOf(rs.getString("error_code"))))
         .build();
   }
@@ -326,11 +326,11 @@ public class PostgresDatabase implements Database {
         "INSERT INTO resize_log"
             + "(timestamp, project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, "
             + "overload_step, current_nodes, target_nodes, cpu_utilization, storage_utilization, detail, "
-            + "success, error_message, load_delta) "
+            + "success, error_message, min_nodes_override) "
             + "VALUES "
             + "(:timestamp, :project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, "
             + ":overload_step, :current_nodes, :target_nodes, :cpu_utilization, :storage_utilization, :detail, "
-            + ":success, :error_message, :load_delta)";
+            + ":success, :error_message, :min_nodes_override)";
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put("timestamp", log.timestamp());
     params.put("project_id", log.projectId());
@@ -347,7 +347,7 @@ public class PostgresDatabase implements Database {
     params.put("detail", String.join("", log.resizeReasons()));
     params.put("success", log.success());
     params.put("error_message", log.errorMessage().orElse(null));
-    params.put("load_delta", log.loadDelta());
+    params.put("min_nodes_override", log.minNodesOverride());
     jdbc.update(sql, Collections.unmodifiableMap(params));
   }
 
@@ -376,7 +376,7 @@ public class PostgresDatabase implements Database {
       final String projectId, final String instanceId, final String clusterId) {
     final String sql =
         "SELECT "
-            + "timestamp, project_id, instance_id, cluster_id, min_nodes, max_nodes, load_delta, cpu_target, overload_step, "
+            + "timestamp, project_id, instance_id, cluster_id, min_nodes, max_nodes, min_nodes_override, cpu_target, overload_step, "
             + "current_nodes, target_nodes, cpu_utilization, storage_utilization, detail, success, error_message "
             + "FROM resize_log "
             + "WHERE project_id = :project_id AND instance_id = :instance_id AND cluster_id = :cluster_id "
@@ -407,22 +407,22 @@ public class PostgresDatabase implements Database {
         .resizeReason(rs.getString("detail"))
         .success(rs.getBoolean("success"))
         .errorMessage(Optional.ofNullable((String) rs.getObject("error_message")))
-        .loadDelta(rs.getInt("load_delta"))
+        .minNodesOverride(rs.getInt("min_nodes_override"))
         .build();
   }
 
   @Override
-  public boolean updateLoadDelta(
+  public boolean setMinNodesOverride(
       final String projectId,
       final String instanceId,
       final String clusterId,
-      final Integer loadDelta) {
+      final Integer minNodesOverride) {
     final String sql =
         "UPDATE autoscale "
-            + "SET load_delta = ? "
+            + "SET min_nodes_override = ? "
             + "WHERE project_id = ? AND instance_id = ? AND cluster_id = ?";
     final int numRowsUpdated =
-        jdbc.getJdbcOperations().update(sql, loadDelta, projectId, instanceId, clusterId);
+        jdbc.getJdbcOperations().update(sql, minNodesOverride, projectId, instanceId, clusterId);
     return numRowsUpdated == 1;
   }
 

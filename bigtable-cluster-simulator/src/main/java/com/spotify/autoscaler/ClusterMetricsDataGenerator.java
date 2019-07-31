@@ -52,15 +52,15 @@ public class ClusterMetricsDataGenerator {
   private static class DataJobInformation {
 
     private DataJobInformation(
-        final String dataJobStart, final String dataJobEnd, final Double dataJobLoadDelta) {
+        final String dataJobStart, final String dataJobEnd, final Double dataJobMinNodesOverride) {
       this.dataJobStart = dataJobStart;
       this.dataJobEnd = dataJobEnd;
-      this.dataJobLoadDelta = dataJobLoadDelta;
+      this.dataJobMinNodesOverride = dataJobMinNodesOverride;
     }
 
     String dataJobStart;
     String dataJobEnd;
-    Double dataJobLoadDelta;
+    Double dataJobMinNodesOverride;
   }
 
   // for now we don't have reliable data, so we manually set data job start, duration, etc
@@ -86,9 +86,10 @@ public class ClusterMetricsDataGenerator {
       populateMetric(metricServiceClient, metrics, cluster, interval, metric);
     }
 
-    // infer the value of loadDelta from the existing metrics, i.e. try to guess if a data job
+    // infer the value of minNodesOverride from the existing metrics, i.e. try to guess if a data
+    // job
     // started at some point
-    populateLoadDelta(metrics);
+    populateMinNodesOverride(metrics);
 
     // save metrics as json
     final ObjectMapper mapper = new ObjectMapper();
@@ -101,7 +102,7 @@ public class ClusterMetricsDataGenerator {
     }
   }
 
-  private static void populateLoadDelta(final Map<Instant, ClusterMetricsData> metrics) {
+  private static void populateMinNodesOverride(final Map<Instant, ClusterMetricsData> metrics) {
     for (final DataJobInformation job : jobs) {
       final Instant dataJobStart = Instant.parse(job.dataJobStart);
       dataJobStart.truncatedTo(ChronoUnit.MINUTES);
@@ -115,7 +116,8 @@ public class ClusterMetricsDataGenerator {
             instant,
             (unused, current) ->
                 ClusterMetricsData.ClusterMetricsDataBuilder.from(current)
-                    .loadDelta(current.loadDelta() + job.dataJobLoadDelta)
+                    .minNodesOverride(
+                        Math.max(current.minNodesOverride(), job.dataJobMinNodesOverride))
                     .build());
       }
     }

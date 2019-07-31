@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.function.Function;
 
-public class StackdriverClientImpl implements StackdriverClient {
+public class AutoscalerStackdriverClient implements StackdriverClient {
 
   private static final String CPU_METRIC =
       "metric.type=\"bigtable.googleapis.com/cluster/cpu_load\""
@@ -42,7 +42,7 @@ public class StackdriverClientImpl implements StackdriverClient {
 
   private final MetricServiceClient metricServiceClient;
 
-  public StackdriverClientImpl() throws IOException {
+  public AutoscalerStackdriverClient() throws IOException {
     metricServiceClient = MetricServiceClient.create();
   }
 

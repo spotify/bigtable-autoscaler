@@ -28,7 +28,7 @@ import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.spotify.autoscaler.client.StackdriverClientImpl;
+import com.spotify.autoscaler.client.AutoscalerStackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.db.PostgresDatabaseTest;
@@ -47,7 +47,7 @@ public class AutoscaleJobITBase {
 
   @Mock protected BigtableInstanceClient bigtableInstanceClient;
 
-  @Mock StackdriverClientImpl stackdriverClient;
+  @Mock AutoscalerStackdriverClient stackdriverClient;
 
   @Mock AutoscalerMetrics autoscalerMetrics;
 

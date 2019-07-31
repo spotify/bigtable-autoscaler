@@ -39,10 +39,13 @@ public class FakeBigtableClusterLoader {
   public static final String ONE_JOB_2 = "simulated_clusters/project4_instance4_one-job.json";
   public static final String MANY_JOBS = "simulated_clusters/project2_instance2_many-jobs.json";
   public static final String MANY_JOBS_2 = "simulated_clusters/project5_instance5_many-jobs.json";
-  public static final String REPLICATION = "simulated_clusters/project6_instance6_no-job-only-replication.json";
-  public static final String REPLICATION_WITH_ONE_JOB = "simulated_clusters/project6_instance6_one-job-replicated.json";
+  public static final String REPLICATION =
+      "simulated_clusters/project6_instance6_no-job-only-replication.json";
+  public static final String REPLICATION_WITH_ONE_JOB =
+      "simulated_clusters/project6_instance6_one-job-replicated.json";
 
-  public static FakeBigtableCluster one(final String fileName, final BigtableClusterBuilder defaults) {
+  public static FakeBigtableCluster one(
+      final String fileName, final BigtableClusterBuilder defaults) {
     final ClassLoader loader = Thread.currentThread().getContextClassLoader();
     final File file = new File(loader.getResource(fileName).getFile());
     final BigtableCluster cluster =
@@ -56,7 +59,15 @@ public class FakeBigtableClusterLoader {
   }
 
   public static List<FakeBigtableCluster> all(final BigtableClusterBuilder defaults) {
-    final List<String> files = List.of(SIMPLE, ONE_JOB, ONE_JOB_2, MANY_JOBS, MANY_JOBS_2, REPLICATION, REPLICATION_WITH_ONE_JOB);
+    final List<String> files =
+        List.of(
+            SIMPLE,
+            ONE_JOB,
+            ONE_JOB_2,
+            MANY_JOBS,
+            MANY_JOBS_2,
+            REPLICATION,
+            REPLICATION_WITH_ONE_JOB);
 
     return files.stream().map(file -> one(file, defaults)).collect(Collectors.toList());
   }

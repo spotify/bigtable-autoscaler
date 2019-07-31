@@ -31,7 +31,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.spotify.autoscaler.client.StackdriverClientImpl;
+import com.spotify.autoscaler.client.AutoscalerStackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
@@ -55,7 +55,7 @@ public class AutoscaleJobTest {
 
   @Mock BigtableInstanceClient bigtableInstanceClient;
 
-  @Mock StackdriverClientImpl stackdriverClient;
+  @Mock AutoscalerStackdriverClient stackdriverClient;
 
   @Mock Database db;
 
@@ -263,17 +263,17 @@ public class AutoscaleJobTest {
 
   @Test
   public void testWeResizeIfSizeConstraintsAreNotMet() throws IOException {
-    final int loadDelta = 10;
+    final int minNodesOverride = MIN_NODES + 10;
     final BigtableCluster cluster =
         BigtableClusterBuilder.from(this.cluster)
-            .loadDelta(loadDelta)
+            .minNodesOverride(minNodesOverride)
             .lastChange(Instant.now())
             .build();
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES);
     job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run(cluster, bigtableSession, Instant::now);
-    assertEquals(Optional.of(MIN_NODES + loadDelta), newSize);
+    assertEquals(Optional.of(minNodesOverride), newSize);
   }
 
   @Test

@@ -27,7 +27,7 @@ import com.google.cloud.bigtable.config.BulkOptions;
 import com.google.cloud.bigtable.config.CallOptionsConfig;
 import com.google.cloud.bigtable.grpc.BigtableInstanceName;
 import com.google.cloud.bigtable.grpc.BigtableSession;
-import com.spotify.autoscaler.client.StackdriverClientImpl;
+import com.spotify.autoscaler.client.AutoscalerStackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.filters.ClusterFilter;
@@ -38,6 +38,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,16 +46,16 @@ public class Autoscaler implements Runnable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Autoscaler.class);
 
-  private final StackdriverClientImpl stackDriverClient;
+  private final AutoscalerStackdriverClient stackDriverClient;
   private final Database database;
   private final AutoscalerMetrics autoscalerMetrics;
   private final ClusterFilter filter;
-
   private final ExecutorService executorService;
 
+  @Inject
   public Autoscaler(
       final ExecutorService executorService,
-      final StackdriverClientImpl stackDriverClient,
+      final AutoscalerStackdriverClient stackDriverClient,
       final Database database,
       final AutoscalerMetrics autoscalerMetrics,
       final ClusterFilter filter) {
@@ -66,7 +67,7 @@ public class Autoscaler implements Runnable {
   }
 
   public AutoscaleJob makeAutoscaleJob(
-      final StackdriverClientImpl stackDriverClient,
+      final AutoscalerStackdriverClient stackDriverClient,
       final Database database,
       final AutoscalerMetrics autoscalerMetrics) {
     return new AutoscaleJob(stackDriverClient, database, autoscalerMetrics);
@@ -107,7 +108,7 @@ public class Autoscaler implements Runnable {
     LoggerContext.pushContext(cluster);
     LOGGER.info("Autoscaling cluster!");
     try (final BigtableSession session =
-        createSession(cluster.instanceId(), cluster.projectId(), Main.SERVICE_NAME)) {
+        createSession(cluster.instanceId(), cluster.projectId(), Application.SERVICE_NAME)) {
       makeAutoscaleJob(stackDriverClient, database, autoscalerMetrics)
           .run(cluster, session, Instant::now);
     } catch (final Exception e) {
@@ -118,7 +119,9 @@ public class Autoscaler implements Runnable {
     LoggerContext.clearContext();
   }
 
-  public void close() {
+  public void close() throws Exception {
+    database.close();
+    stackDriverClient.close();
     executorService.shutdown();
   }
 

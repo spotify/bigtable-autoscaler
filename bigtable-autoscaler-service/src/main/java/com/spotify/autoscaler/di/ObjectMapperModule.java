@@ -18,27 +18,23 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.api;
+package com.spotify.autoscaler.di;
 
-import com.spotify.autoscaler.db.Database;
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import dagger.Module;
+import dagger.Provides;
+import io.norberg.automatter.jackson.AutoMatterModule;
+import javax.inject.Singleton;
 
-@Path("/health")
-public class HealthCheck implements Endpoint {
+@Module
+public class ObjectMapperModule {
 
-  private final Database database;
-
-  @Inject
-  public HealthCheck(final Database database) {
-    this.database = database;
-  }
-
-  @GET
-  public Response healthCheck() {
-    database.healthCheck();
-    return Response.ok().build();
+  @Provides
+  @Singleton
+  public static ObjectMapper mapper() {
+    return new ObjectMapper()
+        .registerModule(new AutoMatterModule())
+        .registerModule(new Jdk8Module());
   }
 }

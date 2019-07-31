@@ -48,29 +48,33 @@ public class AutoscalerMetricsTest {
   public void testClusterDataMetrics() {
     final int minNodes = 10;
     final int maxNodes = 200;
-    final int loadDelta = 0;
+    final int minNodesOverride = 15;
     final int currentNodes = 20;
     final BigtableCluster bigtableCluster1 =
-        clusterBuilder.minNodes(minNodes).maxNodes(maxNodes).loadDelta(loadDelta).build();
+        clusterBuilder
+            .minNodes(minNodes)
+            .maxNodes(maxNodes)
+            .minNodesOverride(minNodesOverride)
+            .build();
     autoscalerMetrics.registerClusterDataMetrics(bigtableCluster1, currentNodes, db);
     assertMetric(registry, "node-count", currentNodes);
     assertMetric(registry, "max-node-count", maxNodes);
     assertMetric(registry, "min-node-count", minNodes);
-    assertMetric(registry, "effective-min-node-count", minNodes + loadDelta);
+    assertMetric(registry, "effective-min-node-count", minNodesOverride);
 
     // verify changes are tracked in metrics properly
     final BigtableCluster bigtableCluster2 =
         clusterBuilder
             .minNodes(minNodes + 10)
             .maxNodes(maxNodes + 10)
-            .loadDelta(loadDelta + 10)
+            .minNodesOverride(minNodesOverride)
             .clusterId("cluster")
             .build();
     autoscalerMetrics.registerClusterDataMetrics(bigtableCluster2, currentNodes + 10, db);
     assertMetric(registry, "node-count", currentNodes + 10);
     assertMetric(registry, "max-node-count", maxNodes + 10);
     assertMetric(registry, "min-node-count", minNodes + 10);
-    assertMetric(registry, "effective-min-node-count", minNodes + loadDelta + 20);
+    assertMetric(registry, "effective-min-node-count", minNodes + 10);
   }
 
   @Test

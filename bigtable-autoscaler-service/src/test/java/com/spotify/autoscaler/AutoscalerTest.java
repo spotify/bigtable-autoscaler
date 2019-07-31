@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.spotify.autoscaler.client.StackdriverClientImpl;
+import com.spotify.autoscaler.client.AutoscalerStackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
@@ -51,7 +51,7 @@ import org.mockito.Mockito;
 
 public class AutoscalerTest {
 
-  @Mock private StackdriverClientImpl stackDriverClient;
+  @Mock private AutoscalerStackdriverClient stackDriverClient;
 
   @Mock private Database database;
 

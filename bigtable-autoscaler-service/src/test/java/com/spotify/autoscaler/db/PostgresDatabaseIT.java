@@ -68,6 +68,7 @@ public class PostgresDatabaseIT {
         .overloadStep(10)
         .enabled(true)
         .errorCode(Optional.of(ErrorCode.OK))
+        .minNodesOverride(10)
         .build();
   }
 
@@ -239,7 +240,7 @@ public class PostgresDatabaseIT {
   }
 
   @Test
-  public void testInsertedAndRetrievedClustersAreEquivalent() throws Exception {
+  public void testInsertedAndRetrievedClustersAreEquivalent() {
 
     final BigtableCluster cluster =
         BigtableClusterBuilder.from(testCluster()).overloadStep(Optional.ofNullable(null)).build();
@@ -252,5 +253,19 @@ public class PostgresDatabaseIT {
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(cluster, retrievedCluster);
+  }
+
+  @Test
+  public void testSetMinNodesOverride() {
+    db.insertBigtableCluster(testCluster());
+    db.setMinNodesOverride(
+        testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId(), 42);
+
+    final BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(42, retrievedCluster.minNodesOverride());
   }
 }

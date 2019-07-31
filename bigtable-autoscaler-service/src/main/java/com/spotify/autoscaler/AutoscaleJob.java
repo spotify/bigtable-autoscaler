@@ -27,7 +27,7 @@ import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.annotations.VisibleForTesting;
-import com.spotify.autoscaler.client.StackdriverClientImpl;
+import com.spotify.autoscaler.client.AutoscalerStackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLog;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
@@ -46,7 +46,7 @@ public class AutoscaleJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AutoscaleJob.class);
 
-  private final StackdriverClientImpl stackdriverClient;
+  private final AutoscalerStackdriverClient stackdriverClient;
   private final Database database;
   private final AutoscalerMetrics autoscalerMetrics;
 
@@ -76,7 +76,7 @@ public class AutoscaleJob {
   private static final double MINIMUM_DOWNSCALE_WEIGHT = 57600;
 
   public AutoscaleJob(
-      final StackdriverClientImpl stackdriverClient,
+      final AutoscalerStackdriverClient stackdriverClient,
       final Database database,
       final AutoscalerMetrics autoscalerMetrics) {
     this.stackdriverClient = checkNotNull(stackdriverClient);
@@ -170,11 +170,11 @@ public class AutoscaleJob {
     }
 
     LOGGER.info(
-        "Running autoscale job. Nodes: {} (min={}, max={}, loadDelta={}), CPU: {} (target={})",
+        "Running autoscale job. Nodes: {} (min={}, max={}, minNodesOverride={}), CPU: {} (target={})",
         nodes,
         cluster.minNodes(),
         cluster.maxNodes(),
-        cluster.loadDelta(),
+        cluster.minNodesOverride(),
         currentCpu,
         cluster.cpuTarget());
 

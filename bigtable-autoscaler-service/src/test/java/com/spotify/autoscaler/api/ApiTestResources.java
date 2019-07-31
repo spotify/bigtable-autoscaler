@@ -39,7 +39,7 @@ public interface ApiTestResources {
 
   String CLUSTERS = "/clusters";
   String HEALTH = "/health";
-  String LOAD = "/clusters/load";
+  String LOAD = "/clusters/override-min-nodes";
   String SERVICE_NAME = "test-service";
 
   BigtableCluster CLUSTER =
@@ -49,9 +49,9 @@ public interface ApiTestResources {
           .instanceId("i")
           .cpuTarget(0.5)
           .minNodes(3)
-          .maxNodes(5)
+          .maxNodes(15)
           .enabled(true)
-          .loadDelta(10)
+          .minNodesOverride(10)
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 

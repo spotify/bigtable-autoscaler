@@ -41,7 +41,7 @@ public interface ClusterResizeLog {
 
   int maxNodes();
 
-  int loadDelta();
+  int minNodesOverride();
 
   double cpuTarget();
 
@@ -74,6 +74,6 @@ public interface ClusterResizeLog {
         .maxNodes(cluster.maxNodes())
         .cpuTarget(cluster.cpuTarget())
         .overloadStep(cluster.overloadStep())
-        .loadDelta(cluster.loadDelta());
+        .minNodesOverride(cluster.minNodesOverride());
   }
 }

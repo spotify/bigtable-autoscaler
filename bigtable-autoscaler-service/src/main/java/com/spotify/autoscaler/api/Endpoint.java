@@ -20,25 +20,5 @@
 
 package com.spotify.autoscaler.api;
 
-import com.spotify.autoscaler.db.Database;
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
-
-@Path("/health")
-public class HealthCheck implements Endpoint {
-
-  private final Database database;
-
-  @Inject
-  public HealthCheck(final Database database) {
-    this.database = database;
-  }
-
-  @GET
-  public Response healthCheck() {
-    database.healthCheck();
-    return Response.ok().build();
-  }
-}
+/* Marker Interface for Rest Endpoint classes.*/
+public interface Endpoint {}

@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
-import com.spotify.autoscaler.client.StackdriverClientImpl;
+import com.spotify.autoscaler.client.AutoscalerStackdriverClient;
 import java.time.Duration;
 import org.mockito.internal.matchers.GreaterThan;
 import org.mockito.internal.matchers.LessOrEqual;
@@ -38,14 +38,14 @@ public abstract class AutoscaleJobTestMocks {
     when(client.getCluster(any())).thenReturn(cluster);
   }
 
-  public static void setCurrentLoad(final StackdriverClientImpl client, final double load) {
+  public static void setCurrentLoad(final AutoscalerStackdriverClient client, final double load) {
     when(client.getCpuLoad(any(), argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(load);
     when(client.getCpuLoad(any(), argThat(new LessOrEqual<>(Duration.ZERO))))
         .thenThrow(new RuntimeException("Negative duration!!!"));
   }
 
   public static void setCurrentDiskUtilization(
-      final StackdriverClientImpl client, final double diskUtil) {
+      final AutoscalerStackdriverClient client, final double diskUtil) {
     when(client.getDiskUtilization(any(), argThat(new GreaterThan<>(Duration.ZERO))))
         .thenReturn(diskUtil);
     when(client.getDiskUtilization(any(), argThat(new LessOrEqual<>(Duration.ZERO))))

@@ -21,9 +21,9 @@
 package com.spotify.autoscaler.metric;
 
 import com.codahale.metrics.Gauge;
+import com.spotify.autoscaler.Application;
 import com.spotify.autoscaler.ErrorCode;
 import com.spotify.autoscaler.LoggerContext;
-import com.spotify.autoscaler.Main;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.metrics.core.MetricId;
@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 /*Helper class containing methods to register and measure autoscaler metrics.*/
 public class AutoscalerMetrics {
 
+  public static final MetricId APP_PREFIX = MetricId.build("key", Application.SERVICE_NAME);
   private static final Logger LOG = LoggerFactory.getLogger(AutoscalerMetrics.class);
 
   private static final Duration CLEANUP_INTERVAL = Duration.ofMinutes(1);
@@ -158,7 +159,7 @@ public class AutoscalerMetrics {
   }
 
   private MetricId baseMetric(final BigtableCluster cluster) {
-    return Main.APP_PREFIX
+    return APP_PREFIX
         .tagged("project-id", cluster.projectId())
         .tagged("cluster-id", cluster.clusterId())
         .tagged("instance-id", cluster.instanceId());
@@ -209,50 +210,50 @@ public class AutoscalerMetrics {
   }
 
   public void markClusterCheck() {
-    registry.meter(Main.APP_PREFIX.tagged("what", "clusters-checked")).mark();
+    registry.meter(APP_PREFIX.tagged("what", "clusters-checked")).mark();
   }
 
   public void markCallToGetSize() {
-    registry.meter(Main.APP_PREFIX.tagged("what", "call-to-get-size")).mark();
+    registry.meter(APP_PREFIX.tagged("what", "call-to-get-size")).mark();
   }
 
   public void markCallToSetSize() {
-    registry.meter(Main.APP_PREFIX.tagged("what", "call-to-set-size")).mark();
+    registry.meter(APP_PREFIX.tagged("what", "call-to-set-size")).mark();
   }
 
   public void markClusterChanged() {
-    registry.meter(Main.APP_PREFIX.tagged("what", "clusters-changed")).mark();
+    registry.meter(APP_PREFIX.tagged("what", "clusters-changed")).mark();
   }
 
   public void markSetSizeError() {
-    registry.meter(Main.APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
+    registry.meter(APP_PREFIX.tagged("what", "set-size-transport-error")).mark();
   }
 
   public void markHeartBeat() {
-    registry.meter(Main.APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
+    registry.meter(APP_PREFIX.tagged("what", "autoscale-heartbeat")).mark();
   }
 
   public void registerOpenDatabaseConnections(final Database database) {
     registry.register(
-        Main.APP_PREFIX.tagged("what", "open-db-connections"),
+        APP_PREFIX.tagged("what", "open-db-connections"),
         (Gauge<Integer>) database::getTotalConnections);
   }
 
   public void registerActiveClusters(final Database database) {
     registry.register(
-        Main.APP_PREFIX.tagged("what", "enabled-clusters"),
+        APP_PREFIX.tagged("what", "enabled-clusters"),
         (Gauge<Long>)
             () -> database.getBigtableClusters().stream().filter(BigtableCluster::enabled).count());
 
     registry.register(
-        Main.APP_PREFIX.tagged("what", "disabled-clusters"),
+        APP_PREFIX.tagged("what", "disabled-clusters"),
         (Gauge<Long>)
             () -> database.getBigtableClusters().stream().filter(p -> !p.enabled()).count());
   }
 
   public void registerOpenFileDescriptors() {
     registry.register(
-        Main.APP_PREFIX.tagged("what", "open-file-descriptors"),
+        APP_PREFIX.tagged("what", "open-file-descriptors"),
         (Gauge<Long>)
             () ->
                 ((UnixOperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean())
@@ -261,14 +262,14 @@ public class AutoscalerMetrics {
 
   public void registerDailyResizeCount(final Database database) {
     registry.register(
-        Main.APP_PREFIX.tagged("what", "daily-resize-count"),
+        APP_PREFIX.tagged("what", "daily-resize-count"),
         (Gauge<Long>) database::getDailyResizeCount);
   }
 
   public void registerFailureCount(final Database database) {
     for (final ErrorCode code : ErrorCode.values()) {
       registry.register(
-          Main.APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
+          APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
           (Gauge<Long>)
               () ->
                   database

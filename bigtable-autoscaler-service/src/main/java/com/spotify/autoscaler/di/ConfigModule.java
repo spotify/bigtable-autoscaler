@@ -18,27 +18,21 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.api;
+package com.spotify.autoscaler.di;
 
-import com.spotify.autoscaler.db.Database;
-import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.Response;
+import com.spotify.autoscaler.Application;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import dagger.Module;
+import dagger.Provides;
+import javax.inject.Singleton;
 
-@Path("/health")
-public class HealthCheck implements Endpoint {
+@Module
+public class ConfigModule {
 
-  private final Database database;
-
-  @Inject
-  public HealthCheck(final Database database) {
-    this.database = database;
-  }
-
-  @GET
-  public Response healthCheck() {
-    database.healthCheck();
-    return Response.ok().build();
+  @Provides
+  @Singleton
+  public static Config config() {
+    return ConfigFactory.load(Application.SERVICE_NAME);
   }
 }

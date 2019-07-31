@@ -89,7 +89,7 @@ public class FakeBigtableCluster implements Arguments {
   public BigtableCluster getCluster() {
     this.cluster =
         BigtableClusterBuilder.from(cluster)
-            .loadDelta(getMetricsForNow().loadDelta.intValue())
+            .minNodesOverride(getMetricsForNow().minNodesOverride().intValue())
             .build();
     return this.cluster;
   }
