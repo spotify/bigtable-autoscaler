@@ -22,14 +22,19 @@ package com.spotify.autoscaler;
 
 import static com.google.api.client.util.Preconditions.checkNotNull;
 
+import com.google.cloud.bigtable.config.BigtableOptions;
+import com.google.cloud.bigtable.config.BulkOptions;
+import com.google.cloud.bigtable.config.CallOptionsConfig;
+import com.google.cloud.bigtable.grpc.BigtableInstanceName;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
+import com.spotify.autoscaler.db.ErrorCode;
 import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
-import com.spotify.autoscaler.util.BigtableUtil;
-import com.spotify.autoscaler.util.ErrorCode;
+import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -41,6 +46,9 @@ import org.slf4j.LoggerFactory;
 public class Autoscaler implements Runnable {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(Autoscaler.class);
+  private static final int SHORT_TIMEOUT = (int) Duration.ofSeconds(10).toMillis();
+  private static final int LONG_TIMEOUT = (int) Duration.ofSeconds(60).toMillis();
+  private static final boolean USE_TIMEOUT = true;
 
   private final StackdriverClient stackDriverClient;
   private final Database database;
@@ -101,10 +109,9 @@ public class Autoscaler implements Runnable {
   }
 
   private void runForCluster(final BigtableCluster cluster) {
-    BigtableUtil.pushContext(cluster);
+    LoggerContext.pushContext(cluster);
     LOGGER.info("Autoscaling cluster!");
-    try (final BigtableSession session =
-        BigtableUtil.createSession(cluster.instanceId(), cluster.projectId())) {
+    try (final BigtableSession session = createSession(cluster.instanceId(), cluster.projectId())) {
       makeAutoscaleJob(stackDriverClient, database, autoscalerMetrics)
           .run(cluster, session, Instant::now);
     } catch (final Exception e) {
@@ -112,7 +119,29 @@ public class Autoscaler implements Runnable {
       LOGGER.error("Failed to autoscale cluster!", e);
       database.increaseFailureCount(cluster, Instant.now(), e.toString(), errorCode);
     }
-    BigtableUtil.clearContext();
+    LoggerContext.clearContext();
+  }
+
+  private static BigtableSession createSession(final String instanceId, final String projectId)
+      throws IOException {
+    final BigtableInstanceName bigtableInstanceName =
+        new BigtableInstanceName(projectId, instanceId);
+
+    final BigtableOptions options =
+        new BigtableOptions.Builder()
+            .setDataChannelCount(64)
+            .setProjectId(projectId)
+            .setInstanceId(bigtableInstanceName.getInstanceId())
+            .setUserAgent(Application.SERVICE_NAME)
+            .setCallOptionsConfig(new CallOptionsConfig(USE_TIMEOUT, SHORT_TIMEOUT, LONG_TIMEOUT))
+            .setBulkOptions(
+                new BulkOptions.Builder()
+                    .setMaxInflightRpcs(1000000)
+                    .setMaxMemory(Long.MAX_VALUE)
+                    .build())
+            .build();
+
+    return new BigtableSession(options);
   }
 
   public void close() throws Exception {

@@ -23,7 +23,6 @@ package com.spotify.autoscaler.db;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.spotify.autoscaler.AutoscaleJob;
-import com.spotify.autoscaler.util.ErrorCode;
 import com.typesafe.config.Config;
 import com.zaxxer.hikari.HikariDataSource;
 import java.sql.ResultSet;

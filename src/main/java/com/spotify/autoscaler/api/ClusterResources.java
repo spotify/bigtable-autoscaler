@@ -24,10 +24,10 @@ import static com.google.api.client.util.Preconditions.checkNotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spotify.autoscaler.LoggerContext;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
-import com.spotify.autoscaler.util.BigtableUtil;
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.validation.constraints.Size;
@@ -134,7 +134,7 @@ public class ClusterResources implements Endpoint {
             .minNodesOverride(minNodesOverride)
             .build();
     try {
-      BigtableUtil.pushContext(cluster);
+      LoggerContext.pushContext(cluster);
       if (database.insertBigtableCluster(cluster)) {
         LOGGER.info(String.format("cluster created: %s", cluster.toString()));
         return Response.ok().build();
@@ -142,7 +142,7 @@ public class ClusterResources implements Endpoint {
         return Response.serverError().build();
       }
     } finally {
-      BigtableUtil.clearContext();
+      LoggerContext.clearContext();
     }
   }
 
@@ -168,7 +168,7 @@ public class ClusterResources implements Endpoint {
             .enabled(enabled)
             .build();
     try {
-      BigtableUtil.pushContext(cluster);
+      LoggerContext.pushContext(cluster);
       if (database.updateBigtableCluster(cluster)) {
         LOGGER.info(String.format("cluster updated: %s", cluster.toString()));
         return Response.ok().build();
@@ -176,7 +176,7 @@ public class ClusterResources implements Endpoint {
         return Response.serverError().build();
       }
     } finally {
-      BigtableUtil.clearContext();
+      LoggerContext.clearContext();
     }
   }
 
@@ -198,7 +198,7 @@ public class ClusterResources implements Endpoint {
             .minNodesOverride(0)
             .build();
     try {
-      BigtableUtil.pushContext(cluster);
+      LoggerContext.pushContext(cluster);
       if (database.deleteBigtableCluster(projectId, instanceId, clusterId)) {
         LOGGER.info(String.format("cluster deleted: %s/%s/%s", projectId, instanceId, clusterId));
         return Response.ok().build();
@@ -206,7 +206,7 @@ public class ClusterResources implements Endpoint {
         return Response.serverError().build();
       }
     } finally {
-      BigtableUtil.clearContext();
+      LoggerContext.clearContext();
     }
   }
 
@@ -226,7 +226,7 @@ public class ClusterResources implements Endpoint {
             .minNodesOverride(minNodesOverride)
             .build();
     try {
-      BigtableUtil.pushContext(cluster);
+      LoggerContext.pushContext(cluster);
       final Optional<BigtableCluster> maybeCluster =
           database.getBigtableCluster(projectId, instanceId, clusterId);
       if (!maybeCluster.isPresent()) {
@@ -239,7 +239,7 @@ public class ClusterResources implements Endpoint {
         return Response.serverError().build();
       }
     } finally {
-      BigtableUtil.clearContext();
+      LoggerContext.clearContext();
     }
   }
 }

@@ -18,7 +18,7 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.util;
+package com.spotify.autoscaler.db;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -48,11 +48,11 @@ public enum ErrorCode {
   private final int value;
   private static final String GRPC_PREFIX = "GRPC_";
 
-  ErrorCode(int val) {
+  ErrorCode(final int val) {
     this.value = val;
   }
 
-  public static ErrorCode fromException(Optional<Exception> e) {
+  public static ErrorCode fromException(final Optional<Exception> e) {
 
     return e.map(
             ex -> {

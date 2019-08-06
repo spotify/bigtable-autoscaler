@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
-import com.spotify.autoscaler.util.ErrorCode;
+import com.spotify.autoscaler.db.ErrorCode;
 import io.norberg.automatter.jackson.AutoMatterModule;
 import java.io.IOException;
 import java.util.List;

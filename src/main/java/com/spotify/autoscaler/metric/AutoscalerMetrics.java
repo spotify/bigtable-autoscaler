@@ -22,10 +22,10 @@ package com.spotify.autoscaler.metric;
 
 import com.codahale.metrics.Gauge;
 import com.spotify.autoscaler.Application;
+import com.spotify.autoscaler.LoggerContext;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
-import com.spotify.autoscaler.util.BigtableUtil;
-import com.spotify.autoscaler.util.ErrorCode;
+import com.spotify.autoscaler.db.ErrorCode;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import com.sun.management.UnixOperatingSystemMXBean;
@@ -116,7 +116,7 @@ public class AutoscalerMetrics {
       if (!bigtableClusters.contains(entry.getKey())) {
         registeredClusters.remove(entry.getKey());
         final BigtableCluster cluster = entry.getValue().cluster();
-        BigtableUtil.pushContext(cluster);
+        LoggerContext.pushContext(cluster);
         registry.removeMatching(
             (name, m) -> {
               final Map<String, String> tags = name.getTags();
@@ -127,7 +127,7 @@ public class AutoscalerMetrics {
             });
 
         LOG.info("Metrics unregistered");
-        BigtableUtil.clearContext();
+        LoggerContext.clearContext();
       }
     }
   }
@@ -166,7 +166,7 @@ public class AutoscalerMetrics {
   }
 
   private static List<String> getAllMetrics() {
-    List<String> metrics = new ArrayList<>();
+    final List<String> metrics = new ArrayList<>();
     Arrays.stream(ClusterDataGauges.values()).map(ClusterDataGauges::getTag).forEach(metrics::add);
     Arrays.stream(ClusterLoadGauges.values()).map(ClusterLoadGauges::getTag).forEach(metrics::add);
     Arrays.stream(ErrorGauges.values()).map(ErrorGauges::getTag).forEach(metrics::add);

@@ -18,7 +18,7 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.util;
+package com.spotify.autoscaler;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -31,7 +31,7 @@ class ThrowableMapper implements ExceptionMapper<Throwable> {
   private static final Logger LOGGER = LoggerFactory.getLogger(ThrowableMapper.class);
 
   @Override
-  public Response toResponse(Throwable exception) {
+  public Response toResponse(final Throwable exception) {
     if (WebApplicationException.class.isInstance(exception)) {
       return WebApplicationException.class.cast(exception).getResponse();
     }
