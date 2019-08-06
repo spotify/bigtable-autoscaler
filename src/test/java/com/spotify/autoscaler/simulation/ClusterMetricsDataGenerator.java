@@ -20,8 +20,6 @@
 
 package com.spotify.autoscaler.simulation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.cloud.monitoring.v3.MetricServiceClient;
 import com.google.cloud.monitoring.v3.PagedResponseWrappers;
 import com.google.monitoring.v3.ListTimeSeriesRequest;
@@ -33,7 +31,6 @@ import com.google.monitoring.v3.TypedValue;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -94,15 +91,16 @@ public class ClusterMetricsDataGenerator {
     populateMinNodesOverride(metrics);
 
     // save metrics as json
-    final ObjectMapper mapper = new ObjectMapper();
-    mapper.enable(SerializationFeature.INDENT_OUTPUT);
-    try (final FileWriter file =
-        new FileWriter(FakeBTCluster.getFilePathForCluster(cluster).toString())) {
-      file.write(mapper.writeValueAsString(metrics));
-      file.flush();
-    } catch (final IOException e) {
-      e.printStackTrace();
-    }
+    // TODO(emilio)
+    //    final ObjectMapper mapper = new ObjectMapper();
+    //    mapper.enable(SerializationFeature.INDENT_OUTPUT);
+    //    try (final FileWriter file =
+    //        new FileWriter(FakeBigtableCluster.getFilePathForCluster(cluster).toString())) {
+    //      file.write(mapper.writeValueAsString(metrics));
+    //      file.flush();
+    //    } catch (final IOException e) {
+    //      e.printStackTrace();
+    //    }
   }
 
   private static void populateMinNodesOverride(final Map<Instant, ClusterMetricsData> metrics) {

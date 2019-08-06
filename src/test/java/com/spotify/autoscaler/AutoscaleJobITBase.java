@@ -33,14 +33,13 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.autoscaler.db.PostgresDatabaseTest;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
-import com.spotify.autoscaler.simulation.FakeBTCluster;
+import com.spotify.autoscaler.simulation.FakeBigtableCluster;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.junit.After;
-import org.junit.Before;
 import org.mockito.Mock;
 
 public class AutoscaleJobITBase {
@@ -53,18 +52,11 @@ public class AutoscaleJobITBase {
 
   @Mock AutoscalerMetrics autoscalerMetrics;
 
-  PostgresDatabase db;
+  PostgresDatabase database;
 
-  protected final FakeBTCluster fakeBTCluster;
-
-  public AutoscaleJobITBase(final FakeBTCluster fakeBTCluster) {
-    this.fakeBTCluster = fakeBTCluster;
-  }
-
-  @Before
-  public void setUp() throws IOException {
+  public void setupMocksFor(final FakeBigtableCluster fakeBigtableCluster) throws IOException {
     initMocks(this);
-    db = initDatabase();
+    database = initDatabase(fakeBigtableCluster);
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
 
     when(bigtableInstanceClient.getCluster(any()))
@@ -73,8 +65,8 @@ public class AutoscaleJobITBase {
               final GetClusterRequest getClusterReq = invocationOnMock.getArgument(0);
               if (getClusterReq != null) {
                 return Cluster.newBuilder()
-                    .setName(fakeBTCluster.getCluster().clusterName())
-                    .setServeNodes(fakeBTCluster.getNumberOfNodes())
+                    .setName(fakeBigtableCluster.getCluster().clusterName())
+                    .setServeNodes(fakeBigtableCluster.getNumberOfNodes())
                     .build();
               } else {
                 return Cluster.newBuilder().build();
@@ -86,34 +78,36 @@ public class AutoscaleJobITBase {
             invocationOnMock -> {
               final Cluster cluster = invocationOnMock.getArgument(0);
               final int newSize = cluster.getServeNodes();
-              fakeBTCluster.setNumberOfNodes(newSize);
+              fakeBigtableCluster.setNumberOfNodes(newSize);
               return null;
             });
-    fakeBTCluster.setNumberOfNodes(100);
+    fakeBigtableCluster.setNumberOfNodes(100);
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
   }
 
   @After
   public void tearDown() {
-    db.getBigtableClusters()
+    database
+        .getBigtableClusters()
         .forEach(
             cluster ->
-                db.deleteBigtableCluster(
+                database.deleteBigtableCluster(
                     cluster.projectId(), cluster.instanceId(), cluster.clusterId()));
-    db.close();
+    database.close();
   }
 
-  private PostgresDatabase initDatabase() {
+  private PostgresDatabase initDatabase(final FakeBigtableCluster fakeBigtableCluster) {
     final PostgresDatabase database = PostgresDatabaseTest.getPostgresDatabase();
-    final TimeSupplier timeSupplier = (TimeSupplier) fakeBTCluster.getTimeSource();
-    timeSupplier.setTime(fakeBTCluster.getFirstValidMetricsInstant());
-    final BigtableCluster cluster = fakeBTCluster.getCluster();
+    final TimeSupplier timeSupplier = (TimeSupplier) fakeBigtableCluster.getTimeSource();
+    timeSupplier.setTime(fakeBigtableCluster.getFirstValidMetricsInstant());
+    final BigtableCluster cluster = fakeBigtableCluster.getCluster();
     database.deleteBigtableCluster(cluster.projectId(), cluster.instanceId(), cluster.clusterId());
     database.insertBigtableCluster(cluster);
     return database;
   }
 
   protected void testThroughTime(
+      final FakeBigtableCluster fakeBigtableCluster,
       final TimeSupplier timeSupplier,
       final Duration period,
       final int repetition,
@@ -131,8 +125,8 @@ public class AutoscaleJobITBase {
       AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
-      final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
-      job.run(fakeBTCluster.getCluster(), bigtableSession, timeSupplier);
+      final AutoscaleJob job = new AutoscaleJob(stackdriverClient, database, autoscalerMetrics);
+      job.run(fakeBigtableCluster.getCluster(), bigtableSession, timeSupplier);
       assertionImmediatelyAfterAutoscaleJob.accept(null);
     }
   }

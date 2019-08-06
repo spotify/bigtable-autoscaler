@@ -20,49 +20,41 @@
 
 package com.spotify.autoscaler.simulation;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.testcontainers.shaded.com.fasterxml.jackson.core.type.TypeReference;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.params.provider.Arguments;
 
-public class FakeBTCluster {
+public class FakeBigtableCluster implements Arguments {
 
-  public static final String METRICS_PATH = "src/test/resources/simulated_clusters";
-  public static final String FILE_PATTERN = "%s_%s_%s.json";
-  public static final Pattern FILE_PATTERN_RE =
-      Pattern.compile(FILE_PATTERN.replace("%s", "([A-Za-z0-9-]+)"));
   private final Supplier<Instant> timeSource;
-  private int nodes;
   private final Map<Instant, ClusterMetricsData> metrics;
+
   private BigtableCluster cluster;
+  private int nodes;
 
-  public FakeBTCluster(final Supplier<Instant> timeSource, final BigtableCluster cluster) {
-
+  public FakeBigtableCluster(
+      final File path, final Supplier<Instant> timeSource, final BigtableCluster defaults) {
     this.timeSource = timeSource;
-    this.cluster = cluster;
-    this.metrics = getMetrics(cluster);
+    this.cluster = defaults;
+    this.metrics = getMetrics(path);
   }
 
-  private Map<Instant, ClusterMetricsData> getMetrics(final BigtableCluster cluster) {
+  private Map<Instant, ClusterMetricsData> getMetrics(final File file) {
 
     final ObjectMapper jsonMapper = new ObjectMapper();
     final Map<String, ClusterMetricsData> tmp;
     try {
-      tmp =
-          jsonMapper.readValue(
-              getFilePathForCluster(cluster).toFile(),
-              new TypeReference<Map<String, ClusterMetricsData>>() {});
+      tmp = jsonMapper.readValue(file, new TypeReference<Map<String, ClusterMetricsData>>() {});
     } catch (final IOException e) {
       throw new RuntimeException(e);
     }
@@ -75,7 +67,8 @@ public class FakeBTCluster {
   public Instant getFirstValidMetricsInstant() {
     // Sometimes Stackdriver returns empty metrics. Autoscaler should normally be able to handle
     // them gracefully.
-    // However, to be able to correctly initialize the FakeBTCluster with an initial node count, we
+    // However, to be able to correctly initialize the FakeBigtableCluster with an initial node
+    // count, we
     // need the
     // first metrics that will serve as the beginning instant for the test to have a valid node
     // count.
@@ -88,27 +81,6 @@ public class FakeBTCluster {
             .findFirst()
             .get();
     return firstMetrics.getKey();
-  }
-
-  public static Path getFilePathForCluster(final BigtableCluster cluster) {
-    return Paths.get(
-        METRICS_PATH,
-        String.format(
-            FILE_PATTERN, cluster.projectId(), cluster.instanceId(), cluster.clusterId()));
-  }
-
-  public static BigtableClusterBuilder getClusterBuilderForFilePath(final Path path) {
-    final Matcher matcher = FILE_PATTERN_RE.matcher(path.getFileName().toString());
-    if (matcher.find()) {
-      final String project = matcher.group(1);
-      final String instance = matcher.group(2);
-      final String cluster = matcher.group(3);
-      return new BigtableClusterBuilder()
-          .projectId(project)
-          .instanceId(instance)
-          .clusterId(cluster);
-    }
-    throw new RuntimeException("Invalid file: " + path.toString());
   }
 
   // DONTLIKEIT
@@ -158,5 +130,10 @@ public class FakeBTCluster {
   public String toString() {
     return String.format(
         "%s/%s/%s", cluster.projectId(), cluster.instanceId(), cluster.clusterId());
+  }
+
+  @Override
+  public Object[] get() {
+    return new Object[] {this};
   }
 }
