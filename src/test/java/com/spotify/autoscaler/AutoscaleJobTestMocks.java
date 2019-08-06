@@ -33,19 +33,18 @@ import org.mockito.internal.matchers.LessOrEqual;
 
 public abstract class AutoscaleJobTestMocks {
 
-  public static void setCurrentSize(final BigtableInstanceClient client, final int size) {
+  static void setCurrentSize(final BigtableInstanceClient client, final int size) {
     final Cluster cluster = Cluster.newBuilder().setServeNodes(size).build();
     when(client.getCluster(any())).thenReturn(cluster);
   }
 
-  public static void setCurrentLoad(final StackdriverClient client, final double load) {
+  static void setCurrentLoad(final StackdriverClient client, final double load) {
     when(client.getCpuLoad(any(), argThat(new GreaterThan<>(Duration.ZERO)))).thenReturn(load);
     when(client.getCpuLoad(any(), argThat(new LessOrEqual<>(Duration.ZERO))))
         .thenThrow(new RuntimeException("Negative duration!!!"));
   }
 
-  public static void setCurrentDiskUtilization(
-      final StackdriverClient client, final double diskUtil) {
+  static void setCurrentDiskUtilization(final StackdriverClient client, final double diskUtil) {
     when(client.getDiskUtilization(any(), argThat(new GreaterThan<>(Duration.ZERO))))
         .thenReturn(diskUtil);
     when(client.getDiskUtilization(any(), argThat(new LessOrEqual<>(Duration.ZERO))))

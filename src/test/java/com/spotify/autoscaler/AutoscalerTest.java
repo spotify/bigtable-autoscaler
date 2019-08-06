@@ -45,8 +45,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 
@@ -96,7 +96,7 @@ public class AutoscalerTest {
     return autoscaler;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() {
     initMocks(this);
   }

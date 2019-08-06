@@ -56,7 +56,9 @@ public class HealthCheckTest extends JerseyTest implements ApiTestResources {
     final Config config = ConfigFactory.load(ApiTestResources.SERVICE_NAME);
     return new HttpServerModule()
         .resourceConfig(
-            config, ImmutableSet.of(new ClusterResources(db, MAPPER), new HealthCheck(db)));
+            config,
+            ImmutableSet.of(
+                new ClusterResources(db, ApiTestResources.MAPPER), new HealthCheck(db)));
   }
 
   @Test

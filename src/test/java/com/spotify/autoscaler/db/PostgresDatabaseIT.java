@@ -30,9 +30,9 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 
 public class PostgresDatabaseIT {
@@ -71,13 +71,13 @@ public class PostgresDatabaseIT {
         .build();
   }
 
-  @Before
+  @BeforeEach
   public void setup() {
     // insert a test cluster
     db = PostgresDatabaseTest.getPostgresDatabase();
   }
 
-  @After
+  @AfterEach
   public void tearDown() {
     db.getBigtableClusters()
         .forEach(

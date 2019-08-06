@@ -46,8 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 public class AutoscaleJobTest {
@@ -72,7 +72,7 @@ public class AutoscaleJobTest {
   private Optional<Integer> newSize = Optional.empty();
   private AutoscaleJob job;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException {
     cluster =
         new BigtableClusterBuilder()

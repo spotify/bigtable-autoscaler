@@ -33,7 +33,7 @@ import com.spotify.autoscaler.db.PostgresDatabase;
 import com.spotify.metrics.core.MetricId;
 import com.spotify.metrics.core.SemanticMetricRegistry;
 import java.util.Collections;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class AutoscalerMetricsTest {
 
