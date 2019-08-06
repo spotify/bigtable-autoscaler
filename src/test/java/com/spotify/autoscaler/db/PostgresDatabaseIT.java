@@ -25,7 +25,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.spotify.autoscaler.util.ErrorCode;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;

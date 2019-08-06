@@ -20,7 +20,6 @@
 
 package com.spotify.autoscaler.db;
 
-import com.spotify.autoscaler.util.ErrorCode;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;

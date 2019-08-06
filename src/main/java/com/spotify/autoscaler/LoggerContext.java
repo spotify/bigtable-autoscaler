@@ -18,31 +18,20 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler.metric;
+package com.spotify.autoscaler;
 
 import com.spotify.autoscaler.db.BigtableCluster;
-import com.spotify.autoscaler.db.ErrorCode;
-import io.norberg.automatter.AutoMatter;
-import java.util.Optional;
+import org.slf4j.MDC;
 
-@AutoMatter
-public interface ClusterData {
+public class LoggerContext {
 
-  BigtableCluster cluster();
+  public static void pushContext(final BigtableCluster cluster) {
+    MDC.put("cluster.projectId", cluster.projectId());
+    MDC.put("cluster.instanceId", cluster.instanceId());
+    MDC.put("cluster.clusterId", cluster.clusterId());
+  }
 
-  int currentNodeCount();
-
-  int minNodeCount();
-
-  int maxNodeCount();
-
-  int effectiveMinNodeCount();
-
-  double cpuUtil();
-
-  int consecutiveFailureCount();
-
-  double storageUtil();
-
-  Optional<ErrorCode> lastErrorCode();
+  public static void clearContext() {
+    MDC.clear();
+  }
 }

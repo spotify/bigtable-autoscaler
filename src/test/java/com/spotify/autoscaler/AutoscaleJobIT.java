@@ -25,8 +25,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
+import com.spotify.autoscaler.db.ErrorCode;
 import com.spotify.autoscaler.simulation.FakeBTCluster;
-import com.spotify.autoscaler.util.ErrorCode;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;

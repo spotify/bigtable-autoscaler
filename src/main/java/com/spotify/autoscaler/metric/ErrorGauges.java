@@ -21,7 +21,7 @@
 package com.spotify.autoscaler.metric;
 
 import com.codahale.metrics.Gauge;
-import com.spotify.autoscaler.util.ErrorCode;
+import com.spotify.autoscaler.db.ErrorCode;
 import java.util.Map;
 
 public enum ErrorGauges {
@@ -30,9 +30,9 @@ public enum ErrorGauges {
     public Gauge getMetricValue(
         final Map<String, ClusterData> registeredClusters,
         final String clusterName,
-        ErrorCode code) {
+        final ErrorCode code) {
       return () -> {
-        ClusterData clusterData = registeredClusters.get(clusterName);
+        final ClusterData clusterData = registeredClusters.get(clusterName);
         return clusterData.lastErrorCode().orElse(ErrorCode.OK) == code
             ? clusterData.consecutiveFailureCount()
             : 0;
@@ -40,7 +40,7 @@ public enum ErrorGauges {
     }
   };
 
-  private String tag;
+  private final String tag;
 
   ErrorGauges(final String tag) {
     this.tag = tag;
