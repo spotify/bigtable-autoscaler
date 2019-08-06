@@ -344,6 +344,22 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
+            <plugin>
+                <!-- https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=919831-->
+                <!--https://github.com/oracle/opengrok/issues/2629-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <javaApiLinks>
+                        <property>
+                            <name>foo</name>
+                            <value>bar</value>
+                        </property>
+                    </javaApiLinks>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 </project>
