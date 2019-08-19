@@ -254,6 +254,14 @@ public class AutoscaleJob {
           cluster, storageUtilization, ClusterLoadGauges.STORAGE);
     }
     if (storageUtilization <= 0.0) {
+      LOGGER.warn(
+          "Storage utilization reported less than or equal to 0.0, not letting any downscale!");
+      if (desiredNodes < currentNodes) {
+        clusterResizeLogBuilder.addResizeReason(
+            " >>Storage strategy: Downscale blocked as "
+                + "storage is reported to be zero or negative "
+                + "(assumed to be an error in metrics)");
+      }
       return Math.max(currentNodes, desiredNodes);
     }
     final int minNodesRequiredForStorage =
@@ -311,13 +319,14 @@ public class AutoscaleJob {
             * Math.abs(1.0 - (double) desiredNodes / currentNodes)
             * timeSinceLastChange.getSeconds();
     final boolean scaleDown = (desiredNodes < currentNodes);
+    final boolean scaleUp = (desiredNodes > currentNodes);
     String path = "normal";
 
     if (scaleDown && (changeWeight < MINIMUM_DOWNSCALE_WEIGHT)) {
       // Avoid downscaling too frequently
       path = "downscale too small/frequent";
       desiredNodes = currentNodes;
-    } else if (!scaleDown && (changeWeight < MINIMUM_UPSCALE_WEIGHT)) {
+    } else if (scaleUp && (changeWeight < MINIMUM_UPSCALE_WEIGHT)) {
       // Avoid upscaling too frequently
       path = "upscale too small/frequent";
       desiredNodes = currentNodes;
