@@ -31,6 +31,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import com.google.bigtable.admin.v2.Cluster;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
+import com.google.longrunning.Operation;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -96,7 +97,7 @@ public class AutoscaleJobTest {
             invocationOnMock -> {
               newSize = Optional.of(((Cluster) invocationOnMock.getArgument(0)).getServeNodes());
               AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, newSize.get());
-              return null;
+              return Operation.newBuilder().setDone(true).build();
             });
   }
 
