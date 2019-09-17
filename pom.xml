@@ -5,7 +5,7 @@
     <name>bigtable-autoscaler</name>
     <artifactId>bigtable-autoscaler</artifactId>
 
-    <version>0.0.32-SNAPSHOT</version>
+    <version>0.0.32</version>
 
     <parent>
         <groupId>com.spotify</groupId>
@@ -230,7 +230,7 @@
         <connection>scm:git:git@github.com:spotify/bigtable-autoscaler.git</connection>
         <developerConnection>scm:git:git@github.com:spotify/bigtable-autoscaler.git
         </developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.0.32</tag>
     </scm>
 
     <build>
