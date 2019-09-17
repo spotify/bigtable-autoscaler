@@ -27,6 +27,7 @@ import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.longrunning.Operation;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLog;
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,18 +106,21 @@ public class AutoscaleJob {
     try {
       autoscalerMetrics.markCallToSetSize();
       clusterResizeLogBuilder.targetNodes(newSize);
-      bigtableSession.getInstanceAdminClient().updateCluster(newSizeCluster);
+      BigtableInstanceClient instanceAdminClient = bigtableSession.getInstanceAdminClient();
+      Operation operation = instanceAdminClient.updateCluster(newSizeCluster);
+      instanceAdminClient.waitForOperation(operation, 60, TimeUnit.SECONDS);
       clusterResizeLogBuilder.success(true);
       autoscalerMetrics.markClusterChanged();
-    } catch (final IOException e) {
-      LOGGER.error("Failed to set cluster size", e);
-      clusterResizeLogBuilder.errorMessage(Optional.of(e.toString()));
-      clusterResizeLogBuilder.success(false);
-      autoscalerMetrics.markSetSizeError();
     } catch (final Throwable t) {
+      LOGGER.error("Failed to set cluster size", t);
       clusterResizeLogBuilder.errorMessage(Optional.of(t.toString()));
       clusterResizeLogBuilder.success(false);
-      throw t;
+      autoscalerMetrics.markSetSizeError();
+      if (t instanceof RuntimeException) {
+        throw (RuntimeException) t;
+      } else {
+        throw new RuntimeException(t);
+      }
     } finally {
       database.logResize(clusterResizeLogBuilder.build());
     }

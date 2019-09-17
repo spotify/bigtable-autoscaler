@@ -28,6 +28,7 @@ import com.google.bigtable.admin.v2.Cluster;
 import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
+import com.google.longrunning.Operation;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.PostgresDatabase;
@@ -87,7 +88,7 @@ public class AutoscaleJobITBase {
               final Cluster cluster = invocationOnMock.getArgument(0);
               final int newSize = cluster.getServeNodes();
               fakeBTCluster.setNumberOfNodes(newSize);
-              return null;
+              return Operation.newBuilder().setDone(true).build();
             });
     fakeBTCluster.setNumberOfNodes(100);
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
