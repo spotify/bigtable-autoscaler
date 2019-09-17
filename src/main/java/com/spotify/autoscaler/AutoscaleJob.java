@@ -27,8 +27,6 @@ import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.longrunning.GetOperationRequest;
-import com.google.longrunning.Operation;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLog;
@@ -36,11 +34,11 @@ import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import com.spotify.autoscaler.metric.ClusterLoadGauges;
+import com.spotify.autoscaler.util.BigtableClusterUtilities;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +105,8 @@ public class AutoscaleJob {
     try {
       autoscalerMetrics.markCallToSetSize();
       clusterResizeLogBuilder.targetNodes(newSize);
-      updateNodeCountBlocking(bigtableSession, newSizeCluster);
+      BigtableInstanceClient instanceAdminClient = bigtableSession.getInstanceAdminClient();
+      BigtableClusterUtilities.updateClusterSize(instanceAdminClient, newSizeCluster);
       clusterResizeLogBuilder.success(true);
       autoscalerMetrics.markClusterChanged();
     } catch (final Throwable t) {
@@ -122,24 +121,6 @@ public class AutoscaleJob {
       }
     } finally {
       database.logResize(clusterResizeLogBuilder.build());
-    }
-  }
-
-  private void updateNodeCountBlocking(
-      final BigtableSession bigtableSession, final Cluster newSizeCluster)
-      throws IOException, TimeoutException {
-    Operation operation = bigtableSession.getInstanceAdminClient().updateCluster(newSizeCluster);
-    if (!operation.getDone()) {
-      bigtableSession.getInstanceAdminClient().waitForOperation(operation);
-      operation =
-          bigtableSession
-              .getInstanceAdminClient()
-              .getOperation(GetOperationRequest.newBuilder().setName(operation.getName()).build());
-    }
-    if (operation.hasError()) {
-      throw new io.grpc.StatusRuntimeException(
-          io.grpc.Status.fromCodeValue(operation.getError().getCode())
-              .withDescription(operation.getError().getMessage()));
     }
   }
 
