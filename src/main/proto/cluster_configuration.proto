@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package cluster_resources;
+
+option java_package = "com.spotify.autoscaler.api.grpc";
+option java_multiple_files = true;
+option java_outer_classname = "ClusterAutoscalerConfigurationProto";
+
+import "google/rpc/status.proto";
+
+
+service ClusterAutoscalerConfiguration {
+
+    rpc Enabled (ClusterIdentifier) returns (ClusterEnabledResponse) {}
+
+    rpc SetMinNodesOverride (stream ClusterMinNodesOverrideRequest) returns (stream ClusterMinNodesOverrideResponse) {}
+}
+
+message ClusterIdentifier {
+    string project_id = 1;
+    string instance_id = 2;
+    string cluster_id = 3;
+}
+
+message ClusterMinNodesOverrideRequest {
+    ClusterIdentifier cluster = 1;
+    int32 min_nodes_override = 2;
+}
+
+message ClusterMinNodesOverrideResponse {
+    ClusterMinNodesOverrideRequest original_request = 1;
+    google.rpc.Status status = 2;
+}
+
+message ClusterEnabledResponse {
+    bool is_enabled = 1;
+}

@@ -37,12 +37,12 @@ import javax.ws.rs.core.Response;
 
 public interface ApiTestResources {
 
-  String CLUSTERS = "/clusters";
-  String HEALTH = "/health";
-  String LOAD = "/clusters/override-min-nodes";
+  String CLUSTERS_ENDPOINT = "/clusters";
+  String HEALTH_ENDPOINT = "/health";
+  String LOAD_ENDPOINT = "/clusters/override-min-nodes";
   String SERVICE_NAME = "test-service";
 
-  BigtableCluster CLUSTER =
+  BigtableCluster ENABLED_CLUSTER =
       new BigtableClusterBuilder()
           .clusterId("c")
           .projectId("p")
@@ -54,6 +54,21 @@ public interface ApiTestResources {
           .minNodesOverride(10)
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
+
+  BigtableCluster DISABLED_CLUSTER =
+      new BigtableClusterBuilder()
+          .clusterId("c1")
+          .projectId("p1")
+          .instanceId("i1")
+          .cpuTarget(0.5)
+          .minNodes(3)
+          .maxNodes(15)
+          .enabled(false)
+          .minNodesOverride(10)
+          .errorCode(Optional.of(ErrorCode.OK))
+          .build();
+
+  BigtableCluster[] CLUSTERS = {ENABLED_CLUSTER, DISABLED_CLUSTER};
 
   ObjectMapper MAPPER =
       new ObjectMapper().registerModule(new AutoMatterModule()).registerModule(new Jdk8Module());

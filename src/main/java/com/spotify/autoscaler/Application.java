@@ -21,6 +21,7 @@
 package com.spotify.autoscaler;
 
 import com.spotify.metrics.ffwd.FastForwardReporter;
+import io.grpc.Server;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
@@ -38,17 +39,20 @@ public class Application {
   private final ScheduledExecutorService scheduledExecutorService =
       new ScheduledThreadPoolExecutor(1);
   private final Autoscaler autoscaler;
-  private final HttpServer server;
+  private final HttpServer httpServer;
+  private final Server grpcServer;
   private final Optional<FastForwardReporter> reporter;
   private static final Duration RUN_INTERVAL = Duration.ofSeconds(5);
 
   @Inject
   public Application(
       final Autoscaler autoscaler,
-      final HttpServer server,
+      final HttpServer httpServer,
+      final Server grpcServer,
       final Optional<FastForwardReporter> reporter) {
     this.autoscaler = autoscaler;
-    this.server = server;
+    this.httpServer = httpServer;
+    this.grpcServer = grpcServer;
     this.reporter = reporter;
   }
 
@@ -56,7 +60,8 @@ public class Application {
     reporter.ifPresent(FastForwardReporter::start);
     scheduledExecutorService.scheduleWithFixedDelay(
         autoscaler, RUN_INTERVAL.toMillis(), RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
-    server.start();
+    httpServer.start();
+    grpcServer.start();
     addShutdownHooks();
   }
 
@@ -76,7 +81,8 @@ public class Application {
   }
 
   private void onShutdown() throws Exception {
-    server.shutdown(10, TimeUnit.SECONDS).get();
+    httpServer.shutdown(10, TimeUnit.SECONDS).get();
+    grpcServer.shutdown();
     reporter.ifPresent(FastForwardReporter::stop);
     scheduledExecutorService.shutdown();
     scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS);

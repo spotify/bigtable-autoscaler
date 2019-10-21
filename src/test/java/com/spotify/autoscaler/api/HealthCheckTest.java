@@ -62,7 +62,7 @@ public class HealthCheckTest extends JerseyTest implements ApiTestResources {
   @Test
   public void getOk() {
     healthCheck = () -> {};
-    final Response response = target(ApiTestResources.HEALTH).request().get();
+    final Response response = target(ApiTestResources.HEALTH_ENDPOINT).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
   }
@@ -73,7 +73,7 @@ public class HealthCheckTest extends JerseyTest implements ApiTestResources {
         () -> {
           throw new RuntimeException("Some db error");
         };
-    final Response response = target(ApiTestResources.HEALTH).request().get();
+    final Response response = target(ApiTestResources.HEALTH_ENDPOINT).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.INTERNAL_SERVER_ERROR));
     assertThat(
         response.readEntity(String.class), equalTo("java.lang.RuntimeException: Some db error"));

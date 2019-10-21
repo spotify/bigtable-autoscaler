@@ -67,7 +67,7 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
     when(db.getBigtableClusters(any(), any(), any()))
         .thenAnswer(invocation -> getBigtableClustersResult);
     when(db.getBigtableCluster(any(), any(), any()))
-        .thenAnswer(invocation -> Optional.of(ApiTestResources.CLUSTER));
+        .thenAnswer(invocation -> Optional.of(ApiTestResources.ENABLED_CLUSTER));
     when(db.setMinNodesOverride(any(), any(), any(), any()))
         .thenAnswer(invocation -> minNodesOverrideResult);
 
@@ -83,15 +83,15 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   @Test
   public void getEmptyAllClusters() {
     getBigtableClustersResult = ImmutableList.of();
-    final Response response = target(ApiTestResources.CLUSTERS).request().get();
+    final Response response = target(ApiTestResources.CLUSTERS_ENDPOINT).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo("[]"));
   }
 
   @Test
   public void getNonEmptyAllClusters() throws IOException {
-    getBigtableClustersResult = ImmutableList.of(ApiTestResources.CLUSTER);
-    final Response response = target(ApiTestResources.CLUSTERS).request().get();
+    getBigtableClustersResult = ImmutableList.of(ApiTestResources.ENABLED_CLUSTER);
+    final Response response = target(ApiTestResources.CLUSTERS_ENDPOINT).request().get();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     final List<BigtableCluster> parsed = deserialize(response);
     assertThat(parsed.size(), equalTo(1));
@@ -102,7 +102,8 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   public void createCluster() {
     insertBigtableClusterResult = true;
     final Response response =
-        request(target(ApiTestResources.CLUSTERS), ApiTestResources.CLUSTER).post(Entity.text(""));
+        request(target(ApiTestResources.CLUSTERS_ENDPOINT), ApiTestResources.ENABLED_CLUSTER)
+            .post(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
     verify(db, times(1)).insertBigtableCluster(any());
@@ -112,7 +113,8 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   public void updateCluster() {
     updateBigtableClusterResult = true;
     final Response response =
-        request(target(ApiTestResources.CLUSTERS), ApiTestResources.CLUSTER).put(Entity.text(""));
+        request(target(ApiTestResources.CLUSTERS_ENDPOINT), ApiTestResources.ENABLED_CLUSTER)
+            .put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
     verify(db, times(1)).updateBigtableCluster(any());
@@ -122,59 +124,59 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
   public void deleteCluster() {
     deleteBigtableClusterResult = true;
     final Response response =
-        target(ApiTestResources.CLUSTERS)
-            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
-            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
-            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
+        target(ApiTestResources.CLUSTERS_ENDPOINT)
+            .queryParam("projectId", ApiTestResources.ENABLED_CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.ENABLED_CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.ENABLED_CLUSTER.clusterId())
             .request()
             .delete();
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
     verify(db, times(1))
         .deleteBigtableCluster(
-            ApiTestResources.CLUSTER.projectId(),
-            ApiTestResources.CLUSTER.instanceId(),
-            ApiTestResources.CLUSTER.clusterId());
+            ApiTestResources.ENABLED_CLUSTER.projectId(),
+            ApiTestResources.ENABLED_CLUSTER.instanceId(),
+            ApiTestResources.ENABLED_CLUSTER.clusterId());
   }
 
   @Test
   public void extraLoad() {
     minNodesOverrideResult = true;
     final Response response =
-        target(ApiTestResources.LOAD)
-            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
-            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
-            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
-            .queryParam("minNodesOverride", ApiTestResources.CLUSTER.minNodesOverride())
+        target(ApiTestResources.LOAD_ENDPOINT)
+            .queryParam("projectId", ApiTestResources.ENABLED_CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.ENABLED_CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.ENABLED_CLUSTER.clusterId())
+            .queryParam("minNodesOverride", ApiTestResources.ENABLED_CLUSTER.minNodesOverride())
             .request()
             .put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     assertThat(response.readEntity(String.class), equalTo(""));
     verify(db, times(1))
         .setMinNodesOverride(
-            ApiTestResources.CLUSTER.projectId(),
-            ApiTestResources.CLUSTER.instanceId(),
-            ApiTestResources.CLUSTER.clusterId(),
-            ApiTestResources.CLUSTER.minNodesOverride());
+            ApiTestResources.ENABLED_CLUSTER.projectId(),
+            ApiTestResources.ENABLED_CLUSTER.instanceId(),
+            ApiTestResources.ENABLED_CLUSTER.clusterId(),
+            ApiTestResources.ENABLED_CLUSTER.minNodesOverride());
   }
 
   @Test
   public void testMinNodesOverrideIsGreaterThanMaxNodes() {
     minNodesOverrideResult = true;
     final Response response =
-        target(ApiTestResources.LOAD)
-            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
-            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
-            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
+        target(ApiTestResources.LOAD_ENDPOINT)
+            .queryParam("projectId", ApiTestResources.ENABLED_CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.ENABLED_CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.ENABLED_CLUSTER.clusterId())
             .queryParam("minNodesOverride", 1000)
             .request()
             .put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));
     verify(db, times(1))
         .setMinNodesOverride(
-            ApiTestResources.CLUSTER.projectId(),
-            ApiTestResources.CLUSTER.instanceId(),
-            ApiTestResources.CLUSTER.clusterId(),
+            ApiTestResources.ENABLED_CLUSTER.projectId(),
+            ApiTestResources.ENABLED_CLUSTER.instanceId(),
+            ApiTestResources.ENABLED_CLUSTER.clusterId(),
             1000);
   }
 
@@ -183,11 +185,11 @@ public class ClusterResourcesTest extends JerseyTest implements ApiTestResources
     minNodesOverrideResult = true;
     when(db.getBigtableCluster(any(), any(), any())).thenAnswer(invocation -> Optional.empty());
     final Response response =
-        target(ApiTestResources.LOAD)
-            .queryParam("projectId", ApiTestResources.CLUSTER.projectId())
-            .queryParam("instanceId", ApiTestResources.CLUSTER.instanceId())
-            .queryParam("clusterId", ApiTestResources.CLUSTER.clusterId())
-            .queryParam("minNodesOverride", ApiTestResources.CLUSTER.minNodesOverride())
+        target(ApiTestResources.LOAD_ENDPOINT)
+            .queryParam("projectId", ApiTestResources.ENABLED_CLUSTER.projectId())
+            .queryParam("instanceId", ApiTestResources.ENABLED_CLUSTER.instanceId())
+            .queryParam("clusterId", ApiTestResources.ENABLED_CLUSTER.clusterId())
+            .queryParam("minNodesOverride", ApiTestResources.ENABLED_CLUSTER.minNodesOverride())
             .request()
             .put(Entity.text(""));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.NOT_FOUND));
