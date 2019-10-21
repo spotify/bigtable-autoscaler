@@ -128,14 +128,20 @@ public class Autoscaler implements Runnable {
         new BigtableInstanceName(projectId, instanceId);
 
     final BigtableOptions options =
-        new BigtableOptions.Builder()
+        BigtableOptions.builder()
             .setDataChannelCount(64)
             .setProjectId(projectId)
             .setInstanceId(bigtableInstanceName.getInstanceId())
             .setUserAgent(Application.SERVICE_NAME)
-            .setCallOptionsConfig(new CallOptionsConfig(USE_TIMEOUT, SHORT_TIMEOUT, LONG_TIMEOUT))
+            .setCallOptionsConfig(
+                CallOptionsConfig.builder()
+                    .setUseTimeout(true)
+                    .setShortRpcTimeoutMs(SHORT_TIMEOUT)
+                    .setMutateRpcTimeoutMs(LONG_TIMEOUT)
+                    .setReadRowsRpcTimeoutMs(LONG_TIMEOUT)
+                    .build())
             .setBulkOptions(
-                new BulkOptions.Builder()
+                BulkOptions.builder()
                     .setMaxInflightRpcs(1000000)
                     .setMaxMemory(Long.MAX_VALUE)
                     .build())
