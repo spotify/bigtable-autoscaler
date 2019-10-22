@@ -26,42 +26,52 @@
         <testcontainers.version>1.11.2</testcontainers.version>
         <auto-matter.version>0.14.1</auto-matter.version>
         <dagger.version>2.23.2</dagger.version>
+        <google.cloud.version>0.106.0-alpha</google.cloud.version>
+        <grpc.version>1.24.0</grpc.version>
+        <protobuf.version>3.10.0</protobuf.version>
+        <netty.version>4.1.42.Final</netty.version>
+        <apollo.version>1.14.0</apollo.version>
+        <guava.version>28.1-jre</guava.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <!-- To make enforcer plugin happy -->
             <dependency>
+                <groupId>com.spotify</groupId>
+                <artifactId>apollo-bom</artifactId>
+                <version>${apollo.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.cloud</groupId>
+                <artifactId>google-cloud-bom</artifactId>
+                <version>${google.cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-bom</artifactId>
+                <version>${grpc.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>20.0</version>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.google.api.grpc</groupId>
-                <artifactId>proto-google-common-protos</artifactId>
-                <version>1.0.4</version>
-            </dependency>
-            <dependency>
-                <groupId>com.google.http-client</groupId>
-                <artifactId>google-http-client-jackson2</artifactId>
-                <version>1.23.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>4.1.42.Final</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson-version}</version>
-                <scope>import</scope>
-                <type>pom</type>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.8.5</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
@@ -80,14 +90,17 @@
             <version>2.3.1</version>
         </dependency>
         <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-core</artifactId>
-            <version>0.11.5</version>
         </dependency>
         <dependency>
             <groupId>com.spotify.metrics</groupId>
             <artifactId>semantic-metrics-ffwd-reporter</artifactId>
-            <version>0.11.5</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
@@ -109,7 +122,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
-            <version>1.7.20</version>
+            <version>1.7.26</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -119,17 +132,15 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud.bigtable</groupId>
             <artifactId>bigtable-client-core</artifactId>
-            <version>1.1.1</version>
+            <version>1.12.1</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-monitoring</artifactId>
-            <version>0.32.0-beta</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -138,13 +149,11 @@
         <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter</artifactId>
-            <version>${auto-matter.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.norberg</groupId>
             <artifactId>auto-matter-jackson</artifactId>
-            <version>${auto-matter.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud.sql</groupId>
@@ -159,12 +168,10 @@
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
-            <version>9.4.17.v20190418</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <version>1.3.2</version>
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -189,11 +196,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.dagger</groupId>
             <artifactId>dagger</artifactId>
             <version>${dagger.version}</version>
@@ -203,7 +205,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.23.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

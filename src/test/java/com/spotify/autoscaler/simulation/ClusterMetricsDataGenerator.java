@@ -23,7 +23,6 @@ package com.spotify.autoscaler.simulation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.cloud.monitoring.v3.MetricServiceClient;
-import com.google.cloud.monitoring.v3.PagedResponseWrappers;
 import com.google.monitoring.v3.ListTimeSeriesRequest;
 import com.google.monitoring.v3.Point;
 import com.google.monitoring.v3.ProjectName;
@@ -141,7 +140,7 @@ public class ClusterMetricsDataGenerator {
         metric.shouldBeDistributed());
   }
 
-  private static PagedResponseWrappers.ListTimeSeriesPagedResponse getMetric(
+  private static MetricServiceClient.ListTimeSeriesPagedResponse getMetric(
       final MetricServiceClient metricServiceClient,
       final BigtableCluster bigtableCluster,
       final TimeInterval interval,
@@ -158,13 +157,13 @@ public class ClusterMetricsDataGenerator {
   }
 
   private static void aggregate(
-      final PagedResponseWrappers.ListTimeSeriesPagedResponse response,
+      final MetricServiceClient.ListTimeSeriesPagedResponse response,
       final Map<Instant, ClusterMetricsData> metrics,
       final Function<TypedValue, Double> converter,
       final BiFunction<ClusterMetricsData, Double, ClusterMetricsData> valueCalculator,
       final boolean distribute) {
 
-    for (final PagedResponseWrappers.ListTimeSeriesPage page : response.iteratePages()) {
+    for (final MetricServiceClient.ListTimeSeriesPage page : response.iteratePages()) {
       for (final TimeSeries ts : page.getValues()) {
         for (final Point p : ts.getPointsList()) {
           final Double value = converter.apply(p.getValue());
