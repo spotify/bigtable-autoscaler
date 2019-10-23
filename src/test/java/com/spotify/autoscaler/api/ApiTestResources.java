@@ -68,7 +68,35 @@ public interface ApiTestResources {
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 
-  BigtableCluster[] CLUSTERS = {ENABLED_CLUSTER, DISABLED_CLUSTER};
+  BigtableCluster ANOTHER_CLUSTER =
+      new BigtableClusterBuilder()
+          .clusterId("c2")
+          .projectId(ENABLED_CLUSTER.projectId())
+          .instanceId(ENABLED_CLUSTER.instanceId())
+          .cpuTarget(0.5)
+          .minNodes(3)
+          .maxNodes(15)
+          .enabled(true)
+          .minNodesOverride(10)
+          .errorCode(Optional.of(ErrorCode.OK))
+          .build();
+
+  BigtableCluster YET_ANOTHER_CLUSTER =
+      new BigtableClusterBuilder()
+          .clusterId("c3")
+          .projectId(ENABLED_CLUSTER.projectId())
+          .instanceId("i2")
+          .cpuTarget(0.5)
+          .minNodes(3)
+          .maxNodes(15)
+          .enabled(true)
+          .minNodesOverride(10)
+          .errorCode(Optional.of(ErrorCode.OK))
+          .build();
+
+  BigtableCluster[] CLUSTERS = {
+    ENABLED_CLUSTER, DISABLED_CLUSTER, ANOTHER_CLUSTER, YET_ANOTHER_CLUSTER
+  };
 
   ObjectMapper MAPPER =
       new ObjectMapper().registerModule(new AutoMatterModule()).registerModule(new Jdk8Module());

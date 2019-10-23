@@ -20,6 +20,11 @@
 
 package com.spotify.autoscaler.api.grpc;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.util.Timestamps;
 import com.spotify.autoscaler.LoggerContext;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -27,6 +32,7 @@ import com.spotify.autoscaler.db.Database;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -132,5 +138,117 @@ public class ClusterResourcesGrpc
         responseObserver.onCompleted();
       }
     };
+  }
+
+  @Override
+  public void create(
+      final AutoscalerConfiguration request,
+      final StreamObserver<com.google.rpc.Status> responseObserver) {
+    super.create(request, responseObserver);
+  }
+
+  @Override
+  public void update(
+      final AutoscalerConfiguration request,
+      final StreamObserver<com.google.rpc.Status> responseObserver) {
+    super.update(request, responseObserver);
+  }
+
+  @Override
+  public void delete(
+      final ClusterIdentifier request,
+      final StreamObserver<com.google.rpc.Status> responseObserver) {
+    super.delete(request, responseObserver);
+  }
+
+  @Override
+  public void get(
+      final OptionalClusterIdentifier request,
+      final StreamObserver<ClusterAutoscalerInfoList> responseObserver) {
+
+    final String projectId = request.hasProjectId() ? request.getProjectId().getValue() : null;
+    final String instanceId = request.hasInstanceId() ? request.getInstanceId().getValue() : null;
+    final String clusterId = request.hasClusterId() ? request.getClusterId().getValue() : null;
+
+    final List<BigtableCluster> bigtableClusters =
+        database.getBigtableClusters(projectId, instanceId, clusterId);
+
+    final ClusterAutoscalerInfoList.Builder builder = ClusterAutoscalerInfoList.newBuilder();
+
+    bigtableClusters
+        .stream()
+        .map(ClusterResourcesGrpc::convertToClusterAutoscalerInfo)
+        .forEach(builder::addClusterAutoscalerInfo);
+
+    responseObserver.onNext(builder.build());
+    responseObserver.onCompleted();
+  }
+
+  @Override
+  public void getLogs(
+      final ClusterIdentifier request,
+      final StreamObserver<ClusterAutoscalerLogs> responseObserver) {
+    super.getLogs(request, responseObserver);
+  }
+
+  @VisibleForTesting
+  public static ClusterAutoscalerInfo convertToClusterAutoscalerInfo(
+      final BigtableCluster cluster) {
+
+    final ClusterIdentifier clusterIdentifier =
+        ClusterIdentifier.newBuilder()
+            .setProjectId(cluster.projectId())
+            .setInstanceId(cluster.instanceId())
+            .setClusterId(cluster.clusterId())
+            .build();
+    final AutoscalerConfiguration.Builder configBuilder =
+        AutoscalerConfiguration.newBuilder()
+            .setCluster(clusterIdentifier)
+            .setMinNodes(cluster.minNodes())
+            .setMaxNodes(cluster.maxNodes())
+            .setCpuTarget(cluster.cpuTarget())
+            .setEnabled(BoolValue.of(cluster.enabled()))
+            .setMinNodesOverride(Int32Value.of(cluster.minNodesOverride()));
+
+    cluster
+        .overloadStep()
+        .ifPresent(overloadStep -> configBuilder.setOverloadStep(Int32Value.of(overloadStep)));
+
+    final AutoscalerConfiguration config = configBuilder.build();
+
+    final ClusterAutoscalerInfo.Builder autoscalerInfoBuilder =
+        ClusterAutoscalerInfo.newBuilder()
+            .setConfiguration(config)
+            .setConsecutiveFailureCount(cluster.consecutiveFailureCount());
+
+    cluster
+        .lastChange()
+        .ifPresent(
+            lastChange ->
+                autoscalerInfoBuilder.setLastChange(
+                    Timestamps.fromMillis(lastChange.toEpochMilli())));
+    cluster
+        .lastCheck()
+        .ifPresent(
+            lastCheck ->
+                autoscalerInfoBuilder.setLastCheck(
+                    Timestamps.fromMillis(lastCheck.toEpochMilli())));
+    cluster
+        .lastFailure()
+        .ifPresent(
+            lastFailure ->
+                autoscalerInfoBuilder.setLastFailure(
+                    Timestamps.fromMillis(lastFailure.toEpochMilli())));
+    cluster
+        .lastFailureMessage()
+        .ifPresent(
+            lastFailureMessage ->
+                autoscalerInfoBuilder.setLastFailureMessage(StringValue.of(lastFailureMessage)));
+    cluster
+        .errorCode()
+        .ifPresent(
+            errorCode -> autoscalerInfoBuilder.setErrorCode(StringValue.of(errorCode.name())));
+
+    return autoscalerInfoBuilder.build();
   }
 }

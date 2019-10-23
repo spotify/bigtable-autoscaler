@@ -7,6 +7,8 @@ option java_multiple_files = true;
 option java_outer_classname = "ClusterAutoscalerConfigurationProto";
 
 import "google/rpc/status.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/timestamp.proto";
 
 
 service ClusterAutoscalerConfiguration {
@@ -14,12 +16,28 @@ service ClusterAutoscalerConfiguration {
     rpc Enabled (ClusterIdentifier) returns (ClusterEnabledResponse) {}
 
     rpc SetMinNodesOverride (stream ClusterMinNodesOverrideRequest) returns (stream ClusterMinNodesOverrideResponse) {}
+
+    rpc Create (AutoscalerConfiguration) returns (google.rpc.Status) {}
+
+    rpc Update (AutoscalerConfiguration) returns (google.rpc.Status) {}
+
+    rpc Delete (ClusterIdentifier) returns (google.rpc.Status) {}
+
+    rpc Get (OptionalClusterIdentifier) returns (ClusterAutoscalerInfoList) {}
+
+    rpc GetLogs (ClusterIdentifier) returns (ClusterAutoscalerLogs) {}
 }
 
 message ClusterIdentifier {
     string project_id = 1;
     string instance_id = 2;
     string cluster_id = 3;
+}
+
+message OptionalClusterIdentifier {
+    google.protobuf.StringValue project_id = 1;
+    google.protobuf.StringValue instance_id = 2;
+    google.protobuf.StringValue cluster_id = 3;
 }
 
 message ClusterMinNodesOverrideRequest {
@@ -34,4 +52,45 @@ message ClusterMinNodesOverrideResponse {
 
 message ClusterEnabledResponse {
     bool is_enabled = 1;
+}
+
+message AutoscalerConfiguration {
+    ClusterIdentifier cluster = 1;
+    int32 minNodes = 2;
+    int32 maxNodes = 3;
+    double cpuTarget = 4;
+    google.protobuf.Int32Value overloadStep = 5;
+    google.protobuf.BoolValue enabled = 6;
+    google.protobuf.Int32Value minNodesOverride = 7;
+}
+
+message ClusterAutoscalerInfo {
+    AutoscalerConfiguration configuration = 1;
+    google.protobuf.Timestamp lastChange = 2;
+    google.protobuf.Timestamp lastCheck = 3;
+    google.protobuf.Timestamp lastFailure = 4;
+    google.protobuf.StringValue lastFailureMessage = 5;
+    int32 consecutiveFailureCount = 6;
+    google.protobuf.StringValue errorCode = 7;
+}
+
+message ClusterAutoscalerInfoList {
+    repeated ClusterAutoscalerInfo clusterAutoscalerInfo = 1;
+}
+
+message ClusterResizeLog {
+    google.protobuf.Timestamp timestamp = 1;
+    AutoscalerConfiguration configuration = 2;
+    int32 currentNodes = 3;
+    int32 targetNodes = 4;
+    double cpuUtilization = 5;
+    double storageUtilization = 6;
+    bool success = 7;
+    google.protobuf.StringValue resizeReason = 8;
+    repeated string resizeReasons = 9;
+    google.protobuf.StringValue errorMessage = 10;
+}
+
+message ClusterAutoscalerLogs {
+    repeated ClusterResizeLog log = 1;
 }

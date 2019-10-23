@@ -31,12 +31,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import com.google.protobuf.StringValue;
+import com.google.protobuf.util.Timestamps;
+import com.spotify.autoscaler.api.grpc.AutoscalerConfiguration;
 import com.spotify.autoscaler.api.grpc.ClusterAutoscalerConfigurationGrpc;
+import com.spotify.autoscaler.api.grpc.ClusterAutoscalerInfo;
+import com.spotify.autoscaler.api.grpc.ClusterAutoscalerInfoList;
 import com.spotify.autoscaler.api.grpc.ClusterEnabledResponse;
 import com.spotify.autoscaler.api.grpc.ClusterIdentifier;
 import com.spotify.autoscaler.api.grpc.ClusterMinNodesOverrideRequest;
 import com.spotify.autoscaler.api.grpc.ClusterMinNodesOverrideResponse;
 import com.spotify.autoscaler.api.grpc.ClusterResourcesGrpc;
+import com.spotify.autoscaler.api.grpc.OptionalClusterIdentifier;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import io.grpc.Status;
@@ -46,11 +52,16 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -102,6 +113,23 @@ public class ClusterResourcesGrpcTest {
               return Optional.empty();
             });
 
+    when(db.getBigtableClusters(any(), any(), any()))
+        .thenAnswer(
+            invocation -> {
+              final String projectId = invocation.getArgument(0);
+              final String instanceId = invocation.getArgument(1);
+              final String clusterId = invocation.getArgument(2);
+              List<BigtableCluster> clusters = new ArrayList<>();
+              for (BigtableCluster cluster : CLUSTERS) {
+                if ((projectId == null || projectId.equals(cluster.projectId()))
+                    && (instanceId == null || instanceId.equals(cluster.instanceId()))
+                    && (clusterId == null || clusterId.equals(cluster.clusterId()))) {
+                  clusters.add(cluster);
+                }
+              }
+              return clusters;
+            });
+
     when(db.setMinNodesOverride(any(), any(), any(), any()))
         .thenAnswer(
             invocation -> {
@@ -138,6 +166,191 @@ public class ClusterResourcesGrpcTest {
         ClusterAutoscalerConfigurationGrpc.newStub(
             grpcCleanup.register(
                 InProcessChannelBuilder.forName(serverName).directExecutor().build()));
+  }
+
+  @Test
+  public void testConversion() {
+    final ClusterAutoscalerInfo clusterAutoscalerInfo =
+        ClusterResourcesGrpc.convertToClusterAutoscalerInfo(ENABLED_CLUSTER);
+    testEquivalent(clusterAutoscalerInfo, ENABLED_CLUSTER);
+  }
+
+  private void testEquivalent(
+      final ClusterAutoscalerInfo clusterAutoscalerInfo, final BigtableCluster bigtableCluster) {
+
+    if (bigtableCluster.lastChange().isPresent()) {
+      assertEquals(
+          bigtableCluster.lastChange().get().toEpochMilli(),
+          Timestamps.toMillis(clusterAutoscalerInfo.getLastChange()));
+    } else {
+      assertFalse(clusterAutoscalerInfo.hasLastChange());
+    }
+
+    if (bigtableCluster.lastFailure().isPresent()) {
+      assertEquals(
+          bigtableCluster.lastFailure().get().toEpochMilli(),
+          Timestamps.toMillis(clusterAutoscalerInfo.getLastFailure()));
+    } else {
+      assertFalse(clusterAutoscalerInfo.hasLastFailure());
+    }
+
+    if (bigtableCluster.lastCheck().isPresent()) {
+      assertEquals(
+          bigtableCluster.lastCheck().get().toEpochMilli(),
+          Timestamps.toMillis(clusterAutoscalerInfo.getLastCheck()));
+    } else {
+      assertFalse(clusterAutoscalerInfo.hasLastCheck());
+    }
+
+    if (bigtableCluster.lastFailureMessage().isPresent()) {
+      assertEquals(
+          bigtableCluster.lastFailureMessage().get(),
+          clusterAutoscalerInfo.getLastFailureMessage().getValue());
+    } else {
+      assertFalse(clusterAutoscalerInfo.hasLastFailureMessage());
+    }
+
+    if (bigtableCluster.errorCode().isPresent()) {
+      assertEquals(
+          bigtableCluster.errorCode().get().name(),
+          clusterAutoscalerInfo.getErrorCode().getValue());
+    } else {
+      assertFalse(clusterAutoscalerInfo.hasErrorCode());
+    }
+
+    final AutoscalerConfiguration configuration = clusterAutoscalerInfo.getConfiguration();
+    assertEquals(bigtableCluster.projectId(), configuration.getCluster().getProjectId());
+    assertEquals(bigtableCluster.instanceId(), configuration.getCluster().getInstanceId());
+    assertEquals(bigtableCluster.clusterId(), configuration.getCluster().getClusterId());
+    assertEquals(bigtableCluster.cpuTarget(), configuration.getCpuTarget(), 0.001);
+    assertEquals(bigtableCluster.enabled(), configuration.getEnabled().getValue());
+    assertEquals(bigtableCluster.minNodes(), configuration.getMinNodes());
+    assertEquals(bigtableCluster.maxNodes(), configuration.getMaxNodes());
+    assertEquals(
+        bigtableCluster.minNodesOverride(), configuration.getMinNodesOverride().getValue());
+
+    Optional<Integer> overloadStep =
+        Optional.ofNullable(
+            configuration.hasOverloadStep() ? configuration.getOverloadStep().getValue() : null);
+    assertEquals(bigtableCluster.overloadStep(), overloadStep);
+    assertEquals(
+        bigtableCluster.consecutiveFailureCount(),
+        clusterAutoscalerInfo.getConsecutiveFailureCount());
+  }
+
+  private void testEquivalence(
+      final Iterable<ClusterAutoscalerInfo> clusterAutoscalerInfos,
+      final Iterable<BigtableCluster> bigtableCluster) {
+
+    for (BigtableCluster cluster : bigtableCluster) {
+      for (ClusterAutoscalerInfo clusterAutoscalerInfo : clusterAutoscalerInfos) {
+        final ClusterIdentifier clusterIdentifier =
+            clusterAutoscalerInfo.getConfiguration().getCluster();
+        if (cluster.projectId().equals(clusterIdentifier.getProjectId())
+            && cluster.instanceId().equals(clusterIdentifier.getInstanceId())
+            && cluster.clusterId().equals(clusterIdentifier.getClusterId())) {
+          testEquivalent(clusterAutoscalerInfo, cluster);
+          break;
+        }
+      }
+    }
+  }
+
+  @Test
+  public void testGetAllClusters() {
+    final OptionalClusterIdentifier emptyIdentifier =
+        OptionalClusterIdentifier.newBuilder().build();
+    final ClusterAutoscalerInfoList clusterAutoscalerInfoList = blockingStub.get(emptyIdentifier);
+    assertEquals(CLUSTERS.length, clusterAutoscalerInfoList.getClusterAutoscalerInfoCount());
+    testEquivalence(
+        clusterAutoscalerInfoList.getClusterAutoscalerInfoList(), Arrays.asList(CLUSTERS));
+  }
+
+  @Test
+  public void testGetAllClustersForInstance() {
+    final OptionalClusterIdentifier instanceIdentifier =
+        OptionalClusterIdentifier.newBuilder()
+            .setInstanceId(StringValue.of(ENABLED_CLUSTER.instanceId()))
+            .build();
+    final List<BigtableCluster> expectedClusters =
+        Arrays.stream(CLUSTERS)
+            .filter(c -> c.instanceId().equals(ENABLED_CLUSTER.instanceId()))
+            .collect(Collectors.toList());
+
+    final ClusterAutoscalerInfoList clusterAutoscalerInfoList =
+        blockingStub.get(instanceIdentifier);
+    assertEquals(
+        expectedClusters.size(), clusterAutoscalerInfoList.getClusterAutoscalerInfoCount());
+    testEquivalence(clusterAutoscalerInfoList.getClusterAutoscalerInfoList(), expectedClusters);
+  }
+
+  @Test
+  public void testGetAllClustersForProject() {
+    final OptionalClusterIdentifier projectIdentifier =
+        OptionalClusterIdentifier.newBuilder()
+            .setProjectId(StringValue.of(ENABLED_CLUSTER.projectId()))
+            .build();
+    final List<BigtableCluster> expectedClusters =
+        Arrays.stream(CLUSTERS)
+            .filter(c -> c.projectId().equals(ENABLED_CLUSTER.projectId()))
+            .collect(Collectors.toList());
+
+    final ClusterAutoscalerInfoList clusterAutoscalerInfoList = blockingStub.get(projectIdentifier);
+    assertEquals(
+        expectedClusters.size(), clusterAutoscalerInfoList.getClusterAutoscalerInfoCount());
+    testEquivalence(clusterAutoscalerInfoList.getClusterAutoscalerInfoList(), expectedClusters);
+  }
+
+  @Test
+  public void testGetAllClustersForProjectInstance() {
+    final OptionalClusterIdentifier projectInstanceIdentifier =
+        OptionalClusterIdentifier.newBuilder()
+            .setProjectId(StringValue.of(ENABLED_CLUSTER.projectId()))
+            .setInstanceId(StringValue.of(ENABLED_CLUSTER.instanceId()))
+            .build();
+    final List<BigtableCluster> expectedClusters =
+        Arrays.stream(CLUSTERS)
+            .filter(
+                c ->
+                    c.projectId().equals(ENABLED_CLUSTER.projectId())
+                        && c.instanceId().equals(ENABLED_CLUSTER.instanceId()))
+            .collect(Collectors.toList());
+
+    final ClusterAutoscalerInfoList clusterAutoscalerInfoList =
+        blockingStub.get(projectInstanceIdentifier);
+    assertEquals(
+        expectedClusters.size(), clusterAutoscalerInfoList.getClusterAutoscalerInfoCount());
+    testEquivalence(clusterAutoscalerInfoList.getClusterAutoscalerInfoList(), expectedClusters);
+  }
+
+  @Test
+  public void testGetSingleCluster() {
+    final OptionalClusterIdentifier enabledClusterIdentifier =
+        OptionalClusterIdentifier.newBuilder()
+            .setProjectId(StringValue.of(ENABLED_CLUSTER.projectId()))
+            .setInstanceId(StringValue.of(ENABLED_CLUSTER.instanceId()))
+            .setClusterId(StringValue.of(ENABLED_CLUSTER.clusterId()))
+            .build();
+
+    final ClusterAutoscalerInfoList clusterAutoscalerInfoList =
+        blockingStub.get(enabledClusterIdentifier);
+    assertEquals(1, clusterAutoscalerInfoList.getClusterAutoscalerInfoCount());
+    testEquivalence(
+        clusterAutoscalerInfoList.getClusterAutoscalerInfoList(),
+        Collections.singletonList(ENABLED_CLUSTER));
+  }
+
+  @Test
+  public void testGetNonExistingCluster() {
+    final OptionalClusterIdentifier nonExistingClusterIdentifier =
+        OptionalClusterIdentifier.newBuilder()
+            .setProjectId(StringValue.of(NONEXISTING_CLUSTER_IDENTIFIER.getProjectId()))
+            .setInstanceId(StringValue.of(NONEXISTING_CLUSTER_IDENTIFIER.getInstanceId()))
+            .setClusterId(StringValue.of(NONEXISTING_CLUSTER_IDENTIFIER.getClusterId()))
+            .build();
+    final ClusterAutoscalerInfoList clusterAutoscalerInfoList =
+        blockingStub.get(nonExistingClusterIdentifier);
+    assertEquals(0, clusterAutoscalerInfoList.getClusterAutoscalerInfoCount());
   }
 
   @Test
