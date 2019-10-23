@@ -78,7 +78,7 @@ message ClusterAutoscalerInfoList {
     repeated ClusterAutoscalerInfo clusterAutoscalerInfo = 1;
 }
 
-message ClusterResizeLog {
+message ClusterAutoscalerLog {
     google.protobuf.Timestamp timestamp = 1;
     AutoscalerConfiguration configuration = 2;
     int32 currentNodes = 3;
@@ -92,5 +92,5 @@ message ClusterResizeLog {
 }
 
 message ClusterAutoscalerLogs {
-    repeated ClusterResizeLog log = 1;
+    repeated ClusterAutoscalerLog log = 1;
 }

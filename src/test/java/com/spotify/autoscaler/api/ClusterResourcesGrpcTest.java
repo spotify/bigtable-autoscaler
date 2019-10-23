@@ -28,6 +28,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -37,13 +39,16 @@ import com.spotify.autoscaler.api.grpc.AutoscalerConfiguration;
 import com.spotify.autoscaler.api.grpc.ClusterAutoscalerConfigurationGrpc;
 import com.spotify.autoscaler.api.grpc.ClusterAutoscalerInfo;
 import com.spotify.autoscaler.api.grpc.ClusterAutoscalerInfoList;
+import com.spotify.autoscaler.api.grpc.ClusterAutoscalerLog;
 import com.spotify.autoscaler.api.grpc.ClusterEnabledResponse;
 import com.spotify.autoscaler.api.grpc.ClusterIdentifier;
 import com.spotify.autoscaler.api.grpc.ClusterMinNodesOverrideRequest;
 import com.spotify.autoscaler.api.grpc.ClusterMinNodesOverrideResponse;
 import com.spotify.autoscaler.api.grpc.ClusterResourcesGrpc;
+import com.spotify.autoscaler.api.grpc.MessageConverters;
 import com.spotify.autoscaler.api.grpc.OptionalClusterIdentifier;
 import com.spotify.autoscaler.db.BigtableCluster;
+import com.spotify.autoscaler.db.ClusterResizeLog;
 import com.spotify.autoscaler.db.Database;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -55,6 +60,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,6 +154,22 @@ public class ClusterResourcesGrpcTest {
               return false;
             });
 
+    when(db.deleteBigtableCluster(any(), any(), any()))
+        .thenAnswer(
+            invocation -> {
+              final String projectId = invocation.getArgument(0);
+              final String instanceId = invocation.getArgument(1);
+              final String clusterId = invocation.getArgument(2);
+              for (BigtableCluster cluster : CLUSTERS) {
+                if (projectId.equals(cluster.projectId())
+                    && instanceId.equals(cluster.instanceId())
+                    && clusterId.equals(cluster.clusterId())) {
+                  return true;
+                }
+              }
+              return false;
+            });
+
     String serverName = InProcessServerBuilder.generateName();
 
     grpcCleanup.register(
@@ -169,9 +191,68 @@ public class ClusterResourcesGrpcTest {
   }
 
   @Test
-  public void testConversion() {
+  public void testConvertToClusterAutoscalerInfoFromClusterResizeLog() {
+
+    final ClusterResizeLog clusterResizeLog =
+        ClusterResizeLog.builder(ENABLED_CLUSTER)
+            .resizeReason("i have my reasons")
+            .errorMessage("fail")
+            .success(false)
+            .cpuUtilization(0.9)
+            .storageUtilization(0.7)
+            .currentNodes(10)
+            .targetNodes(15)
+            .timestamp(new Date())
+            .build();
+    final ClusterAutoscalerLog clusterAutoscalerLog =
+        MessageConverters.convertToClusterClusterAutoscalerLog(clusterResizeLog);
+    testEquivalent(clusterAutoscalerLog, clusterResizeLog);
+  }
+
+  private void testEquivalent(
+      final ClusterAutoscalerLog clusterAutoscalerLog, final ClusterResizeLog clusterResizeLog) {
+
+    final AutoscalerConfiguration configuration = clusterAutoscalerLog.getConfiguration();
+    assertEquals(clusterResizeLog.projectId(), configuration.getCluster().getProjectId());
+    assertEquals(clusterResizeLog.instanceId(), configuration.getCluster().getInstanceId());
+    assertEquals(clusterResizeLog.clusterId(), configuration.getCluster().getClusterId());
+    assertEquals(clusterResizeLog.cpuTarget(), configuration.getCpuTarget(), 0.001);
+    assertFalse(configuration.hasEnabled());
+    assertEquals(clusterResizeLog.minNodes(), configuration.getMinNodes());
+    assertEquals(clusterResizeLog.maxNodes(), configuration.getMaxNodes());
+    assertEquals(
+        clusterResizeLog.minNodesOverride(), configuration.getMinNodesOverride().getValue());
+
+    Optional<Integer> overloadStep =
+        Optional.ofNullable(
+            configuration.hasOverloadStep() ? configuration.getOverloadStep().getValue() : null);
+    assertEquals(clusterResizeLog.overloadStep(), overloadStep);
+
+    if (clusterResizeLog.errorMessage().isPresent()) {
+      assertEquals(
+          clusterResizeLog.errorMessage().get(), clusterAutoscalerLog.getErrorMessage().getValue());
+    } else {
+      assertFalse(clusterAutoscalerLog.hasErrorMessage());
+    }
+    assertEquals(
+        clusterResizeLog.timestamp().getTime(),
+        Timestamps.toMillis(clusterAutoscalerLog.getTimestamp()));
+
+    assertEquals(
+        clusterResizeLog.resizeReason(), clusterAutoscalerLog.getResizeReason().getValue());
+    assertEquals(clusterResizeLog.currentNodes(), clusterAutoscalerLog.getCurrentNodes());
+    assertEquals(clusterResizeLog.targetNodes(), clusterAutoscalerLog.getTargetNodes());
+    assertEquals(
+        clusterResizeLog.cpuUtilization(), clusterAutoscalerLog.getCpuUtilization(), 0.001);
+    assertEquals(
+        clusterResizeLog.storageUtilization(), clusterAutoscalerLog.getStorageUtilization(), 0.001);
+    assertEquals(clusterResizeLog.success(), clusterAutoscalerLog.getSuccess());
+  }
+
+  @Test
+  public void testConvertToClusterAutoscalerInfoFromBigtableCluster() {
     final ClusterAutoscalerInfo clusterAutoscalerInfo =
-        ClusterResourcesGrpc.convertToClusterAutoscalerInfo(ENABLED_CLUSTER);
+        MessageConverters.convertToClusterAutoscalerInfo(ENABLED_CLUSTER);
     testEquivalent(clusterAutoscalerInfo, ENABLED_CLUSTER);
   }
 
@@ -446,5 +527,27 @@ public class ClusterResourcesGrpcTest {
           final int code = realStatuses.get(key).getCode();
           assertEquals(key.toString(), value.getCode().value(), code);
         });
+  }
+
+  @Test
+  public void testDeleteExistingCluster() {
+    final com.google.rpc.Status delete = blockingStub.delete(ENABLED_CLUSTER_IDENTIFIER);
+    assertEquals(Status.OK.getCode().value(), delete.getCode());
+    verify(db, times(1))
+        .deleteBigtableCluster(
+            ApiTestResources.ENABLED_CLUSTER.projectId(),
+            ApiTestResources.ENABLED_CLUSTER.instanceId(),
+            ApiTestResources.ENABLED_CLUSTER.clusterId());
+  }
+
+  @Test
+  public void testDeleteNonExistingCluster() {
+    final com.google.rpc.Status delete = blockingStub.delete(NONEXISTING_CLUSTER_IDENTIFIER);
+    assertEquals(Status.NOT_FOUND.getCode().value(), delete.getCode());
+    verify(db, times(1))
+        .deleteBigtableCluster(
+            NONEXISTING_CLUSTER_IDENTIFIER.getProjectId(),
+            NONEXISTING_CLUSTER_IDENTIFIER.getInstanceId(),
+            NONEXISTING_CLUSTER_IDENTIFIER.getClusterId());
   }
 }
