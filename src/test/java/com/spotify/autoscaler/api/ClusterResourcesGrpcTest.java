@@ -57,6 +57,7 @@ import io.grpc.inprocess.InProcessServerBuilder;
 import io.grpc.stub.StreamObserver;
 import io.grpc.testing.GrpcCleanupRule;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,6 +99,13 @@ public class ClusterResourcesGrpcTest {
           .setInstanceId("nonExistingInstance")
           .setClusterId("nonExistingCluster")
           .build();
+
+  private static final AutoscalerConfiguration INVALID_CONFIGURATION =
+      AutoscalerConfiguration.newBuilder()
+          .setCluster(ClusterIdentifier.newBuilder().setProjectId("invalid").build())
+          .build();
+
+  private static final Throwable SQL_EXCEPTION = new SQLException("Invalid data!!");
 
   @Before
   public void configure() throws IOException {
@@ -168,6 +176,30 @@ public class ClusterResourcesGrpcTest {
                 }
               }
               return false;
+            });
+
+    when(db.insertBigtableCluster(any()))
+        .thenAnswer(
+            invocation -> {
+              final BigtableCluster bigtableCluster = invocation.getArgument(0);
+              if (bigtableCluster
+                  .projectId()
+                  .equals(INVALID_CONFIGURATION.getCluster().getProjectId())) {
+                throw SQL_EXCEPTION;
+              }
+              return true;
+            });
+
+    when(db.updateBigtableCluster(any()))
+        .thenAnswer(
+            invocation -> {
+              final BigtableCluster bigtableCluster = invocation.getArgument(0);
+              if (bigtableCluster
+                  .projectId()
+                  .equals(INVALID_CONFIGURATION.getCluster().getProjectId())) {
+                throw SQL_EXCEPTION;
+              }
+              return true;
             });
 
     String serverName = InProcessServerBuilder.generateName();
@@ -549,5 +581,43 @@ public class ClusterResourcesGrpcTest {
             NONEXISTING_CLUSTER_IDENTIFIER.getProjectId(),
             NONEXISTING_CLUSTER_IDENTIFIER.getInstanceId(),
             NONEXISTING_CLUSTER_IDENTIFIER.getClusterId());
+  }
+
+  @Test
+  public void createClusterFail() {
+    exception.expect(StatusRuntimeException.class);
+    exception.expectMessage(SQL_EXCEPTION.toString());
+    blockingStub.create(INVALID_CONFIGURATION);
+    verify(db, times(1)).insertBigtableCluster(any());
+  }
+
+  @Test
+  public void createClusterSuccessfully() {
+    final AutoscalerConfiguration autoscalerConfiguration =
+        MessageConverters.convertToAutoscalerConfiguration(ENABLED_CLUSTER);
+
+    final com.google.rpc.Status status = blockingStub.create(autoscalerConfiguration);
+    System.out.println(status);
+    assertEquals(Status.OK.getCode().value(), status.getCode());
+    verify(db, times(1)).insertBigtableCluster(any());
+  }
+
+  @Test
+  public void updateClusterFail() {
+    exception.expect(StatusRuntimeException.class);
+    exception.expectMessage(SQL_EXCEPTION.toString());
+    blockingStub.update(INVALID_CONFIGURATION);
+    verify(db, times(1)).updateBigtableCluster(any());
+  }
+
+  @Test
+  public void updateClusterSuccessfully() {
+    final AutoscalerConfiguration autoscalerConfiguration =
+        MessageConverters.convertToAutoscalerConfiguration(ENABLED_CLUSTER);
+
+    final com.google.rpc.Status status = blockingStub.update(autoscalerConfiguration);
+    System.out.println(status);
+    assertEquals(Status.OK.getCode().value(), status.getCode());
+    verify(db, times(1)).updateBigtableCluster(any());
   }
 }

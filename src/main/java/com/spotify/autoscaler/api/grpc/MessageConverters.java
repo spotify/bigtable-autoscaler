@@ -74,6 +74,23 @@ public class MessageConverters {
         .build();
   }
 
+  static BigtableCluster convertToBigtableCluster(final AutoscalerConfiguration config) {
+    final BigtableClusterBuilder builder =
+        convertToBigtableClusterBuilder(config.getCluster())
+            .minNodes(config.getMinNodes())
+            .maxNodes(config.getMaxNodes())
+            .cpuTarget(config.getCpuTarget())
+            .overloadStep(
+                Optional.ofNullable(
+                    config.hasOverloadStep() ? config.getOverloadStep().getValue() : null))
+            .enabled(!config.hasEnabled() || config.getEnabled().getValue());
+
+    if (config.hasMinNodesOverride()) {
+      builder.minNodesOverride(config.getMinNodesOverride().getValue());
+    }
+    return builder.build();
+  }
+
   @VisibleForTesting
   public static ClusterAutoscalerInfo convertToClusterAutoscalerInfo(
       final BigtableCluster cluster) {
@@ -131,7 +148,8 @@ public class MessageConverters {
         .build();
   }
 
-  private static AutoscalerConfiguration convertToAutoscalerConfiguration(
+  @VisibleForTesting
+  public static AutoscalerConfiguration convertToAutoscalerConfiguration(
       final BigtableCluster cluster) {
     final AutoscalerConfiguration.Builder configBuilder =
         AutoscalerConfiguration.newBuilder()

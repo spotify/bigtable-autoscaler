@@ -52,15 +52,20 @@ public class ClusterResourcesGrpc
       final ClusterIdentifier request,
       final StreamObserver<ClusterEnabledResponse> responseObserver) {
 
-    final Optional<BigtableCluster> cluster =
-        database.getBigtableCluster(
-            request.getProjectId(), request.getInstanceId(), request.getClusterId());
-    if (cluster.isPresent()) {
-      responseObserver.onNext(
-          ClusterEnabledResponse.newBuilder().setIsEnabled(cluster.get().enabled()).build());
-      responseObserver.onCompleted();
-    } else {
-      responseObserver.onError(new StatusRuntimeException(Status.NOT_FOUND));
+    try {
+      final Optional<BigtableCluster> cluster =
+          database.getBigtableCluster(
+              request.getProjectId(), request.getInstanceId(), request.getClusterId());
+      if (cluster.isPresent()) {
+        responseObserver.onNext(
+            ClusterEnabledResponse.newBuilder().setIsEnabled(cluster.get().enabled()).build());
+        responseObserver.onCompleted();
+      } else {
+        responseObserver.onError(new StatusRuntimeException(Status.NOT_FOUND));
+      }
+    } catch (Throwable t) {
+      responseObserver.onError(
+          new StatusRuntimeException(Status.INTERNAL.withCause(t).withDescription(t.toString())));
     }
   }
 
@@ -141,14 +146,50 @@ public class ClusterResourcesGrpc
   public void create(
       final AutoscalerConfiguration request,
       final StreamObserver<com.google.rpc.Status> responseObserver) {
-    super.create(request, responseObserver);
+
+    final BigtableCluster cluster = MessageConverters.convertToBigtableCluster(request);
+    try {
+      LoggerContext.pushContext(cluster);
+      if (database.insertBigtableCluster(cluster)) {
+        LOGGER.info("Cluster created");
+        responseObserver.onNext(
+            com.google.rpc.Status.newBuilder().setCode(Status.Code.OK.value()).build());
+      } else {
+        responseObserver.onNext(
+            com.google.rpc.Status.newBuilder().setCode(Status.Code.UNKNOWN.value()).build());
+      }
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      responseObserver.onError(
+          new StatusRuntimeException(Status.INTERNAL.withCause(t).withDescription(t.toString())));
+    } finally {
+      LoggerContext.clearContext();
+    }
   }
 
   @Override
   public void update(
       final AutoscalerConfiguration request,
       final StreamObserver<com.google.rpc.Status> responseObserver) {
-    super.update(request, responseObserver);
+
+    final BigtableCluster cluster = MessageConverters.convertToBigtableCluster(request);
+    try {
+      LoggerContext.pushContext(cluster);
+      if (database.updateBigtableCluster(cluster)) {
+        LOGGER.info("Cluster updated");
+        responseObserver.onNext(
+            com.google.rpc.Status.newBuilder().setCode(Status.Code.OK.value()).build());
+      } else {
+        responseObserver.onNext(
+            com.google.rpc.Status.newBuilder().setCode(Status.Code.NOT_FOUND.value()).build());
+      }
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      responseObserver.onError(
+          new StatusRuntimeException(Status.INTERNAL.withCause(t).withDescription(t.toString())));
+    } finally {
+      LoggerContext.clearContext();
+    }
   }
 
   @Override
@@ -168,6 +209,9 @@ public class ClusterResourcesGrpc
             com.google.rpc.Status.newBuilder().setCode(Status.Code.NOT_FOUND.value()).build());
       }
       responseObserver.onCompleted();
+    } catch (Throwable t) {
+      responseObserver.onError(
+          new StatusRuntimeException(Status.INTERNAL.withCause(t).withDescription(t.toString())));
     } finally {
       LoggerContext.clearContext();
     }
@@ -178,22 +222,27 @@ public class ClusterResourcesGrpc
       final OptionalClusterIdentifier request,
       final StreamObserver<ClusterAutoscalerInfoList> responseObserver) {
 
-    final String projectId = request.hasProjectId() ? request.getProjectId().getValue() : null;
-    final String instanceId = request.hasInstanceId() ? request.getInstanceId().getValue() : null;
-    final String clusterId = request.hasClusterId() ? request.getClusterId().getValue() : null;
+    try {
+      final String projectId = request.hasProjectId() ? request.getProjectId().getValue() : null;
+      final String instanceId = request.hasInstanceId() ? request.getInstanceId().getValue() : null;
+      final String clusterId = request.hasClusterId() ? request.getClusterId().getValue() : null;
 
-    final List<BigtableCluster> bigtableClusters =
-        database.getBigtableClusters(projectId, instanceId, clusterId);
+      final List<BigtableCluster> bigtableClusters =
+          database.getBigtableClusters(projectId, instanceId, clusterId);
 
-    final ClusterAutoscalerInfoList.Builder builder = ClusterAutoscalerInfoList.newBuilder();
+      final ClusterAutoscalerInfoList.Builder builder = ClusterAutoscalerInfoList.newBuilder();
 
-    bigtableClusters
-        .stream()
-        .map(MessageConverters::convertToClusterAutoscalerInfo)
-        .forEach(builder::addClusterAutoscalerInfo);
+      bigtableClusters
+          .stream()
+          .map(MessageConverters::convertToClusterAutoscalerInfo)
+          .forEach(builder::addClusterAutoscalerInfo);
 
-    responseObserver.onNext(builder.build());
-    responseObserver.onCompleted();
+      responseObserver.onNext(builder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      responseObserver.onError(
+          new StatusRuntimeException(Status.INTERNAL.withCause(t).withDescription(t.toString())));
+    }
   }
 
   @Override
@@ -201,16 +250,21 @@ public class ClusterResourcesGrpc
       final ClusterIdentifier request,
       final StreamObserver<ClusterAutoscalerLogs> responseObserver) {
 
-    final Collection<ClusterResizeLog> latestResizeEvents =
-        database.getLatestResizeEvents(
-            request.getProjectId(), request.getInstanceId(), request.getClusterId());
-    final ClusterAutoscalerLogs.Builder builder = ClusterAutoscalerLogs.newBuilder();
+    try {
+      final Collection<ClusterResizeLog> latestResizeEvents =
+          database.getLatestResizeEvents(
+              request.getProjectId(), request.getInstanceId(), request.getClusterId());
+      final ClusterAutoscalerLogs.Builder builder = ClusterAutoscalerLogs.newBuilder();
 
-    latestResizeEvents
-        .stream()
-        .map(MessageConverters::convertToClusterClusterAutoscalerLog)
-        .forEach(builder::addLog);
-    responseObserver.onNext(builder.build());
-    responseObserver.onCompleted();
+      latestResizeEvents
+          .stream()
+          .map(MessageConverters::convertToClusterClusterAutoscalerLog)
+          .forEach(builder::addLog);
+      responseObserver.onNext(builder.build());
+      responseObserver.onCompleted();
+    } catch (Throwable t) {
+      responseObserver.onError(
+          new StatusRuntimeException(Status.INTERNAL.withCause(t).withDescription(t.toString())));
+    }
   }
 }
