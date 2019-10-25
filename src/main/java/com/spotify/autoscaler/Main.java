@@ -24,6 +24,7 @@ import com.spotify.autoscaler.di.AutoscalerExecutorModule;
 import com.spotify.autoscaler.di.ClusterFilterModule;
 import com.spotify.autoscaler.di.ConfigModule;
 import com.spotify.autoscaler.di.DatabaseModule;
+import com.spotify.autoscaler.di.GrpcServerInterceptorsModule;
 import com.spotify.autoscaler.di.GrpcServerModule;
 import com.spotify.autoscaler.di.HttpServerModule;
 import com.spotify.autoscaler.di.MetricsModule;
@@ -50,6 +51,7 @@ public final class Main {
         AutoscalerExecutorModule.class,
         ObjectMapperModule.class,
         OptionalsModule.class,
+        GrpcServerInterceptorsModule.class,
       })
   public interface AutoscalerComponent {
     Application configure();

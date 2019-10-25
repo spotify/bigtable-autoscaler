@@ -27,17 +27,22 @@ import dagger.Module;
 import dagger.Provides;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerInterceptor;
 import io.grpc.protobuf.services.ProtoReflectionService;
+import java.util.Set;
 
 @Module
 public class GrpcServerModule {
 
   @Provides
-  public Server initializeServer(final Config config, final Database database) {
+  public Server initializeServer(
+      final Config config, final Database database, final Set<ServerInterceptor> interceptors) {
     final int port = config.getConfig("grpc").getConfig("server").getInt("port");
-    return ServerBuilder.forPort(port)
-        .addService(new ClusterResourcesGrpc(database))
-        .addService(ProtoReflectionService.newInstance())
-        .build();
+    final ServerBuilder<?> serverBuilder =
+        ServerBuilder.forPort(port)
+            .addService(new ClusterResourcesGrpc(database))
+            .addService(ProtoReflectionService.newInstance());
+    interceptors.forEach(serverBuilder::intercept);
+    return serverBuilder.build();
   }
 }
