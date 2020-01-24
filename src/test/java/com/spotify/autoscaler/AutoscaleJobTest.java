@@ -327,15 +327,15 @@ public class AutoscaleJobTest {
     SemanticMetricRegistry registry = new SemanticMetricRegistry();
     BigtableCluster cluster1 = BigtableClusterBuilder.from(this.cluster).storageTarget(0.5).build();
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
-    job = new AutoscaleJob(stackdriverClient, db, new AutoscalerMetrics(registry) );
+    job = new AutoscaleJob(stackdriverClient, db, new AutoscalerMetrics(registry));
     job.run(cluster1, bigtableSession, Instant::now);
     final List<MetricId> metric =
-            registry
-                    .getMeters()
-                    .keySet()
-                    .stream()
-                    .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
-                    .collect(Collectors.toList());
+        registry
+            .getMeters()
+            .keySet()
+            .stream()
+            .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
+            .collect(Collectors.toList());
     assertEquals(1, metric.size());
     Map<String, String> tags = metric.get(0).getTags();
     assertEquals("5", tags.get("desired-nodes"));
