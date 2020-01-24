@@ -81,6 +81,7 @@ public class AutoscaleJobTest {
             .instanceId(instanceId)
             .clusterId(clusterId)
             .cpuTarget(0.8)
+            .storageTarget(0.7)
             .maxNodes(MAX_NODES)
             .minNodes(MIN_NODES)
             .overloadStep(100)
@@ -317,5 +318,28 @@ public class AutoscaleJobTest {
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run(cluster, bigtableSession, Instant::now);
     assertEquals(Optional.empty(), newSize);
+  }
+
+  @Test
+  public void testWeResizeIfStorageTargetChanges() throws IOException {
+    AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.65);
+    AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, MIN_NODES + 1);
+    SemanticMetricRegistry registry = new SemanticMetricRegistry();
+    BigtableCluster cluster1 = BigtableClusterBuilder.from(this.cluster).storageTarget(0.5).build();
+    AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
+    job = new AutoscaleJob(stackdriverClient, db, new AutoscalerMetrics(registry) );
+    job.run(cluster1, bigtableSession, Instant::now);
+    final List<MetricId> metric =
+            registry
+                    .getMeters()
+                    .keySet()
+                    .stream()
+                    .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
+                    .collect(Collectors.toList());
+    assertEquals(1, metric.size());
+    Map<String, String> tags = metric.get(0).getTags();
+    assertEquals("5", tags.get("desired-nodes"));
+    assertEquals("10", tags.get("target-nodes"));
+    assertEquals("storage-constraint", tags.get("reason"));
   }
 }

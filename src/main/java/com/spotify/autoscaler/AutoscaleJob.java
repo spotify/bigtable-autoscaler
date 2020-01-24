@@ -59,11 +59,6 @@ public class AutoscaleJob {
   private static final double CPU_OVERLOAD_THRESHOLD = 0.9;
   private static final Duration MAX_SAMPLE_INTERVAL = Duration.ofHours(1);
 
-  // Google recommends keeping the disk utilization around 70% to accommodate sudden spikes
-  // see <<Storage utilization per node>> section for details,
-  // https://cloud.google.com/bigtable/quotas
-  private static final double MAX_DISK_UTILIZATION_PERCENTAGE = 0.7d;
-
   // Time related constants
   private static final Duration AFTER_CHANGE_SAMPLE_BUFFER_TIME = Duration.ofMinutes(5);
   private static final Duration RESIZE_SETTLE_TIME = Duration.ofMinutes(5);
@@ -270,11 +265,12 @@ public class AutoscaleJob {
       return Math.max(currentNodes, desiredNodes);
     }
     final int minNodesRequiredForStorage =
-        (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
+        (int) Math.ceil(storageUtilization * currentNodes / cluster.storageTarget());
     LOGGER.info(
-        "Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
+        "Minimum nodes for storage: {}, currentUtilization: {}, storageTarget: {}, current nodes: {}",
         minNodesRequiredForStorage,
         storageUtilization.toString(),
+        cluster.storageTarget(),
         currentNodes);
     clusterResizeLogBuilder.storageUtilization(storageUtilization);
     if (minNodesRequiredForStorage > desiredNodes) {

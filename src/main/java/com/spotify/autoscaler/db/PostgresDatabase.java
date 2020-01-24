@@ -55,6 +55,7 @@ public class PostgresDatabase implements Database {
         "min_nodes",
         "max_nodes",
         "cpu_target",
+        "storage_target",
         "overload_step",
         "last_change",
         "last_check",
@@ -117,6 +118,7 @@ public class PostgresDatabase implements Database {
         .minNodes(rs.getInt("min_nodes"))
         .maxNodes(rs.getInt("max_nodes"))
         .cpuTarget(rs.getDouble("cpu_target"))
+        .storageTarget(rs.getDouble("storage_target"))
         .overloadStep(Optional.ofNullable((Integer) rs.getObject("overload_step")))
         .lastChange(Optional.ofNullable(rs.getTimestamp("last_change")).map(Timestamp::toInstant))
         .lastCheck(Optional.ofNullable(rs.getTimestamp("last_check")).map(Timestamp::toInstant))
@@ -160,12 +162,14 @@ public class PostgresDatabase implements Database {
   private boolean upsertBigtableCluster(final BigtableCluster cluster) {
     final String sql =
         "INSERT INTO "
-            + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, overload_step, enabled) "
-            + "VALUES(:project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, :overload_step, :enabled) "
+            + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, storage_target, "
+            + "overload_step, enabled) "
+            + "VALUES(:project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, :storage_target, "
+            + ":overload_step, :enabled) "
             + "ON CONFLICT(project_id, instance_id, cluster_id) "
             + "DO UPDATE SET "
-            + "min_nodes = :min_nodes, max_nodes = :max_nodes, cpu_target = :cpu_target, overload_step = :overload_step, "
-            + "enabled = :enabled";
+            + "min_nodes = :min_nodes, max_nodes = :max_nodes, cpu_target = :cpu_target, storage_target = :storage_target, "
+            + "overload_step = :overload_step, enabled = :enabled";
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put("project_id", cluster.projectId());
     params.put("instance_id", cluster.instanceId());
@@ -173,6 +177,7 @@ public class PostgresDatabase implements Database {
     params.put("min_nodes", cluster.minNodes());
     params.put("max_nodes", cluster.maxNodes());
     params.put("cpu_target", cluster.cpuTarget());
+    params.put("storage_target", cluster.storageTarget());
     params.put("overload_step", cluster.overloadStep().orElse(null));
     params.put("enabled", cluster.enabled());
     return jdbc.update(sql, Collections.unmodifiableMap(params)) == 1;
@@ -323,11 +328,11 @@ public class PostgresDatabase implements Database {
   public void logResize(final ClusterResizeLog log) {
     final String sql =
         "INSERT INTO resize_log"
-            + "(timestamp, project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, "
+            + "(timestamp, project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, storage_target, "
             + "overload_step, current_nodes, target_nodes, cpu_utilization, storage_utilization, detail, "
             + "success, error_message, min_nodes_override) "
             + "VALUES "
-            + "(:timestamp, :project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, "
+            + "(:timestamp, :project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, :storage_target, "
             + ":overload_step, :current_nodes, :target_nodes, :cpu_utilization, :storage_utilization, :detail, "
             + ":success, :error_message, :min_nodes_override)";
     final Map<String, Object> params = new HashMap<String, Object>();
@@ -338,6 +343,7 @@ public class PostgresDatabase implements Database {
     params.put("min_nodes", log.minNodes());
     params.put("max_nodes", log.maxNodes());
     params.put("cpu_target", log.cpuTarget());
+    params.put("storage_target", log.storageTarget());
     params.put("overload_step", log.overloadStep().orElse(null));
     params.put("current_nodes", log.currentNodes());
     params.put("target_nodes", log.targetNodes());
@@ -375,8 +381,8 @@ public class PostgresDatabase implements Database {
       final String projectId, final String instanceId, final String clusterId) {
     final String sql =
         "SELECT "
-            + "timestamp, project_id, instance_id, cluster_id, min_nodes, max_nodes, min_nodes_override, cpu_target, overload_step, "
-            + "current_nodes, target_nodes, cpu_utilization, storage_utilization, detail, success, error_message "
+            + "timestamp, project_id, instance_id, cluster_id, min_nodes, max_nodes, min_nodes_override, cpu_target, storage_target, "
+            + "overload_step, current_nodes, target_nodes, cpu_utilization, storage_utilization, detail, success, error_message "
             + "FROM resize_log "
             + "WHERE project_id = :project_id AND instance_id = :instance_id AND cluster_id = :cluster_id "
             + "ORDER BY timestamp DESC "
@@ -398,6 +404,7 @@ public class PostgresDatabase implements Database {
         .minNodes(rs.getInt("min_nodes"))
         .maxNodes(rs.getInt("max_nodes"))
         .cpuTarget(rs.getDouble("cpu_target"))
+        .storageTarget(rs.getDouble("storage_target"))
         .overloadStep(Optional.ofNullable((Integer) rs.getObject("overload_step")))
         .currentNodes(rs.getInt("current_nodes"))
         .targetNodes(rs.getInt("target_nodes"))

@@ -57,6 +57,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
             .instanceId("instance")
             .clusterId("no-jobs")
             .cpuTarget(0.8)
+            .storageTarget(0.7)
             .maxNodes(500)
             .minNodes(5)
             .overloadStep(100)
