@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS resize_log (
 CREATE INDEX ON resize_log(timestamp);
 
 ALTER TABLE autoscale ADD COLUMN IF NOT EXISTS storage_target double precision NOT NULL default(0.7);
+ALTER TABLE resize_log ADD COLUMN IF NOT EXISTS storage_target double precision NOT NULL default(0.7);
 ALTER TABLE autoscale DROP CONSTRAINT IF EXISTS autoscale_storage_target_check;
 ALTER TABLE autoscale ADD CONSTRAINT autoscale_storage_target_check CHECK ((storage_target > (0.0)::double precision));
 ALTER TABLE autoscale DROP CONSTRAINT IF EXISTS autoscale_storage_target_check1;
