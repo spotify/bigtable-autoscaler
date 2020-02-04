@@ -51,14 +51,6 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
     super(fakeBTCluster);
   }
 
-  private final List<Algorithm> algorithms = new ArrayList<>();
-
-  @Before
-  public void setUp() {
-    this.algorithms.add(new CPUAlgorithm(stackdriverClient, autoscalerMetrics));
-    this.algorithms.add(new StorageAlgorithm(stackdriverClient, autoscalerMetrics));
-  }
-
   @Parameterized.Parameters
   public static Collection<Object[]> data() {
     // load the files as you want

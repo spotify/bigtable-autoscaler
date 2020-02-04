@@ -48,6 +48,7 @@ import java.util.function.Supplier;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class AutoscaleJobITBase {
 
@@ -71,7 +72,7 @@ public class AutoscaleJobITBase {
 
   @Before
   public void setUp() throws IOException {
-    initMocks(this);
+    MockitoAnnotations.initMocks(this);
     db = initDatabase();
     algorithms = new ArrayList<>();
     algorithms.add(new CPUAlgorithm(stackdriverClient, autoscalerMetrics));
@@ -144,7 +145,7 @@ public class AutoscaleJobITBase {
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
       final AutoscaleJob job =
-          new AutoscaleJob(stackdriverClient, db, autoscalerMetrics, new ArrayList<>());
+          new AutoscaleJob(stackdriverClient, db, autoscalerMetrics, algorithms);
       job.run(fakeBTCluster.getCluster(), bigtableSession, timeSupplier);
       assertionImmediatelyAfterAutoscaleJob.accept(null);
     }

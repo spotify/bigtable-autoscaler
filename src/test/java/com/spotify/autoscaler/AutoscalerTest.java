@@ -53,6 +53,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class AutoscalerTest {
 
@@ -94,6 +95,7 @@ public class AutoscalerTest {
 
   @Before
   public void setUp() {
+    MockitoAnnotations.initMocks(this);
     algorithms = new ArrayList<>();
     this.algorithms.add(new CPUAlgorithm(stackDriverClient, autoscalerMetrics));
     this.algorithms.add(new StorageAlgorithm(stackDriverClient, autoscalerMetrics));

@@ -81,9 +81,6 @@ public class AutoscaleJobTest {
 
   @Before
   public void setUp() throws IOException {
-    this.algorithms.add(new CPUAlgorithm(stackdriverClient, autoscalerMetrics));
-    this.algorithms.add(new StorageAlgorithm(stackdriverClient, autoscalerMetrics));
-
     cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
@@ -97,6 +94,8 @@ public class AutoscaleJobTest {
             .build();
 
     initMocks(this);
+    this.algorithms.add(new CPUAlgorithm(stackdriverClient, autoscalerMetrics));
+    this.algorithms.add(new StorageAlgorithm(stackdriverClient, autoscalerMetrics));
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
     AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, 0.00001);
     AutoscaleJobTestMocks.setCurrentSize(bigtableInstanceClient, 100);
