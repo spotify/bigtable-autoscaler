@@ -20,6 +20,7 @@
 
 package com.spotify.autoscaler;
 
+import com.spotify.autoscaler.di.AlgorithmModule;
 import com.spotify.autoscaler.di.AutoscalerExecutorModule;
 import com.spotify.autoscaler.di.ClusterFilterModule;
 import com.spotify.autoscaler.di.ConfigModule;
@@ -48,6 +49,7 @@ public final class Main {
         AutoscalerExecutorModule.class,
         ObjectMapperModule.class,
         OptionalsModule.class,
+        AlgorithmModule.class,
       })
   public interface AutoscalerComponent {
     Application configure();

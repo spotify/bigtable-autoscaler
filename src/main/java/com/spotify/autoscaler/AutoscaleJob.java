@@ -28,6 +28,7 @@ import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.longrunning.Operation;
+import com.spotify.autoscaler.algorithm.Algorithm;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLog;
@@ -37,6 +38,7 @@ import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -56,7 +58,6 @@ public class AutoscaleJob {
 
   private static final Duration MAX_SAMPLE_INTERVAL = Duration.ofHours(1);
 
-
   // Time related constants
   private static final Duration AFTER_CHANGE_SAMPLE_BUFFER_TIME = Duration.ofMinutes(5);
   private static final Duration RESIZE_SETTLE_TIME = Duration.ofMinutes(5);
@@ -69,18 +70,17 @@ public class AutoscaleJob {
   // This means that a 2 % capacity decrease can only happen every eight hours,
   // but a twenty percent change can happen as often as every 48 minutes.
   private static final double MINIMUM_DOWNSCALE_WEIGHT = 57600;
-  private final CPUAlgorithm cpuAlgorithm;
-  private final StorageAlgorithm storageAlgorithm;
+  private List<Algorithm> algorithms;
 
   public AutoscaleJob(
       final StackdriverClient stackdriverClient,
       final Database database,
-      final AutoscalerMetrics autoscalerMetrics) {
+      final AutoscalerMetrics autoscalerMetrics,
+      final List<Algorithm> algorithms) {
+    this.algorithms = algorithms;
     checkNotNull(stackdriverClient);
     this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.database = checkNotNull(database);
-    this.cpuAlgorithm = new CPUAlgorithm(stackdriverClient, autoscalerMetrics);
-    this.storageAlgorithm = new StorageAlgorithm(stackdriverClient, autoscalerMetrics);
   }
 
   private int getSize(final Cluster clusterInfo) {
@@ -143,15 +143,14 @@ public class AutoscaleJob {
   Duration computeSamplingDuration(final Duration timeSinceLastChange) {
     final Duration reducedTimeSinceLastChange =
         timeSinceLastChange.minus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
-    final Duration duration = reducedTimeSinceLastChange.compareTo(MAX_SAMPLE_INTERVAL) <= 0
-                              ? reducedTimeSinceLastChange
-                              : MAX_SAMPLE_INTERVAL;
+    final Duration duration =
+        reducedTimeSinceLastChange.compareTo(MAX_SAMPLE_INTERVAL) <= 0
+            ? reducedTimeSinceLastChange
+            : MAX_SAMPLE_INTERVAL;
 
     LOGGER.info("sampling duration {}", duration);
     return duration;
   }
-
-
 
   @VisibleForTesting
   boolean shouldExponentialBackoff(
@@ -186,8 +185,6 @@ public class AutoscaleJob {
     return false;
   }
 
-
-
   private ScalingEvent nodeCountSettingsConstraints(
       final BigtableCluster cluster,
       final ClusterResizeLogBuilder clusterResizeLogBuilder,
@@ -201,7 +198,7 @@ public class AutoscaleJob {
           String.format(
               " >>Size strategy: Target count overridden(%d -> %d)", desiredNodes, finalNodes));
     }
-    return new ScalingEvent(finalNodes," >>Size strategy: Target count overridden(%d -> %d)");
+    return new ScalingEvent(finalNodes, " >>Size strategy: Target count overridden(%d -> %d)");
   }
 
   private boolean isTooEarlyToAutoscale(
@@ -264,7 +261,9 @@ public class AutoscaleJob {
 
     if (isTooEarlyToAutoscale(cluster, timeSupplier)) {
       LOGGER.info("Too early to autoscale");
-      final int newNodeCount = nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, currentNodes).getDesiredNodeCount();
+      final int newNodeCount =
+          nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, currentNodes)
+              .getDesiredNodeCount();
       if (newNodeCount == currentNodes) {
         return;
       } else {
@@ -276,13 +275,20 @@ public class AutoscaleJob {
     }
     final Duration samplingDuration = getSamplingDuration(cluster, timeSupplier);
 
-    final ScalingEvent scalingEventCpu = cpuAlgorithm.calculateWantedNodes(cluster, clusterResizeLogBuilder, samplingDuration, currentNodes);
-    final ScalingEvent scalingEventStorage = storageAlgorithm.calculateWantedNodes(
-            cluster, clusterResizeLogBuilder, samplingDuration, currentNodes);
-    int newNodeCount = Math.max(scalingEventCpu.getDesiredNodeCount(), scalingEventStorage.getDesiredNodeCount());
+    int newNodeCount =
+        algorithms
+            .stream()
+            .map(
+                algorithm ->
+                    algorithm.calculateWantedNodes(
+                        cluster, clusterResizeLogBuilder, samplingDuration, currentNodes))
+            .max(ScalingEvent::compareTo)
+            .get()
+            .getDesiredNodeCount();
 
     newNodeCount = frequencyConstraints(cluster, timeSupplier, newNodeCount, currentNodes);
-    final ScalingEvent nodeCountSettingsConstraints = nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, newNodeCount);
+    final ScalingEvent nodeCountSettingsConstraints =
+        nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, newNodeCount);
     newNodeCount = nodeCountSettingsConstraints.getDesiredNodeCount();
     updateNodeCount(
         session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);

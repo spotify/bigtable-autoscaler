@@ -18,29 +18,18 @@
  * -/-/-
  */
 
-package com.spotify.autoscaler;
+package com.spotify.autoscaler.algorithm;
 
-import org.jetbrains.annotations.NotNull;
+import com.spotify.autoscaler.ScalingEvent;
+import com.spotify.autoscaler.db.BigtableCluster;
+import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
+import java.time.Duration;
 
-public class ScalingEvent implements Comparable<ScalingEvent> {
-  private int desiredNodeCount;
-  private String reason;
+public interface Algorithm {
 
-  public ScalingEvent(final int desiredNodeCount, final String reason) {
-    this.desiredNodeCount = desiredNodeCount;
-    this.reason = reason;
-  }
-
-  public int getDesiredNodeCount() {
-    return desiredNodeCount;
-  }
-
-  public String getReason() {
-    return reason;
-  }
-
-  @Override
-  public int compareTo(@NotNull final ScalingEvent o) {
-    return this.getDesiredNodeCount() > o.getDesiredNodeCount() ? 1 : -1;
-  }
+  ScalingEvent calculateWantedNodes(
+      final BigtableCluster cluster,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final Duration samplingDuration,
+      final int currentNodes);
 }

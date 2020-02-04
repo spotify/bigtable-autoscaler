@@ -1,5 +1,26 @@
-package com.spotify.autoscaler;
+/*-
+ * -\-\-
+ * bigtable-autoscaler
+ * --
+ * Copyright (C) 2018 Spotify AB
+ * --
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * -/-/-
+ */
 
+package com.spotify.autoscaler.algorithm;
+
+import com.spotify.autoscaler.ScalingEvent;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
@@ -17,20 +38,19 @@ public class CPUAlgorithm implements Algorithm {
   private final StackdriverClient stackdriverClient;
   private final AutoscalerMetrics autoscalerMetrics;
 
-  public CPUAlgorithm(final StackdriverClient stackdriverClient, final AutoscalerMetrics autoscalerMetrics) {
+  public CPUAlgorithm(
+      final StackdriverClient stackdriverClient, final AutoscalerMetrics autoscalerMetrics) {
     this.stackdriverClient = stackdriverClient;
     this.autoscalerMetrics = autoscalerMetrics;
   }
 
-
-  public ScalingEvent calculateWantedNodes(final BigtableCluster cluster,
-                                  final ClusterResizeLogBuilder clusterResizeLogBuilder,
-                                  final Duration samplingDuration,
-                                  final int currentNodes) {
+  public ScalingEvent calculateWantedNodes(
+      final BigtableCluster cluster,
+      final ClusterResizeLogBuilder clusterResizeLogBuilder,
+      final Duration samplingDuration,
+      final int currentNodes) {
     return cpuStrategy(cluster, clusterResizeLogBuilder, samplingDuration, currentNodes);
-
   }
-
 
   private ScalingEvent cpuStrategy(
       final BigtableCluster cluster,
@@ -83,11 +103,7 @@ public class CPUAlgorithm implements Algorithm {
     return new ScalingEvent(roundedDesiredNodes, "CPU strategy required nodes");
   }
 
-
   private double getCurrentCpu(final BigtableCluster cluster, final Duration samplingDuration) {
     return stackdriverClient.getCpuLoad(cluster, samplingDuration);
   }
-
 }
-
-

@@ -23,6 +23,9 @@ package com.spotify.autoscaler;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import com.spotify.autoscaler.algorithm.Algorithm;
+import com.spotify.autoscaler.algorithm.CPUAlgorithm;
+import com.spotify.autoscaler.algorithm.StorageAlgorithm;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.ErrorCode;
@@ -32,9 +35,11 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,6 +49,14 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
 
   public AutoscaleJobIT(final FakeBTCluster fakeBTCluster) {
     super(fakeBTCluster);
+  }
+
+  private final List<Algorithm> algorithms = new ArrayList<>();
+
+  @Before
+  public void setUp() {
+    this.algorithms.add(new CPUAlgorithm(stackdriverClient, autoscalerMetrics));
+    this.algorithms.add(new StorageAlgorithm(stackdriverClient, autoscalerMetrics));
   }
 
   @Parameterized.Parameters
@@ -147,7 +160,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
       final int expectedSize,
       final Supplier<Instant> timeSource)
       throws IOException {
-    final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
+    final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics, algorithms);
     job.run(cluster, bigtableSession, timeSource);
     assertEquals(expectedSize, fakeBTCluster.getNumberOfNodes());
   }

@@ -29,6 +29,9 @@ import com.google.bigtable.admin.v2.GetClusterRequest;
 import com.google.cloud.bigtable.grpc.BigtableInstanceClient;
 import com.google.cloud.bigtable.grpc.BigtableSession;
 import com.google.longrunning.Operation;
+import com.spotify.autoscaler.algorithm.Algorithm;
+import com.spotify.autoscaler.algorithm.CPUAlgorithm;
+import com.spotify.autoscaler.algorithm.StorageAlgorithm;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.PostgresDatabase;
@@ -38,6 +41,8 @@ import com.spotify.autoscaler.simulation.FakeBTCluster;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.junit.After;
@@ -56,6 +61,8 @@ public class AutoscaleJobITBase {
 
   PostgresDatabase db;
 
+  List<Algorithm> algorithms = null;
+
   protected final FakeBTCluster fakeBTCluster;
 
   public AutoscaleJobITBase(final FakeBTCluster fakeBTCluster) {
@@ -66,6 +73,10 @@ public class AutoscaleJobITBase {
   public void setUp() throws IOException {
     initMocks(this);
     db = initDatabase();
+    algorithms = new ArrayList<>();
+    algorithms.add(new CPUAlgorithm(stackdriverClient, autoscalerMetrics));
+    algorithms.add(new StorageAlgorithm(stackdriverClient, autoscalerMetrics));
+
     when(bigtableSession.getInstanceAdminClient()).thenReturn(bigtableInstanceClient);
 
     when(bigtableInstanceClient.getCluster(any()))
@@ -132,7 +143,8 @@ public class AutoscaleJobITBase {
       AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, cpuSupplier.get());
       AutoscaleJobTestMocks.setCurrentDiskUtilization(stackdriverClient, diskUtilSupplier.get());
 
-      final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
+      final AutoscaleJob job =
+          new AutoscaleJob(stackdriverClient, db, autoscalerMetrics, new ArrayList<>());
       job.run(fakeBTCluster.getCluster(), bigtableSession, timeSupplier);
       assertionImmediatelyAfterAutoscaleJob.accept(null);
     }
