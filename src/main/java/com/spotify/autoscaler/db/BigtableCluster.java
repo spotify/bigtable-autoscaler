@@ -41,6 +41,8 @@ public interface BigtableCluster {
 
   Optional<Instant> lastChange();
 
+  Optional<LastChangeType> lastChangeType();
+
   Optional<Instant> lastCheck();
 
   boolean enabled();
@@ -71,4 +73,9 @@ public interface BigtableCluster {
     final ErrorCode errorCode = errorCode().orElse(ErrorCode.OK);
     return errorCode != ErrorCode.GRPC_NOT_FOUND && errorCode != ErrorCode.PROJECT_NOT_FOUND;
   }
+}
+
+enum LastChangeType {
+  SCALE_UP,
+  SCALE_DOWN
 }

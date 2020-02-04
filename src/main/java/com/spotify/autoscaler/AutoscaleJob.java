@@ -34,7 +34,6 @@ import com.spotify.autoscaler.db.ClusterResizeLog;
 import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
-import com.spotify.autoscaler.metric.ClusterLoadGauges;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -48,21 +47,15 @@ public class AutoscaleJob {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AutoscaleJob.class);
 
-  private final StackdriverClient stackdriverClient;
   private final Database database;
   private final AutoscalerMetrics autoscalerMetrics;
 
   public static final Duration CHECK_INTERVAL = Duration.ofSeconds(30);
 
   // CPU related constants
-  private static final double MAX_REDUCTION_RATIO = 0.7;
-  private static final double CPU_OVERLOAD_THRESHOLD = 0.9;
+
   private static final Duration MAX_SAMPLE_INTERVAL = Duration.ofHours(1);
 
-  // Google recommends keeping the disk utilization around 70% to accommodate sudden spikes
-  // see <<Storage utilization per node>> section for details,
-  // https://cloud.google.com/bigtable/quotas
-  private static final double MAX_DISK_UTILIZATION_PERCENTAGE = 0.7d;
 
   // Time related constants
   private static final Duration AFTER_CHANGE_SAMPLE_BUFFER_TIME = Duration.ofMinutes(5);
@@ -76,14 +69,18 @@ public class AutoscaleJob {
   // This means that a 2 % capacity decrease can only happen every eight hours,
   // but a twenty percent change can happen as often as every 48 minutes.
   private static final double MINIMUM_DOWNSCALE_WEIGHT = 57600;
+  private final CPUAlgorithm cpuAlgorithm;
+  private final StorageAlgorithm storageAlgorithm;
 
   public AutoscaleJob(
       final StackdriverClient stackdriverClient,
       final Database database,
       final AutoscalerMetrics autoscalerMetrics) {
-    this.stackdriverClient = checkNotNull(stackdriverClient);
+    checkNotNull(stackdriverClient);
     this.autoscalerMetrics = checkNotNull(autoscalerMetrics);
     this.database = checkNotNull(database);
+    this.cpuAlgorithm = new CPUAlgorithm(stackdriverClient, autoscalerMetrics);
+    this.storageAlgorithm = new StorageAlgorithm(stackdriverClient, autoscalerMetrics);
   }
 
   private int getSize(final Cluster clusterInfo) {
@@ -146,71 +143,15 @@ public class AutoscaleJob {
   Duration computeSamplingDuration(final Duration timeSinceLastChange) {
     final Duration reducedTimeSinceLastChange =
         timeSinceLastChange.minus(AFTER_CHANGE_SAMPLE_BUFFER_TIME);
-    return reducedTimeSinceLastChange.compareTo(MAX_SAMPLE_INTERVAL) <= 0
-        ? reducedTimeSinceLastChange
-        : MAX_SAMPLE_INTERVAL;
+    final Duration duration = reducedTimeSinceLastChange.compareTo(MAX_SAMPLE_INTERVAL) <= 0
+                              ? reducedTimeSinceLastChange
+                              : MAX_SAMPLE_INTERVAL;
+
+    LOGGER.info("sampling duration {}", duration);
+    return duration;
   }
 
-  /*
-   * If we haven't recently resized, also sample longer time intervals and choose the
-   * highest load to avoid scaling down too much on transient load dips, while still
-   * quickly scaling up on load increases. Basically, we want to scale up optimistically
-   * but scale down pessimistically.
-   */
-  private double getCurrentCpu(final BigtableCluster cluster, final Duration samplingDuration) {
-    return stackdriverClient.getCpuLoad(cluster, samplingDuration);
-  }
 
-  private int cpuStrategy(
-      final BigtableCluster cluster,
-      final ClusterResizeLogBuilder clusterResizeLogBuilder,
-      final Duration samplingDuration,
-      final int nodes) {
-    double currentCpu = 0d;
-
-    try {
-      currentCpu = getCurrentCpu(cluster, samplingDuration);
-    } finally {
-      autoscalerMetrics.registerClusterLoadMetrics(cluster, currentCpu, ClusterLoadGauges.CPU);
-    }
-
-    LOGGER.info(
-        "Running autoscale job. Nodes: {} (min={}, max={}, minNodesOverride={}), CPU: {} (target={})",
-        nodes,
-        cluster.minNodes(),
-        cluster.maxNodes(),
-        cluster.minNodesOverride(),
-        currentCpu,
-        cluster.cpuTarget());
-
-    final double initialDesiredNodes = currentCpu * nodes / cluster.cpuTarget();
-
-    final double desiredNodes;
-    final boolean scaleDown = (initialDesiredNodes < nodes);
-    final String path;
-    if ((currentCpu > CPU_OVERLOAD_THRESHOLD) && cluster.overloadStep().isPresent()) {
-      // If cluster is overloaded and the overloadStep is set, bump by that amount
-      path = "overload";
-      desiredNodes = nodes + cluster.overloadStep().get();
-    } else if (scaleDown) {
-      // Don't reduce node count too quickly to avoid overload from tablet shuffling
-      path = "throttled change";
-      desiredNodes = Math.max(initialDesiredNodes, MAX_REDUCTION_RATIO * nodes);
-    } else {
-      path = "normal";
-      desiredNodes = initialDesiredNodes;
-    }
-
-    final int roundedDesiredNodes = (int) Math.ceil(desiredNodes);
-    LOGGER.info(
-        "Ideal node count: {}. Revised nodes: {}. Reason: {}.",
-        initialDesiredNodes,
-        desiredNodes,
-        path);
-    clusterResizeLogBuilder.cpuUtilization(currentCpu);
-    clusterResizeLogBuilder.addResizeReason(" >>CPU strategy: " + path);
-    return roundedDesiredNodes;
-  }
 
   @VisibleForTesting
   boolean shouldExponentialBackoff(
@@ -245,49 +186,9 @@ public class AutoscaleJob {
     return false;
   }
 
-  private int storageConstraints(
-      final BigtableCluster cluster,
-      final ClusterResizeLogBuilder clusterResizeLogBuilder,
-      final Duration samplingDuration,
-      final int desiredNodes,
-      final int currentNodes) {
-    Double storageUtilization = 0.0;
-    try {
-      storageUtilization = stackdriverClient.getDiskUtilization(cluster, samplingDuration);
-    } finally {
-      autoscalerMetrics.registerClusterLoadMetrics(
-          cluster, storageUtilization, ClusterLoadGauges.STORAGE);
-    }
-    if (storageUtilization <= 0.0) {
-      LOGGER.warn(
-          "Storage utilization reported less than or equal to 0.0, not letting any downscale!");
-      if (desiredNodes < currentNodes) {
-        clusterResizeLogBuilder.addResizeReason(
-            " >>Storage strategy: Downscale blocked as "
-                + "storage is reported to be zero or negative "
-                + "(assumed to be an error in metrics)");
-      }
-      return Math.max(currentNodes, desiredNodes);
-    }
-    final int minNodesRequiredForStorage =
-        (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
-    LOGGER.info(
-        "Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
-        minNodesRequiredForStorage,
-        storageUtilization.toString(),
-        currentNodes);
-    clusterResizeLogBuilder.storageUtilization(storageUtilization);
-    if (minNodesRequiredForStorage > desiredNodes) {
-      autoscalerMetrics.markStorageConstraint(cluster, desiredNodes, minNodesRequiredForStorage);
-      clusterResizeLogBuilder.addResizeReason(
-          String.format(
-              " >>Storage strategy: Target node count overridden(%d -> %d).",
-              desiredNodes, minNodesRequiredForStorage));
-    }
-    return Math.max(minNodesRequiredForStorage, desiredNodes);
-  }
 
-  private int sizeConstraints(
+
+  private ScalingEvent nodeCountSettingsConstraints(
       final BigtableCluster cluster,
       final ClusterResizeLogBuilder clusterResizeLogBuilder,
       final int desiredNodes) {
@@ -300,10 +201,10 @@ public class AutoscaleJob {
           String.format(
               " >>Size strategy: Target count overridden(%d -> %d)", desiredNodes, finalNodes));
     }
-    return finalNodes;
+    return new ScalingEvent(finalNodes," >>Size strategy: Target count overridden(%d -> %d)");
   }
 
-  private boolean isTooEarlyToFetchMetrics(
+  private boolean isTooEarlyToAutoscale(
       final BigtableCluster cluster, final Supplier<Instant> timeSupplier) {
     final Duration timeSinceLastChange = getDurationSinceLastChange(cluster, timeSupplier);
     return timeSinceLastChange.minus(MINIMUM_CHANGE_INTERVAL).isNegative();
@@ -361,25 +262,28 @@ public class AutoscaleJob {
     autoscalerMetrics.registerClusterDataMetrics(cluster, currentNodes, database);
     autoscalerMetrics.markClusterCheck();
 
-    if (isTooEarlyToFetchMetrics(cluster, timeSupplier)) {
-      final int newNodeCount = sizeConstraints(cluster, clusterResizeLogBuilder, currentNodes);
+    if (isTooEarlyToAutoscale(cluster, timeSupplier)) {
+      LOGGER.info("Too early to autoscale");
+      final int newNodeCount = nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, currentNodes).getDesiredNodeCount();
       if (newNodeCount == currentNodes) {
-        LOGGER.info("Too early to autoscale");
         return;
       } else {
+        LOGGER.info("Ensuring node count within boundaries.");
         updateNodeCount(
             session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);
         return;
       }
     }
     final Duration samplingDuration = getSamplingDuration(cluster, timeSupplier);
-    int newNodeCount =
-        cpuStrategy(cluster, clusterResizeLogBuilder, samplingDuration, currentNodes);
-    newNodeCount =
-        storageConstraints(
-            cluster, clusterResizeLogBuilder, samplingDuration, newNodeCount, currentNodes);
+
+    final ScalingEvent scalingEventCpu = cpuAlgorithm.calculateWantedNodes(cluster, clusterResizeLogBuilder, samplingDuration, currentNodes);
+    final ScalingEvent scalingEventStorage = storageAlgorithm.calculateWantedNodes(
+            cluster, clusterResizeLogBuilder, samplingDuration, currentNodes);
+    int newNodeCount = Math.max(scalingEventCpu.getDesiredNodeCount(), scalingEventStorage.getDesiredNodeCount());
+
     newNodeCount = frequencyConstraints(cluster, timeSupplier, newNodeCount, currentNodes);
-    newNodeCount = sizeConstraints(cluster, clusterResizeLogBuilder, newNodeCount);
+    final ScalingEvent nodeCountSettingsConstraints = nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, newNodeCount);
+    newNodeCount = nodeCountSettingsConstraints.getDesiredNodeCount();
     updateNodeCount(
         session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);
   }

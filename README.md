@@ -49,9 +49,9 @@ Start the service with docker-compose using a dockerized local postgres:
 Register the Bigtable cluster that should be autoscaled in the service:
 
 ```
-PROJECT_ID=<YOUR GCP PROJECT ID>
-INSTANCE_ID=<YOUR INSTANCE ID>
-CLUSTER_ID=<YOUR CLUSTER ID>
+PROJECT_ID=autoscaler-hackweek
+INSTANCE_ID=hackweek-load
+CLUSTER_ID=hackweek-load-c1
 
 curl -v -X POST "http://localhost:8080/clusters?projectId=$PROJECT_ID&instanceId=$INSTANCE_ID&clusterId=$CLUSTER_ID&minNodes=4&maxNodes=6&cpuTarget=0.8"
 ```
