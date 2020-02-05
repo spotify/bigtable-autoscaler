@@ -23,6 +23,7 @@ package com.spotify.autoscaler.metric;
 import com.codahale.metrics.Gauge;
 import com.spotify.autoscaler.Application;
 import com.spotify.autoscaler.LoggerContext;
+import com.spotify.autoscaler.ScalingEvent;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.db.ErrorCode;
@@ -179,6 +180,15 @@ public class AutoscalerMetrics {
         .meter(
             constraintMetric(cluster, desiredNodes, targetNodes)
                 .tagged("reason", "storage-constraint"))
+        .mark();
+  }
+
+  public void markScalingEventConstraint(
+      final BigtableCluster cluster, final int desiredNodes, final ScalingEvent event) {
+    registry
+        .meter(
+            constraintMetric(cluster, desiredNodes, event.getDesiredNodeCount())
+                .tagged("reason", event.getReason()))
         .mark();
   }
 

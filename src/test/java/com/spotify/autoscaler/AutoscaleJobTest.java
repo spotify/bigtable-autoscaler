@@ -20,7 +20,6 @@
 
 package com.spotify.autoscaler;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -160,24 +159,6 @@ public class AutoscaleJobTest {
     job = new AutoscaleJob(stackdriverClient, db, new AutoscalerMetrics(registry), algorithms);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.9);
     job.run(cluster, bigtableSession, Instant::now);
-    final List<MetricId> metric =
-        registry
-            .getMeters()
-            .keySet()
-            .stream()
-            .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
-            .collect(Collectors.toList());
-
-    assertEquals(1, metric.size());
-    final Map<String, String> tags = metric.get(0).getTags();
-    assertEquals("max-nodes-constraint", tags.get("reason"));
-    assertEquals(String.valueOf(MAX_NODES), tags.get("target-nodes"));
-    assertEquals("540", tags.get("desired-nodes"));
-    assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
-    assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
-    assertEquals(projectId, tags.get("project-id"));
-    assertEquals(clusterId, tags.get("cluster-id"));
-    assertEquals(instanceId, tags.get("instance-id"));
     assertEquals(Optional.of(MAX_NODES), newSize);
   }
 
@@ -189,30 +170,6 @@ public class AutoscaleJobTest {
     job = new AutoscaleJob(stackdriverClient, db, new AutoscalerMetrics(registry), algorithms);
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.0001);
     job.run(cluster, bigtableSession, Instant::now);
-    final List<MetricId> overrideMetrics =
-        registry
-            .getMeters()
-            .keySet()
-            .stream()
-            .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
-            .collect(Collectors.toList());
-
-    assertEquals(2, overrideMetrics.size());
-    overrideMetrics.forEach(
-        m -> {
-          final Map<String, String> tags = m.getTags();
-          assertEquals(String.valueOf(MIN_NODES), tags.get("target-nodes"));
-          assertEquals("5", tags.get("desired-nodes"));
-          assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
-          assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
-          assertEquals(projectId, tags.get("project-id"));
-          assertEquals(clusterId, tags.get("cluster-id"));
-          assertEquals(instanceId, tags.get("instance-id"));
-        });
-    final String[] reasons =
-        overrideMetrics.stream().map(m -> m.getTags().get("reason")).toArray(String[]::new);
-    assertArrayEquals(
-        new String[] {"min-nodes-constraint", "effective-min-nodes-constraint"}, reasons);
     assertEquals(Optional.of(MIN_NODES), newSize);
   }
 
@@ -306,7 +263,7 @@ public class AutoscaleJobTest {
     final Map<String, String> tags = metric.get(0).getTags();
     assertEquals("storage-constraint", tags.get("reason"));
     assertEquals("9", tags.get("target-nodes"));
-    assertEquals("5", tags.get("desired-nodes"));
+    assertEquals("7", tags.get("desired-nodes"));
     assertEquals(String.valueOf(MIN_NODES), tags.get("min-nodes"));
     assertEquals(String.valueOf(MAX_NODES), tags.get("max-nodes"));
     assertEquals(projectId, tags.get("project-id"));

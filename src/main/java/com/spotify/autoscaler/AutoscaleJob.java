@@ -275,7 +275,7 @@ public class AutoscaleJob {
     }
     final Duration samplingDuration = getSamplingDuration(cluster, timeSupplier);
 
-    int newNodeCount =
+    ScalingEvent newScalingEvent =
         algorithms
             .stream()
             .map(
@@ -283,8 +283,10 @@ public class AutoscaleJob {
                     algorithm.calculateWantedNodes(
                         cluster, clusterResizeLogBuilder, samplingDuration, currentNodes))
             .max(ScalingEvent::compareTo)
-            .get()
-            .getDesiredNodeCount();
+            .get();
+
+    int newNodeCount = newScalingEvent.getDesiredNodeCount();
+    autoscalerMetrics.markScalingEventConstraint(cluster, currentNodes, newScalingEvent);
 
     newNodeCount = frequencyConstraints(cluster, timeSupplier, newNodeCount, currentNodes);
     final ScalingEvent nodeCountSettingsConstraints =

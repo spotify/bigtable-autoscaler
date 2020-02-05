@@ -100,7 +100,7 @@ public class CPUAlgorithm implements Algorithm {
         path);
     clusterResizeLogBuilder.cpuUtilization(currentCpu);
     clusterResizeLogBuilder.addResizeReason(" >>CPU strategy: " + path);
-    return new ScalingEvent(roundedDesiredNodes, "CPU strategy required nodes");
+    return new ScalingEvent(roundedDesiredNodes, "cpu-constraint");
   }
 
   private double getCurrentCpu(final BigtableCluster cluster, final Duration samplingDuration) {

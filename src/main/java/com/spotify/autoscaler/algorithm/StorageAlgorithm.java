@@ -70,7 +70,7 @@ public class StorageAlgorithm implements Algorithm {
     if (storageUtilization <= 0.0) {
       LOGGER.warn(
           "Storage utilization reported less than or equal to 0.0, not letting any downscale!");
-      return new ScalingEvent(currentNodes, "Storage utilization reported as 0.0, dont downscale");
+      return new ScalingEvent(currentNodes, "0 storage utilization");
     }
     final int minNodesRequiredForStorage =
         (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
@@ -81,7 +81,6 @@ public class StorageAlgorithm implements Algorithm {
         currentNodes);
     clusterResizeLogBuilder.storageUtilization(storageUtilization);
 
-    return new ScalingEvent(
-        minNodesRequiredForStorage, "Min nodes required for storage utilization");
+    return new ScalingEvent(minNodesRequiredForStorage, "storage-constraint");
   }
 }
