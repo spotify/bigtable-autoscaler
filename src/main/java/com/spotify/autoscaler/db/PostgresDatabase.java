@@ -59,6 +59,7 @@ public class PostgresDatabase implements Database {
         "last_change",
         "last_check",
         "enabled",
+        "extra_enabled_algorithms",
         "last_failure",
         "consecutive_failure_count",
         "last_failure_message",
@@ -121,6 +122,7 @@ public class PostgresDatabase implements Database {
         .lastChange(Optional.ofNullable(rs.getTimestamp("last_change")).map(Timestamp::toInstant))
         .lastCheck(Optional.ofNullable(rs.getTimestamp("last_check")).map(Timestamp::toInstant))
         .enabled(rs.getBoolean("enabled"))
+        .extraEnabledAlgorithms(Optional.ofNullable(rs.getString("extra_enabled_algorithms")))
         .lastFailure(Optional.ofNullable(rs.getTimestamp("last_failure")).map(Timestamp::toInstant))
         .lastFailureMessage(Optional.ofNullable(rs.getString("last_failure_message")))
         .consecutiveFailureCount(rs.getInt("consecutive_failure_count"))
@@ -160,12 +162,14 @@ public class PostgresDatabase implements Database {
   private boolean upsertBigtableCluster(final BigtableCluster cluster) {
     final String sql =
         "INSERT INTO "
-            + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, overload_step, enabled) "
-            + "VALUES(:project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, :overload_step, :enabled) "
+            + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, "
+            + "overload_step, enabled, extra_enabled_algorithms) "
+            + "VALUES(:project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, "
+            + ":cpu_target, :overload_step, :enabled, :extra_enabled_algorithms) "
             + "ON CONFLICT(project_id, instance_id, cluster_id) "
             + "DO UPDATE SET "
             + "min_nodes = :min_nodes, max_nodes = :max_nodes, cpu_target = :cpu_target, overload_step = :overload_step, "
-            + "enabled = :enabled";
+            + "enabled = :enabled, extra_enabled_algorithms = :extra_enabled_algorithms";
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put("project_id", cluster.projectId());
     params.put("instance_id", cluster.instanceId());
@@ -175,6 +179,7 @@ public class PostgresDatabase implements Database {
     params.put("cpu_target", cluster.cpuTarget());
     params.put("overload_step", cluster.overloadStep().orElse(null));
     params.put("enabled", cluster.enabled());
+    params.put("extra_enabled_algorithms", cluster.extraEnabledAlgorithms().orElse(null));
     return jdbc.update(sql, Collections.unmodifiableMap(params)) == 1;
   }
 

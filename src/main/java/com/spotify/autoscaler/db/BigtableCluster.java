@@ -59,6 +59,8 @@ public interface BigtableCluster {
 
   Optional<ErrorCode> errorCode();
 
+  Optional<String> extraEnabledAlgorithms();
+
   default String clusterName() {
     return "projects/" + projectId() + "/instances/" + instanceId() + "/clusters/" + clusterId();
   }

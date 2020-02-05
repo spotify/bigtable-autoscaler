@@ -37,6 +37,7 @@ CREATE TABLE IF NOT EXISTS autoscale (
     last_failure_message text,
     min_nodes_override integer NOT NULL default(0),
     error_code error_code NOT NULL default('OK'),
+    extra_enabled_algorithms character varying(256),
     CONSTRAINT full_name PRIMARY KEY(project_id, instance_id, cluster_id),
     CONSTRAINT autoscale_cpu_target_check CHECK ((cpu_target > (0.0)::double precision)),
     CONSTRAINT autoscale_cpu_target_check1 CHECK ((cpu_target < (1.0)::double precision)),
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS resize_log (
 CREATE INDEX ON resize_log(timestamp);
 
 --cluster count limit trigger
-CREATE OR REPLACE FUNCTION enforce_cluster_count_limit() RETURNS trigger AS 
+CREATE OR REPLACE FUNCTION enforce_cluster_count_limit() RETURNS trigger AS
 '
 DECLARE
 max_cluster_count INTEGER := 200;
