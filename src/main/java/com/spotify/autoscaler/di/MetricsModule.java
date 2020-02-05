@@ -68,16 +68,20 @@ public class MetricsModule {
     return null;
   }
 
+  private static AutoscalerMetrics autoscalerMetrics;
+
   @Provides
   public AutoscalerMetrics initializeMetrics(
       final SemanticMetricRegistry registry, final Database database) {
-    final AutoscalerMetrics autoscalerMetrics = new AutoscalerMetrics(registry);
-    autoscalerMetrics.registerActiveClusters(database);
-    autoscalerMetrics.registerOpenFileDescriptors();
-    autoscalerMetrics.registerDailyResizeCount(database);
-    autoscalerMetrics.registerFailureCount(database);
-    autoscalerMetrics.registerOpenDatabaseConnections(database);
-    autoscalerMetrics.scheduleCleanup(database);
+    if (autoscalerMetrics == null) {
+      autoscalerMetrics = new AutoscalerMetrics(registry);
+      autoscalerMetrics.registerActiveClusters(database);
+      autoscalerMetrics.registerOpenFileDescriptors();
+      autoscalerMetrics.registerDailyResizeCount(database);
+      autoscalerMetrics.registerFailureCount(database);
+      autoscalerMetrics.registerOpenDatabaseConnections(database);
+      autoscalerMetrics.scheduleCleanup(database);
+    }
     return autoscalerMetrics;
   }
 }

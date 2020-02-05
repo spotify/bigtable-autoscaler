@@ -30,9 +30,11 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import com.spotify.autoscaler.algorithm.Algorithm;
+import com.spotify.autoscaler.algorithm.CPUAlgorithm;
+import com.spotify.autoscaler.algorithm.StorageAlgorithm;
 import com.spotify.autoscaler.client.StackdriverClient;
 import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
@@ -42,13 +44,16 @@ import com.spotify.autoscaler.filters.AllowAllClusterFilter;
 import com.spotify.autoscaler.filters.ClusterFilter;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class AutoscalerTest {
 
@@ -61,6 +66,8 @@ public class AutoscalerTest {
   @Mock private AutoscaleJob autoscaleJob;
 
   private final ExecutorService executorService = MoreExecutors.newDirectExecutorService();
+
+  private List<Algorithm> algorithms = null;
 
   private final BigtableCluster cluster1 =
       new BigtableClusterBuilder()
@@ -86,19 +93,28 @@ public class AutoscalerTest {
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    algorithms = new ArrayList<>();
+    this.algorithms.add(new CPUAlgorithm(stackDriverClient, autoscalerMetrics));
+    this.algorithms.add(new StorageAlgorithm(stackDriverClient, autoscalerMetrics));
+  }
+
   private Autoscaler getAutoscaler(final ClusterFilter cluster) {
+
     final Autoscaler autoscaler =
         spy(
             new Autoscaler(
-                executorService, stackDriverClient, database, autoscalerMetrics, cluster));
-    when(autoscaler.makeAutoscaleJob(stackDriverClient, database, autoscalerMetrics))
+                executorService,
+                stackDriverClient,
+                database,
+                autoscalerMetrics,
+                cluster,
+                algorithms));
+    when(autoscaler.makeAutoscaleJob(stackDriverClient, database, autoscalerMetrics, algorithms))
         .thenReturn(autoscaleJob);
     return autoscaler;
-  }
-
-  @Before
-  public void setUp() {
-    initMocks(this);
   }
 
   @Test

@@ -147,7 +147,7 @@ public class AutoscaleJobIT extends AutoscaleJobITBase {
       final int expectedSize,
       final Supplier<Instant> timeSource)
       throws IOException {
-    final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics);
+    final AutoscaleJob job = new AutoscaleJob(stackdriverClient, db, autoscalerMetrics, algorithms);
     job.run(cluster, bigtableSession, timeSource);
     assertEquals(expectedSize, fakeBTCluster.getNumberOfNodes());
   }
