@@ -120,6 +120,7 @@ public class ClusterResources implements Endpoint {
       @QueryParam("cpuTarget") final Double cpuTarget,
       @QueryParam("overloadStep") final Integer overloadStep,
       @QueryParam("enabled") @DefaultValue("true") final Boolean enabled,
+      @QueryParam("extraEnabledAlgorithms") final String extraEnabledAlgorithms,
       @QueryParam("minNodesOverride") @DefaultValue("0") final Integer minNodesOverride) {
     final BigtableCluster cluster =
         new BigtableClusterBuilder()
@@ -131,6 +132,7 @@ public class ClusterResources implements Endpoint {
             .cpuTarget(cpuTarget)
             .overloadStep(Optional.ofNullable(overloadStep))
             .enabled(enabled)
+            .extraEnabledAlgorithms(Optional.ofNullable(extraEnabledAlgorithms))
             .minNodesOverride(minNodesOverride)
             .build();
     try {
@@ -155,7 +157,8 @@ public class ClusterResources implements Endpoint {
       @QueryParam("maxNodes") final Integer maxNodes,
       @QueryParam("cpuTarget") final Double cpuTarget,
       @QueryParam("overloadStep") final Integer overloadStep,
-      @QueryParam("enabled") @DefaultValue("true") final Boolean enabled) {
+      @QueryParam("enabled") final Boolean enabled,
+      @QueryParam("extraEnabledAlgorithms") final String extraEnabledAlgorithms) {
     final BigtableCluster cluster =
         new BigtableClusterBuilder()
             .projectId(projectId)
@@ -166,6 +169,7 @@ public class ClusterResources implements Endpoint {
             .cpuTarget(cpuTarget)
             .overloadStep(Optional.ofNullable(overloadStep))
             .enabled(enabled)
+            .extraEnabledAlgorithms(Optional.ofNullable(extraEnabledAlgorithms))
             .build();
     try {
       LoggerContext.pushContext(cluster);

@@ -36,8 +36,11 @@ import com.spotify.autoscaler.db.ClusterResizeLogBuilder;
 import com.spotify.autoscaler.db.Database;
 import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -275,8 +278,28 @@ public class AutoscaleJob {
     }
     final Duration samplingDuration = getSamplingDuration(cluster, timeSupplier);
 
+    List<Algorithm> allAlgorithmList = new ArrayList<>(algorithms);
+    if (cluster.extraEnabledAlgorithms().isPresent()) {
+      final String[] extraAlgorithmStr = cluster.extraEnabledAlgorithms().get().split(",");
+      for (String algorithm : extraAlgorithmStr) {
+        try {
+          final Class algorithmClass = Class.forName(algorithm);
+          final Constructor algorithmConstructor = algorithmClass.getConstructor();
+          allAlgorithmList.add((Algorithm) algorithmConstructor.newInstance());
+        } catch (ClassNotFoundException
+            | NoSuchMethodException
+            | IllegalAccessException
+            | InstantiationException
+            | InvocationTargetException e) {
+          LOGGER.warn(
+              "Algorithm found in the database failed to be added to be executed. - "
+                  + e.getMessage());
+        }
+      }
+    }
+
     ScalingEvent newScalingEvent =
-        algorithms
+        allAlgorithmList
             .stream()
             .map(
                 algorithm ->

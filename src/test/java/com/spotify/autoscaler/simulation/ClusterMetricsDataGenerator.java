@@ -43,8 +43,12 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClusterMetricsDataGenerator {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(DataJobInformation.class);
 
   private static final String PROJECT_ID = "project";
   private static final String INSTANCE_ID = "instance";
@@ -100,7 +104,7 @@ public class ClusterMetricsDataGenerator {
       file.write(mapper.writeValueAsString(metrics));
       file.flush();
     } catch (final IOException e) {
-      e.printStackTrace();
+      LOGGER.warn("Error saving the metrics. - " + e.getMessage());
     }
   }
 
