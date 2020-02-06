@@ -20,8 +20,6 @@
 
 package com.spotify.autoscaler;
 
-import org.jetbrains.annotations.NotNull;
-
 public class ScalingEvent implements Comparable<ScalingEvent> {
   private int desiredNodeCount;
   private String reason;
@@ -40,7 +38,7 @@ public class ScalingEvent implements Comparable<ScalingEvent> {
   }
 
   @Override
-  public int compareTo(@NotNull final ScalingEvent o) {
+  public int compareTo(final ScalingEvent o) {
     return this.getDesiredNodeCount() > o.getDesiredNodeCount() ? 1 : -1;
   }
 }

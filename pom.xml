@@ -5,7 +5,7 @@
     <name>bigtable-autoscaler</name>
     <artifactId>bigtable-autoscaler</artifactId>
 
-    <version>0.0.35-SNAPSHOT</version>
+    <version>0.0.34-SNAPSHOT</version>
 
     <parent>
         <groupId>com.spotify</groupId>
@@ -25,7 +25,7 @@
         <jackson-version>2.9.9</jackson-version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <auto-matter.version>0.14.1</auto-matter.version>
-        <dagger.version>2.26</dagger.version>
+        <dagger.version>2.23.2</dagger.version>
         <google.cloud.version>0.106.0-alpha</google.cloud.version>
         <grpc.version>1.24.0</grpc.version>
         <protobuf.version>3.10.0</protobuf.version>
@@ -200,12 +200,6 @@
             <artifactId>dagger</artifactId>
             <version>${dagger.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.dagger</groupId>
-            <artifactId>dagger-compiler</artifactId>
-            <version>${dagger.version}</version>
-        </dependency>
-
 
         <!-- test scope -->
         <dependency>
