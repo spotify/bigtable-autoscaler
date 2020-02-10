@@ -73,11 +73,12 @@ public class StorageAlgorithm implements Algorithm {
       return new ScalingEvent(currentNodes, "0 storage utilization");
     }
     final int minNodesRequiredForStorage =
-        (int) Math.ceil(storageUtilization * currentNodes / MAX_DISK_UTILIZATION_PERCENTAGE);
+        (int) Math.ceil(storageUtilization * currentNodes / cluster.storageTarget());
     LOGGER.info(
-        "Minimum nodes for storage: {}, currentUtilization: {}, current nodes: {}",
+        "Minimum nodes for storage: {}, currentUtilization: {}, storageTarget: {}, current nodes: {}",
         minNodesRequiredForStorage,
         storageUtilization.toString(),
+        cluster.storageTarget(),
         currentNodes);
     clusterResizeLogBuilder.storageUtilization(storageUtilization);
 

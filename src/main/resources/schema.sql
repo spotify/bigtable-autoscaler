@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS autoscale (
     min_nodes integer NOT NULL,
     max_nodes integer NOT NULL,
     cpu_target double precision NOT NULL,
+    storage_target double precision NOT NULL default(0.7),
     overload_step integer,
     last_change timestamp with time zone,
     last_check timestamp with time zone,
@@ -44,7 +45,9 @@ CREATE TABLE IF NOT EXISTS autoscale (
     CONSTRAINT autoscale_min_nodes_check CHECK ((min_nodes >= 3)),
     CONSTRAINT autoscale_overload_step_check1 CHECK (((overload_step > 0) OR (overload_step IS NULL))),
     CONSTRAINT autoscale_max_nodes_check CHECK(max_nodes >= min_nodes),
-    CONSTRAINT min_nodes_override_check CHECK(min_nodes_override >= 0)
+    CONSTRAINT min_nodes_override_check CHECK(min_nodes_override >= 0),
+    CONSTRAINT autoscale_storage_target_check CHECK ((storage_target > (0.0)::double precision)),
+    CONSTRAINT autoscale_storage_target_check1 CHECK ((storage_target < (1.0)::double precision))
 );
 
 
@@ -60,6 +63,7 @@ CREATE TABLE IF NOT EXISTS resize_log (
     current_nodes integer NOT NULL,
     target_nodes integer NOT NULL,
     cpu_utilization double precision NOT NULL,
+    storage_target double precision NOT NULL default(0.7),
     storage_utilization double precision NOT NULL,
     detail text,
     success boolean,
@@ -68,6 +72,13 @@ CREATE TABLE IF NOT EXISTS resize_log (
 );
 
 CREATE INDEX ON resize_log(timestamp);
+
+ALTER TABLE autoscale ADD COLUMN IF NOT EXISTS storage_target double precision NOT NULL default(0.7);
+ALTER TABLE resize_log ADD COLUMN IF NOT EXISTS storage_target double precision NOT NULL default(0.7);
+ALTER TABLE autoscale DROP CONSTRAINT IF EXISTS autoscale_storage_target_check;
+ALTER TABLE autoscale ADD CONSTRAINT autoscale_storage_target_check CHECK ((storage_target > (0.0)::double precision));
+ALTER TABLE autoscale DROP CONSTRAINT IF EXISTS autoscale_storage_target_check1;
+ALTER TABLE autoscale ADD CONSTRAINT autoscale_storage_target_check1 CHECK ((storage_target < (1.0)::double precision));
 
 --cluster count limit trigger
 CREATE OR REPLACE FUNCTION enforce_cluster_count_limit() RETURNS trigger AS

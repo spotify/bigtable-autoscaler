@@ -102,6 +102,18 @@ public enum ClusterDataGauges {
         return clusterData.cpuUtil() / clusterData.cluster().cpuTarget();
       };
     }
+  },
+
+  STORAGE_TARGET_RATIO("storage-target-ratio") {
+    public Gauge getMetricValue(
+        final Map<String, ClusterData> registeredClusters,
+        final String clusterName,
+        final Database db) {
+      return () -> {
+        ClusterData clusterData = registeredClusters.get(clusterName);
+        return clusterData.storageUtil() / clusterData.cluster().storageTarget();
+      };
+    }
   };
 
   private String tag;
