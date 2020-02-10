@@ -118,6 +118,7 @@ public class ClusterResources implements Endpoint {
       @QueryParam("minNodes") final Integer minNodes,
       @QueryParam("maxNodes") final Integer maxNodes,
       @QueryParam("cpuTarget") final Double cpuTarget,
+      @QueryParam("storageTarget") @DefaultValue("0.7") final Double storageTarget,
       @QueryParam("overloadStep") final Integer overloadStep,
       @QueryParam("enabled") @DefaultValue("true") final Boolean enabled,
       @QueryParam("extraEnabledAlgorithms") final String extraEnabledAlgorithms,
@@ -130,6 +131,7 @@ public class ClusterResources implements Endpoint {
             .minNodes(minNodes)
             .maxNodes(maxNodes)
             .cpuTarget(cpuTarget)
+            .storageTarget(storageTarget)
             .overloadStep(Optional.ofNullable(overloadStep))
             .enabled(enabled)
             .extraEnabledAlgorithms(Optional.ofNullable(extraEnabledAlgorithms))
@@ -156,6 +158,7 @@ public class ClusterResources implements Endpoint {
       @QueryParam("minNodes") final Integer minNodes,
       @QueryParam("maxNodes") final Integer maxNodes,
       @QueryParam("cpuTarget") final Double cpuTarget,
+      @QueryParam("storageTarget") @DefaultValue("0.7") final Double storageTarget,
       @QueryParam("overloadStep") final Integer overloadStep,
       @QueryParam("enabled") final Boolean enabled,
       @QueryParam("extraEnabledAlgorithms") final String extraEnabledAlgorithms) {
@@ -167,6 +170,7 @@ public class ClusterResources implements Endpoint {
             .minNodes(minNodes)
             .maxNodes(maxNodes)
             .cpuTarget(cpuTarget)
+            .storageTarget(storageTarget)
             .overloadStep(Optional.ofNullable(overloadStep))
             .enabled(enabled)
             .extraEnabledAlgorithms(Optional.ofNullable(extraEnabledAlgorithms))
@@ -197,6 +201,7 @@ public class ClusterResources implements Endpoint {
             .minNodes(0)
             .maxNodes(0)
             .cpuTarget(0)
+            .storageTarget(0)
             .overloadStep(Optional.of(0))
             .enabled(true)
             .minNodesOverride(0)

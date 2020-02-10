@@ -39,6 +39,8 @@ public interface BigtableCluster {
 
   double cpuTarget();
 
+  double storageTarget();
+
   Optional<Instant> lastChange();
 
   Optional<Instant> lastCheck();

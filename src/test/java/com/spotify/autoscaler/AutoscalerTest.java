@@ -78,6 +78,7 @@ public class AutoscalerTest {
           .maxNodes(500)
           .minNodes(5)
           .overloadStep(100)
+          .storageTarget(0.7)
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 
@@ -90,6 +91,7 @@ public class AutoscalerTest {
           .maxNodes(500)
           .minNodes(5)
           .overloadStep(100)
+          .storageTarget(0.7)
           .errorCode(Optional.of(ErrorCode.OK))
           .build();
 

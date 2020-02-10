@@ -45,6 +45,8 @@ public interface ClusterResizeLog {
 
   double cpuTarget();
 
+  double storageTarget();
+
   Optional<Integer> overloadStep();
 
   int currentNodes();
@@ -73,6 +75,7 @@ public interface ClusterResizeLog {
         .minNodes(cluster.minNodes())
         .maxNodes(cluster.maxNodes())
         .cpuTarget(cluster.cpuTarget())
+        .storageTarget(cluster.storageTarget())
         .overloadStep(cluster.overloadStep())
         .minNodesOverride(cluster.minNodesOverride());
   }

@@ -64,6 +64,7 @@ public class SimulationIT extends AutoscaleJobITBase {
                     .minNodes(3)
                     .maxNodes(2000)
                     .cpuTarget(0.6)
+                    .storageTarget(0.7)
                     .build();
             data.add(new Object[] {new FakeBTCluster(new TimeSupplier(), cluster)});
           });
