@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS autoscale (
     CONSTRAINT full_name PRIMARY KEY(project_id, instance_id, cluster_id),
     CONSTRAINT autoscale_cpu_target_check CHECK ((cpu_target > (0.0)::double precision)),
     CONSTRAINT autoscale_cpu_target_check1 CHECK ((cpu_target < (1.0)::double precision)),
-    CONSTRAINT autoscale_min_nodes_check CHECK ((min_nodes >= 3)),
+    CONSTRAINT autoscale_min_nodes_check CHECK ((min_nodes >= 1)),
     CONSTRAINT autoscale_overload_step_check1 CHECK (((overload_step > 0) OR (overload_step IS NULL))),
     CONSTRAINT autoscale_max_nodes_check CHECK(max_nodes >= min_nodes),
     CONSTRAINT min_nodes_override_check CHECK(min_nodes_override >= 0),
