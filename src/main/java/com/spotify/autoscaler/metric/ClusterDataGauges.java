@@ -50,6 +50,17 @@ public enum ClusterDataGauges {
       };
     }
   },
+  NODE_COUNT_MINUS_MIN_NODE_COUNT("node-count-minus-min-node-count") {
+    public Gauge getMetricValue(
+        final Map<String, ClusterData> registeredClusters,
+        final String clusterName,
+        final Database db) {
+      return () -> {
+        ClusterData clusterData = registeredClusters.get(clusterName);
+        return clusterData.currentNodeCount() - clusterData.minNodeCount();
+      };
+    }
+  },
   MAX_NODE_COUNT("max-node-count") {
     public Gauge getMetricValue(
         final Map<String, ClusterData> registeredClusters,
@@ -61,6 +72,17 @@ public enum ClusterDataGauges {
       };
     }
   },
+  MAX_NODE_COUNT_MINUS_NODE_COUNT("max-node-count-minus-node-count") {
+    public Gauge getMetricValue(
+        final Map<String, ClusterData> registeredClusters,
+        final String clusterName,
+        final Database db) {
+      return () -> {
+        ClusterData clusterData = registeredClusters.get(clusterName);
+        return clusterData.maxNodeCount() - clusterData.currentNodeCount();
+      };
+    }
+  },
   EFFECTIVE_MIN_NODE_COUNT("effective-min-node-count") {
     public Gauge getMetricValue(
         final Map<String, ClusterData> registeredClusters,
@@ -69,6 +91,17 @@ public enum ClusterDataGauges {
       return () -> {
         ClusterData cluster = registeredClusters.get(clusterName);
         return cluster.effectiveMinNodeCount();
+      };
+    }
+  },
+  NODE_COUNT_MINUS_EFFECTIVE_MIN_NODE_COUNT("node-count-minus-effective-min-node-count") {
+    public Gauge getMetricValue(
+        final Map<String, ClusterData> registeredClusters,
+        final String clusterName,
+        final Database db) {
+      return () -> {
+        ClusterData cluster = registeredClusters.get(clusterName);
+        return cluster.currentNodeCount() - cluster.effectiveMinNodeCount();
       };
     }
   },
