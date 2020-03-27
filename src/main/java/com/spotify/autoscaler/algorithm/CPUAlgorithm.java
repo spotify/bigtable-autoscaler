@@ -86,7 +86,7 @@ public class CPUAlgorithm implements Algorithm {
     } else if (scaleDown) {
       // Don't reduce node count too quickly to avoid overload from tablet shuffling
       path = "throttled change";
-      final double lowestAmountNodes = MAX_REDUCTION_RATIO * nodes
+      final double lowestAmountNodes = MAX_REDUCTION_RATIO * nodes;
       final double maxReduction = nodes - lowestAmountNodes;
       desiredNodes =
           maxReduction > 1
