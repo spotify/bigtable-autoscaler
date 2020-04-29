@@ -1,7 +1,7 @@
-NS = spotify
+NS = default 
 
 SERVICE_NAME = bigtable-autoscaler
-SERVICE_IMAGE_VERSION = latest
+SERVICE_IMAGE_VERSION ?= 0.0.1 
 SERVICE_IMAGE_TAG = $(NS)/$(SERVICE_NAME):$(SERVICE_IMAGE_VERSION)
 
 MVN_IMAGE_NAME = mvn-builder
