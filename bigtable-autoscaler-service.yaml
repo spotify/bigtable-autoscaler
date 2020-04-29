@@ -36,6 +36,7 @@ spec:
       containers:
       - name: bigtable-autoscaler 
         image: {{IMAGE}}
+        imagePullPolicy: Always
         volumeMounts:
           - mountPath: /service-account
             name: service-account
