@@ -1,6 +1,6 @@
 # tag the image with both :date-commit and :commit
 steps:
-- name: 'gcr.io/cloud-builders/docker'
+- name: 'gcr.io/cloud-builders/alpine'
   args: ['build',
     '--tag', '$_REPO/$PROJECT_ID/$_DOCKER_TAG_DATE_COMMIT',
     '--tag', '$_REPO/$PROJECT_ID/$_DOCKER_TAG_COMMIT',
