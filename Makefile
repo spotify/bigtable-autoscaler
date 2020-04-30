@@ -1,4 +1,4 @@
-NS = default 
+NS = default
 
 SERVICE_NAME = bigtable-autoscaler
 SERVICE_IMAGE_VERSION ?= 0.0.1 
