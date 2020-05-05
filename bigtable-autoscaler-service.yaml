@@ -35,7 +35,7 @@ spec:
     spec:
       containers:
       - name: bigtable-autoscaler 
-        image: {{IMAGE}}
+        image: us.gcr.io/triggeredmail/bigtable-autoscaler:0.0.1 
         imagePullPolicy: Always
         volumeMounts:
           - mountPath: /service-account
@@ -50,13 +50,24 @@ spec:
           - name: ENVIRONMENT
             value: remote
           - name: GOOGLE_APPLICATION_CREDENTIALS
-            value: /service-account/recommendationsvc.json
-          # - name: JDBC_URL
-          #   value: jdbc:postgresql://postgres:5432/autoscaler
-          # - name: DB_USERNAME
-          #   value: postgres
-          # - name: DB_PASSWORD
-          #   value: postgres
+            value: service-account/key.json
+          - name: DB_HOSTNAME
+            valueFrom:
+                secretKeyRef:
+                  name: bigtable-autoscaler-database
+                  key: hostname
+          - name: DB_USERNAME
+            valueFrom:
+                secretKeyRef:
+                  name: bigtable-autoscaler-database
+                  key: username
+          - name: DB_PASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: bigtable-autoscaler-database
+                  key: password
+          - name: JDBC_URL
+            value: jdbc:postgresql://$(DB_HOSTNAME):5432/autoscaler
         securityContext:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
@@ -67,4 +78,4 @@ spec:
       volumes:
       - name: service-account
         secret:
-          secretName: recommendationsvc-key
+          secretName: bigtable-autoscaler-service 
