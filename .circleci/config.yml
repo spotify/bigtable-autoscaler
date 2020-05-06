@@ -10,7 +10,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update docker-compose make
+            apk add --update make
       - run:
           name: Build image
           command: SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 make build-image
