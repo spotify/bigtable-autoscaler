@@ -6,7 +6,7 @@ jobs:
         auth:
           username: _json_key
           password: $TRIGGERMAIL_GCR_AUTH
-    working_directory: ${HOME}/bigtable-autoscaler
+    working_directory: ~/bigtable-autoscaler
     steps:
       - run:
           name: Build image
