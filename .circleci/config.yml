@@ -8,10 +8,10 @@ jobs:
           password: $TRIGGERMAIL_GCR_AUTH
     working_directory: ~/bigtable-autoscaler
     steps:
-      - checkout
       - run:
           name: Install Docker client
           command: apk add docker-cli
+      - checkout
       - run:
           name: Build image
           command: |
