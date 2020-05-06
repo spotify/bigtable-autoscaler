@@ -9,7 +9,9 @@ jobs:
     working_directory: ~/bigtable-autoscaler
     steps:
       - checkout
-      - setup_remote_docker
+      - run:
+          name: Install Docker client
+          command: apk add docker-cli
       - run:
           name: Build image
           command: |
