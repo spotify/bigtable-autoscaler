@@ -9,6 +9,7 @@ jobs:
     working_directory: ~/bigtable-autoscaler
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: Build image
           command: |
