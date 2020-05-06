@@ -41,7 +41,7 @@ logs:
 
 # Build the service image
 build-image: maven-build Dockerfile
-	docker build --tag $(SERVICE_IMAGE_TAG) .
+	docker build --tag $(SERVICE_IMAGE_TAG) $(pwd) 
 
 # just to have a short name for next target
 maven-build: target/bigtable-autoscaler.jar
