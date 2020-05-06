@@ -1,12 +1,12 @@
 version: 2
 jobs:
   build:
-    working_directory: ${HOME}/bigtable-autoscaler
     docker:
       - image: $BUILD_CONTAINER_IMAGE 
         auth:
           username: _json_key
           password: $TRIGGERMAIL_GCR_AUTH
+    working_directory: ${HOME}/bigtable-autoscaler
     steps:
       - run:
           name: Build image
