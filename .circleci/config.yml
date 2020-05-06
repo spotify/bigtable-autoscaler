@@ -8,6 +8,7 @@ jobs:
           password: $TRIGGERMAIL_GCR_AUTH
     working_directory: ~/bigtable-autoscaler
     steps:
+      - checkout
       - run:
           name: Build image
           command: |
