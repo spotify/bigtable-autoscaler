@@ -8,6 +8,10 @@ jobs:
       - setup_remote_docker
       - checkout
       - run:
+          name: Install Make
+          command: |
+            apt-get update && apt-get install make
+      - run:
           name: Build image
           command: SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 make build-image
       - run:
