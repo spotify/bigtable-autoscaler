@@ -2,10 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: $BUILD_CONTAINER_IMAGE 
-        auth:
-          username: _json_key
-          password: $TRIGGERMAIL_GCR_AUTH
+      - image: docker:19.03
     working_directory: ~/bigtable-autoscaler
     steps:
       - setup_remote_docker
