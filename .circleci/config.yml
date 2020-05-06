@@ -1,42 +1,27 @@
-# Java Maven CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
 version: 2
-executorType: machine
 jobs:
   build:
     docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:11-jdk
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    working_directory: ~/repo
-
-    environment:
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
-
+      - image: $BUILD_CONTAINER_IMAGE 
+        auth:
+          username: _json_key
+          password: $TRIGGERMAIL_GCR_AUTH
     steps:
-      - checkout
-
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
-      - run: mvn dependency:go-offline
-
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      # run tests
-      - run: mvn verify
+      - run:
+          name: Build image
+          command: SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 make build_image
+      - run:
+          name: Upload image
+          command: |
+            if [ $CIRCLE_BRANCH == "master" ]; then
+              echo $TRIGGERMAIL_GCR_AUTH > ${HOME}/gcloud-service-key.json
+              gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+              docker tag $CIRCLE_SHA1 us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
+              docker push us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
+            fi
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          context: build-global
