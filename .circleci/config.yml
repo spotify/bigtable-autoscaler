@@ -9,7 +9,8 @@ jobs:
     steps:
       - run:
           name: Build image
-          command: SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 make build_image
+          command: |
+            SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 make build_image
       - run:
           name: Upload image
           command: |
