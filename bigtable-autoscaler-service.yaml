@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bigtable-autoscaler
+  labels:
+    app: bigtable-autoscaler
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      targetPort: 8080
+      port: 8080
+  selector:
+    app: bigtable-autoscaler
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: bigtable-autoscaler 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bigtable-autoscaler 
+  template:
+    metadata:
+      labels:
+        app: bigtable-autoscaler 
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
+    spec:
+      containers:
+      - name: bigtable-autoscaler 
+        image: {{IMAGE}}
+        imagePullPolicy: Always
+        volumeMounts:
+          - mountPath: /service-account
+            name: service-account
+        resources:
+          requests:
+            cpu: "0.25"
+            memory: 512Mi
+          limits:
+            memory: 512Mi
+        env:
+          - name: ENVIRONMENT
+            value: remote
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: service-account/key.json
+          - name: DB_HOSTNAME
+            valueFrom:
+                secretKeyRef:
+                  name: bigtable-autoscaler-database
+                  key: hostname
+          - name: DB_USERNAME
+            valueFrom:
+                secretKeyRef:
+                  name: bigtable-autoscaler-database
+                  key: username
+          - name: DB_PASSWORD
+            valueFrom:
+                secretKeyRef:
+                  name: bigtable-autoscaler-database
+                  key: password
+          - name: JDBC_URL
+            value: jdbc:postgresql://$(DB_HOSTNAME):5432/autoscaler
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 65534
+          capabilities:
+            drop:
+            - all
+      volumes:
+      - name: service-account
+        secret:
+          secretName: bigtable-autoscaler-service 

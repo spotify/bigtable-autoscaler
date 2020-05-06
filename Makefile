@@ -1,7 +1,7 @@
-NS = spotify
+NS = default
 
 SERVICE_NAME = bigtable-autoscaler
-SERVICE_IMAGE_VERSION = latest
+SERVICE_IMAGE_VERSION ?= 0.0.1 
 SERVICE_IMAGE_TAG = $(NS)/$(SERVICE_NAME):$(SERVICE_IMAGE_VERSION)
 
 MVN_IMAGE_NAME = mvn-builder
@@ -48,7 +48,7 @@ maven-build: target/bigtable-autoscaler.jar
 
 # package service as jar
 target/bigtable-autoscaler.jar: build-maven-builder src/**/*
-	docker run --name $(MVN_IMAGE_NAME) $(VOLUMES) --rm $(MVN_IMAGE_TAG) mvn -T 1C -o package
+	docker run --name $(MVN_IMAGE_NAME) $(VOLUMES) --rm $(MVN_IMAGE_TAG) mvn -T 1C -DskipTests package
 
 # rebuild the maven image if pom.xml changed
 build-maven-builder: pom.xml Builder.Dockerfile
