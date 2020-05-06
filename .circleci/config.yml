@@ -11,6 +11,7 @@ jobs:
       - run:
           name: Build image
           command: |
+            pwd
             SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 
             make build-image
       - run:
