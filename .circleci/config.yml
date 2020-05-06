@@ -13,15 +13,18 @@ jobs:
             apk add --update make
       - run:
           name: Build image
-          command: SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 make build-image
+          command: |
+            SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 
+            make build-image
       - run:
           name: Upload image
           command: |
             if [ $CIRCLE_BRANCH == "master" ]; then
+              GCR_REPO=us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
               echo $TRIGGERMAIL_GCR_AUTH > ${HOME}/gcloud-service-key.json
               gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
-              docker tag $CIRCLE_SHA1 us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
-              docker push us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
+              docker tag $CIRCLE_SHA1 $GCR_REPO
+              docker push $GCR_REPO
             fi
 workflows:
   version: 2
