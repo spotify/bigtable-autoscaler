@@ -1,6 +1,7 @@
 version: 2
 jobs:
   build:
+    working_directory: ${HOME}/bigtable-autoscaler
     docker:
       - image: $BUILD_CONTAINER_IMAGE 
         auth:
@@ -10,7 +11,8 @@ jobs:
       - run:
           name: Build image
           command: |
-            SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 make build-image
+            SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 
+            make build-image
       - run:
           name: Upload image
           command: |
