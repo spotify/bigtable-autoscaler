@@ -1,8 +1,8 @@
 version: 2
 jobs:
   build:
-    docker:
-      - image: docker:19.03
+    machine:
+      image: ubuntu-1604:202004-01
     working_directory: ~/bigtable-autoscaler
     steps:
       - checkout
