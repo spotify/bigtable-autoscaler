@@ -2,12 +2,9 @@
 
 [![CircleCI](https://circleci.com/gh/spotify/bigtable-autoscaler.svg?style=svg)](https://circleci.com/gh/spotify/bigtable-autoscaler)
 
-You have a Bigtable cluster and you would like to optimize its cost by using the
-right number of nodes at any given time. Then you should consider using the Bigtable
-autoscaler service!
-
-Many Bigtable clusters have uneven load over time. To avoid wasting capacity (and money), it's 
-desirable to scale down the cluster during off-hours. The Bigtable autoscaler lets you do that 
+If you have a Bigtable cluster and you would like to optimize its cost by using the
+right number of nodes at any given time you should consider using this Bigtable
+autoscaler service! The Bigtable autoscaler lets you do that 
 with no manual intervention.
 
 ## Getting started
@@ -24,14 +21,15 @@ with no manual intervention.
         * Role **Monitoring Viewer**, in particular the permissions
             * monitoring.timeSeries.list
 * Docker
+* Java 11 and maven
 * (Optional) **PostgreSQL database** for production use. In this quickstart session we're using a postgres docker image
-* [GNU make](https://www.gnu.org/software/make)
+* (Optional) We have a [make-file](https://www.gnu.org/software/make) with local development helper methods. 
 
 ### Building
 
 Run this command to build the project and create a docker image:
 
-    make build-image
+    mvn package
 
 ### Running
 
