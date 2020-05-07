@@ -26,6 +26,7 @@ jobs:
             # push the image to GCR
             export GCR_REPO=us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
             docker tag default/bigtable-autoscaler $GCR_REPO
+            gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us.gcr.io
             docker push $GCR_REPO
             # fi
 workflows:
