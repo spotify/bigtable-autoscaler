@@ -8,9 +8,7 @@ jobs:
       - checkout
       - run:
           name: Build image
-          command: |
-            export SERVICE_IMAGE_VERSION=$CIRCLE_SHA1 
-            make build-image
+          command: make build-image
       - run:
           name: Upload image
           command: |
@@ -25,9 +23,9 @@ jobs:
             echo $TRIGGERMAIL_GCR_AUTH > ${HOME}/gcloud-service-key.json
             gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
             
-            # push the image
+            # push the image to GCR
             export GCR_REPO=us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
-            docker tag $CIRCLE_SHA1 $GCR_REPO
+            docker tag default/bigtable-autoscaler $GCR_REPO
             docker push $GCR_REPO
             # fi
 workflows:
