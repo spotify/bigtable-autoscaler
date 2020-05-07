@@ -12,24 +12,24 @@ jobs:
       - run:
           name: Upload image
           command: |
-            # if [ $CIRCLE_BRANCH == "master" ]; then
-            # install gcloud
-            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-            sudo apt-get update && sudo apt-get install google-cloud-sdk
-            
-            # authenticate gcloud
-            echo $TRIGGERMAIL_GCR_AUTH > ${HOME}/gcloud-service-key.json
-            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            if [ $CIRCLE_BRANCH == "master" ]; then
+              # install gcloud
+              echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+              curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+              sudo apt-get update && sudo apt-get install google-cloud-sdk
+              
+              # authenticate gcloud
+              echo $TRIGGERMAIL_GCR_AUTH > ${HOME}/gcloud-service-key.json
+              gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
 
-            # log in to docker using gcloud
-            gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us.gcr.io
-            
-            # push the image to GCR using docker
-            GCR_REPO=us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
-            docker tag default/bigtable-autoscaler $GCR_REPO
-            docker push $GCR_REPO
-            # fi
+              # log in to docker using gcloud
+              gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us.gcr.io
+              
+              # push the image to GCR using docker
+              GCR_REPO=us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
+              docker tag default/bigtable-autoscaler $GCR_REPO
+              docker push $GCR_REPO
+            fi
 workflows:
   version: 2
   build_and_test:
