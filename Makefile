@@ -41,7 +41,7 @@ logs:
 
 # Build the service image
 build-image: maven-build Dockerfile
-	docker build --tag $(SERVICE_IMAGE_TAG) $(PWD) 
+	docker build --tag $(SERVICE_IMAGE_TAG) .
 
 # just to have a short name for next target
 maven-build: target/bigtable-autoscaler.jar
@@ -52,7 +52,7 @@ target/bigtable-autoscaler.jar: build-maven-builder src/**/*
 
 # rebuild the maven image if pom.xml changed
 build-maven-builder: pom.xml Builder.Dockerfile
-	docker build --tag $(MVN_IMAGE_TAG) -f Builder.Dockerfile --cache-from $(MVN_IMAGE_TAG) $(PWD) 
+	docker build --tag $(MVN_IMAGE_TAG) -f Builder.Dockerfile --cache-from $(MVN_IMAGE_TAG) .
 
 clean:
 	rm -rf target
