@@ -1,42 +1,38 @@
-# Java Maven CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
 version: 2
-executorType: machine
 jobs:
   build:
-    docker:
-      # specify the version you desire here
-      - image: circleci/openjdk:11-jdk
-
-      # Specify service dependencies here if necessary
-      # CircleCI maintains a library of pre-built images
-      # documented at https://circleci.com/docs/2.0/circleci-images/
-      # - image: circleci/postgres:9.4
-
-    working_directory: ~/repo
-
-    environment:
-      # Customize the JVM maximum heap limit
-      MAVEN_OPTS: -Xmx3200m
-
+    machine:
+      image: ubuntu-1604:202004-01
+    working_directory: ~/bigtable-autoscaler
     steps:
       - checkout
+      - run:
+          name: Build image
+          command: make build-image
+      - run:
+          name: Upload image
+          command: |
+            if [ $CIRCLE_BRANCH == "master" ]; then
+              # install gcloud
+              echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+              curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+              sudo apt-get update && sudo apt-get install google-cloud-sdk
+              
+              # authenticate gcloud
+              echo $TRIGGERMAIL_GCR_AUTH > ${HOME}/gcloud-service-key.json
+              gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "pom.xml" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
-      - run: mvn dependency:go-offline
-
-      - save_cache:
-          paths:
-            - ~/.m2
-          key: v1-dependencies-{{ checksum "pom.xml" }}
-
-      # run tests
-      - run: mvn verify
+              # log in to docker using gcloud
+              gcloud auth print-access-token | docker login -u oauth2accesstoken --password-stdin https://us.gcr.io
+              
+              # push the image to GCR using docker
+              GCR_REPO=us.gcr.io/triggeredmail/bigtable-autoscaler:$CIRCLE_SHA1
+              docker tag default/bigtable-autoscaler $GCR_REPO
+              docker push $GCR_REPO
+            fi
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build:
+          context: build-global
