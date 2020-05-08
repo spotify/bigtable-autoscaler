@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/spotify/bigtable-autoscaler.svg?style=svg)](https://circleci.com/gh/spotify/bigtable-autoscaler)
 
-If you have a Bigtable cluster and you would like to optimize its cost by using the
+If you have a Bigtable cluster and you would like to optimize its cost-efficiency by using the
 right number of nodes at any given time you should consider using this Bigtable
 autoscaler service! The Bigtable autoscaler lets you do that 
 with no manual intervention.
