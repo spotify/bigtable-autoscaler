@@ -32,6 +32,7 @@
         <netty.version>4.1.42.Final</netty.version>
         <apollo.version>1.14.0</apollo.version>
         <guava.version>28.1-jre</guava.version>
+        <dockerfile-maven-version>1.4.9</dockerfile-maven-version>
     </properties>
 
     <dependencyManagement>
@@ -343,6 +344,26 @@
                             <version>${auto-matter.version}</version>
                         </path>
                     </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-version}</version>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <repository>spotify/bigtable-autoscaler</repository>
+                    <tag>latest</tag>
+                    <buildArgs>
+                        <JAR_FILE>${project.build.finalName}.jar</JAR_FILE>
+                    </buildArgs>
                 </configuration>
             </plugin>
             <plugin>
