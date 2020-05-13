@@ -23,7 +23,7 @@ down:
 
 # run only the service container (pointing to your own postgresql)
 run:
-	docker run --name $(SERVICE_NAME) --detach --env-file .env --rm $(SERVICE_IMAGE_TAG)
+	docker-compose run --name $(SERVICE_NAME) --detach --no-deps --rm $(SERVICE_NAME)
 
 # stop service container only
 stop:

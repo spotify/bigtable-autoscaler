@@ -68,9 +68,12 @@ state. We recommend connecting using the [JDBC socket factory](https://cloud.goo
 
 Just update [.env](.env) with your postgres url, user and password and then run:
 
+    # source your environment
+    . ./.env
+    # start the service with docker compose
     make run
 
-This uses the same image but only with docker (no docker-compose) and points to the postgresql you provided.
+This runs the same bigtable-autoscaler image, doesn't run postgres, and points bigtable-autoscaler to the postgresql you provided.
 
 In the same way you can see service logs (make logs) and then to stop the service:
 
