@@ -160,7 +160,7 @@ public class ClusterResources implements Endpoint {
       @QueryParam("cpuTarget") final Double cpuTarget,
       @QueryParam("storageTarget") @DefaultValue("0.7") final Double storageTarget,
       @QueryParam("overloadStep") final Integer overloadStep,
-      @QueryParam("enabled") final Boolean enabled,
+      @QueryParam("enabled") @DefaultValue("true") final Boolean enabled,
       @QueryParam("extraEnabledAlgorithms") final String extraEnabledAlgorithms) {
     final BigtableCluster cluster =
         new BigtableClusterBuilder()

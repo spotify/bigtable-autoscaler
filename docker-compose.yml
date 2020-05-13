@@ -9,6 +9,7 @@ services:
       - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/1-create-schema.sql
     environment:
       POSTGRES_DB: autoscaler
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
 
   bigtable-autoscaler:
     container_name: bigtable-autoscaler

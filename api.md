@@ -19,9 +19,9 @@
         * *minNodes*: Minimum number of nodes. The autoscaler will not try to set the number of nodes below this number.
         * *maxNodes*: Maximum number of nodes. The autoscaler will not try to set the number of nodes above this number.
         * *cpuTarget*: Target CPU utilization. The autoscaler will try to set the number of nodes in order to have this CPU utilization.
-        * *storageTarget*: Target storage utilization. The autoscaler will try to set the number of nodes in order to be below this storage utilization.
-        * *overloadStep* (optional): In case the cluster is hitting 90% CPU utilization we don't really know how big the resize should be. With this parameter you can set how aggressive the resize step should be in that case. This is an additive factor, not a multiplier to the number of nodes.
         * *enabled* (default=true): Whether to have autoscaling enabled or disabled for the cluster.
+        * *storageTarget* (optional): Target storage utilization. The autoscaler will try to set the number of nodes in order to be below this storage utilization.
+        * *overloadStep* (optional): In case the cluster is hitting 90% CPU utilization we don't really know how big the resize should be. With this parameter you can set how aggressive the resize step should be in that case. This is an additive factor, not a multiplier to the number of nodes.
         * *extra_enabled_algorithms* (optional): This field is a comma separated class name, 
                 which should implement the interface Algorithm. This is to inject possible new Algorithm 
                 strategies for the autoscaler without affecting this open-source project.
@@ -34,9 +34,9 @@
         * *minNodes*: Minimum number of nodes. The autoscaler will not try to set the number of nodes below this number.
         * *maxNodes*: Maximum number of nodes. The autoscaler will not try to set the number of nodes above this number.
         * *cpuTarget*: Target CPU utilization. The autoscaler will try to set the number of nodes in order to have this CPU utilization.
-        * *storageTarget*: Target storage utilization. The autoscaler will try to set the number of nodes in order to be below this storage utilization.
-        * *overloadStep* (optional): In case the cluster is hitting 90% CPU utilization we don't really know how big the resize should be. With this parameter you can set how aggressive the resize step should be in that case. This is an additive factor, not a multiplier to the number of nodes.
         * *enabled* (default=true): Whether to have autoscaling enabled or disabled for the cluster.
+        * *storageTarget* (optional): Target storage utilization. The autoscaler will try to set the number of nodes in order to be below this storage utilization.
+        * *overloadStep* (optional): In case the cluster is hitting 90% CPU utilization we don't really know how big the resize should be. With this parameter you can set how aggressive the resize step should be in that case. This is an additive factor, not a multiplier to the number of nodes.
         * *extra_enabled_algorithms* (optional): This field is a comma separated class name, 
         which should implement the interface Algorithm. This is to inject possible new Algorithm 
         strategies for the autoscaler without affecting this open-source project.
