@@ -68,7 +68,6 @@ public interface ApiTestResources {
         .queryParam("storageTarget", Double.toString(cluster.storageTarget()))
         .queryParam("minNodes", Integer.toString(cluster.minNodes()))
         .queryParam("maxNodes", Integer.toString(cluster.maxNodes()))
-        .queryParam("enabled", Boolean.toString(cluster.enabled()))
         .request();
   }
 
