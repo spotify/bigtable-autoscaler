@@ -26,14 +26,11 @@ import com.google.gson.Gson;
 import com.spotify.autoscaler.api.type.BigtableAutoscaler;
 import com.spotify.autoscaler.api.type.ReconcileRequest;
 import com.spotify.autoscaler.api.type.ReconcileResponse;
-import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import io.kubernetes.client.openapi.JSON;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
@@ -61,92 +58,49 @@ public class KCCAutoscalerController implements Endpoint {
 
   @POST
   @Path("/reconcile")
-  @Produces("application/json")
-  @Consumes("application/json")
-  public ReconcileResponse reconcile(ReconcileRequest request) {
+  public String reconcile(String request) {
 
-    final BigtableAutoscaler autoscalerConfig = request.getForObject();
+    final ReconcileRequest reconcileRequest = gson.fromJson(request, ReconcileRequest.class);
+    final BigtableAutoscaler autoscalerConfig = reconcileRequest.getForObject();
     final ReconcileResponse.EnsureResources.ForObject forObj =
         new ReconcileResponse.EnsureResources.ForObject(autoscalerConfig.getApiVersion(), autoscalerConfig.getKind(),
         autoscalerConfig.getMetadata().getNamespace(), autoscalerConfig.getMetadata().getName());
 
     final String projectId = autoscalerConfig.getMetadata().getNamespace();
     final String instanceId = autoscalerConfig.getSpec().getInstanceId();
-    final List<BigtableCluster> existingClustersList =
-        database.getBigtableClusters(projectId, instanceId, null);
 
-    if(request.getDeletionInProgress()) {
-      existingClustersList.forEach(cluster -> database.deleteBigtableCluster(projectId, instanceId, cluster.clusterId()));
+    if(reconcileRequest.getDeletionInProgress()) {
+      // TODO: a method to delete all clusters of instance
+      // database.deleteBigtableClusters(projectId, instanceId);
       forObj.deleted(true);
-      return new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj));
+      return gson.toJson(new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
+          ReconcileResponse.class);
     }
-
-    final Map<String, BigtableCluster> existingClusters =
-        existingClustersList.stream().collect(Collectors.toMap(
-            BigtableCluster::clusterId,
-            Function.identity()));
 
     final Map<String, BigtableAutoscaler.Spec.Cluster> targetClusters =
         Arrays.stream(autoscalerConfig.getSpec().getCluster()).collect(Collectors.toMap(
             BigtableAutoscaler.Spec.Cluster::getClusterId, Function.identity()));
 
-    final List<String> clustersToBeDeleted =
-        existingClusters.keySet().stream().filter(clusterId -> !targetClusters.containsKey(clusterId))
-            .collect(Collectors.toList());
-
-    final List<String> clustersToBeCreated =
-        targetClusters.keySet().stream().filter(clusterId -> !existingClusters.containsKey(clusterId))
-            .collect(Collectors.toList());
-
-    final List<String> clustersToBeModified =
-        existingClusters.entrySet().stream().filter(entry -> targetClusters.containsKey(entry.getKey()))
-            .filter(entry -> equivalent(entry.getValue(), targetClusters.get(entry.getKey())))
-            .map(Map.Entry::getKey)
-            .collect(Collectors.toList());
-
-    clustersToBeDeleted.forEach(clusterId -> database.deleteBigtableCluster(projectId, instanceId, clusterId));
-
-    clustersToBeCreated.forEach(clusterId -> {
-      final BigtableAutoscaler.Spec.Cluster cluster = targetClusters.get(clusterId);
-      database.insertBigtableCluster(new BigtableClusterBuilder()
-          .projectId(projectId)
-          .instanceId(instanceId)
-          .clusterId(clusterId)
-          .minNodes(cluster.getMinNodes())
-          .maxNodes(cluster.getMaxNodes())
-          .cpuTarget(cluster.getCpuTarget())
-          .storageTarget(0.7)
-          .overloadStep(Optional.empty())
-          .enabled(true)
-          .extraEnabledAlgorithms(Optional.empty())
-          .minNodesOverride(0)
-          .build());
+    targetClusters.forEach((clusterId, clusterSpec) -> {
+      //TODO: an upsert method that doesn't override the existingCluster fields.
+//      database.updateBigtableCluster(new BigtableClusterBuilder()
+//          .projectId(projectId)
+//          .instanceId(instanceId)
+//          .clusterId(clusterId)
+//          .minNodes(clusterSpec.getMinNodes())
+//          .maxNodes(clusterSpec.getMaxNodes())
+//          .cpuTarget(clusterSpec.getCpuTarget())
+////          .storageTarget(existingCluster.storageTarget())
+////          .overloadStep(existingCluster.overloadStep())
+//          .enabled(true)
+////          .extraEnabledAlgorithms(existingCluster.extraEnabledAlgorithms())
+//          .build());
     });
 
-    clustersToBeModified.forEach(clusterId -> {
-      final BigtableAutoscaler.Spec.Cluster cluster = targetClusters.get(clusterId);
-      final BigtableCluster existingCluster = existingClusters.get(clusterId);
-      database.updateBigtableCluster(new BigtableClusterBuilder()
-          .projectId(projectId)
-          .instanceId(instanceId)
-          .clusterId(clusterId)
-          .minNodes(cluster.getMinNodes())
-          .maxNodes(cluster.getMaxNodes())
-          .cpuTarget(cluster.getCpuTarget())
-          .storageTarget(existingCluster.storageTarget())
-          .overloadStep(existingCluster.overloadStep())
-          .enabled(existingCluster.enabled())
-          .extraEnabledAlgorithms(existingCluster.extraEnabledAlgorithms())
-          .build());
-    });
+    //TODO: a method that deletes all the cluster configs for an instance except the ones passed
+    // database.deleteBigtableClustersExcept(projectId, instanceId, targetClusters.keySet());
 
-    return new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj));
-  }
-
-  private boolean equivalent(final BigtableCluster bigtableClusterInternal,
-                             final BigtableAutoscaler.Spec.Cluster bigtableClusterK8s) {
-    return bigtableClusterInternal.minNodes() == bigtableClusterK8s.getMinNodes()
-           && bigtableClusterInternal.maxNodes() == bigtableClusterK8s.getMaxNodes()
-           && bigtableClusterInternal.cpuTarget() == bigtableClusterK8s.getCpuTarget();
+    return gson.toJson(new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
+        ReconcileResponse.class);
   }
 }
