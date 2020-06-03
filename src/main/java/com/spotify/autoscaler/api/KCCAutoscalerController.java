@@ -41,7 +41,6 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,14 +148,5 @@ public class KCCAutoscalerController implements Endpoint {
     return bigtableClusterInternal.minNodes() == bigtableClusterK8s.getMinNodes()
            && bigtableClusterInternal.maxNodes() == bigtableClusterK8s.getMaxNodes()
            && bigtableClusterInternal.cpuTarget() == bigtableClusterK8s.getCpuTarget();
-  }
-
-  @POST
-  @Path("/trigger")
-  @Produces("application/json")
-  @Consumes("application/json")
-  public Response trigger(String request) {
-    System.out.println(request);
-    return Response.ok().build();
   }
 }
