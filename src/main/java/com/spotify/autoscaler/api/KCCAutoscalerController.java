@@ -26,7 +26,6 @@ import com.google.gson.Gson;
 import com.spotify.autoscaler.api.type.BigtableAutoscaler;
 import com.spotify.autoscaler.api.type.ReconcileRequest;
 import com.spotify.autoscaler.api.type.ReconcileResponse;
-import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import io.kubernetes.client.openapi.JSON;
 import java.util.Arrays;
@@ -34,10 +33,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -100,6 +97,8 @@ public class KCCAutoscalerController implements Endpoint {
     //TODO: a method that deletes all the cluster configs for an instance except the ones passed
     // database.deleteBigtableClustersExcept(projectId, instanceId, targetClusters.keySet());
 
+    // TODO: what do we want to return here?
+    forObj.status(gson.toJsonTree("OK"));
     return gson.toJson(new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
         ReconcileResponse.class);
   }
