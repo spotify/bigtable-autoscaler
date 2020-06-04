@@ -77,4 +77,11 @@ public interface Database extends AutoCloseable {
       String projectId, String instanceId, String clusterId, Integer minNodesOverride);
 
   int getTotalConnections();
+
+  int deleteBigtableClusters(String projectId, String instanceId);
+
+  int deleteBigtableClustersExcept(String projectId, String instanceId, Set<String> keySet);
+
+  boolean reconcileBigtableCluster(final BigtableCluster cluster);
+
 }

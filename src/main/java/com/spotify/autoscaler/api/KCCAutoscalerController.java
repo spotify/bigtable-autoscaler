@@ -26,6 +26,7 @@ import com.google.gson.Gson;
 import com.spotify.autoscaler.api.type.BigtableAutoscaler;
 import com.spotify.autoscaler.api.type.ReconcileRequest;
 import com.spotify.autoscaler.api.type.ReconcileResponse;
+import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import io.kubernetes.client.openapi.JSON;
 import java.util.Arrays;
@@ -67,8 +68,8 @@ public class KCCAutoscalerController implements Endpoint {
     final String instanceId = autoscalerConfig.getSpec().getInstanceId();
 
     if(reconcileRequest.getDeletionInProgress()) {
-      // TODO: a method to delete all clusters of instance
-      // database.deleteBigtableClusters(projectId, instanceId);
+      int deletedClustersCount = database.deleteBigtableClusters(projectId, instanceId);
+      LOGGER.info("Project {}, instance {}: {} clusters deleted", projectId, instanceId, deletedClustersCount);
       forObj.deleted(true);
       return gson.toJson(new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
           ReconcileResponse.class);
@@ -79,23 +80,21 @@ public class KCCAutoscalerController implements Endpoint {
             BigtableAutoscaler.Spec.Cluster::getClusterId, Function.identity()));
 
     targetClusters.forEach((clusterId, clusterSpec) -> {
-      //TODO: an upsert method that doesn't override the existingCluster fields.
-//      database.updateBigtableCluster(new BigtableClusterBuilder()
-//          .projectId(projectId)
-//          .instanceId(instanceId)
-//          .clusterId(clusterId)
-//          .minNodes(clusterSpec.getMinNodes())
-//          .maxNodes(clusterSpec.getMaxNodes())
-//          .cpuTarget(clusterSpec.getCpuTarget())
-////          .storageTarget(existingCluster.storageTarget())
-////          .overloadStep(existingCluster.overloadStep())
-//          .enabled(true)
-////          .extraEnabledAlgorithms(existingCluster.extraEnabledAlgorithms())
-//          .build());
+      database.reconcileBigtableCluster(new BigtableClusterBuilder()
+          .projectId(projectId)
+          .instanceId(instanceId)
+          .clusterId(clusterId)
+          .minNodes(clusterSpec.getMinNodes())
+          .maxNodes(clusterSpec.getMaxNodes())
+          .cpuTarget(clusterSpec.getCpuTarget())
+          .enabled(true)
+          .build());
     });
 
-    //TODO: a method that deletes all the cluster configs for an instance except the ones passed
-    // database.deleteBigtableClustersExcept(projectId, instanceId, targetClusters.keySet());
+    int deletedClustersCount = database.deleteBigtableClustersExcept(projectId, instanceId, targetClusters.keySet());
+    if (deletedClustersCount > 0) {
+      LOGGER.info("Project {}, instance {}: {} clusters deleted", projectId, instanceId, deletedClustersCount);
+    }
 
     // TODO: what do we want to return here?
     forObj.status(gson.toJsonTree("OK"));
