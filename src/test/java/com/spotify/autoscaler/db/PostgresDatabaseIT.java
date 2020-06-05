@@ -291,8 +291,8 @@ public class PostgresDatabaseIT {
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(0.7, retrievedCluster.storageTarget(), 0.0001);
-    assertTrue(retrievedCluster.overloadStep().isEmpty());
-    assertTrue(retrievedCluster.extraEnabledAlgorithms().isEmpty());
+    assertFalse(retrievedCluster.overloadStep().isPresent());
+    assertFalse(retrievedCluster.extraEnabledAlgorithms().isPresent());
     assertEquals(10, retrievedCluster.minNodes());
     assertEquals(100, retrievedCluster.maxNodes());
   }
