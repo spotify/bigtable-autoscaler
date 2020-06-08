@@ -33,6 +33,10 @@ public interface Database extends AutoCloseable {
     return getBigtableClusters(null, null, null);
   }
 
+  default List<BigtableCluster> getBigtableClusters(String projectId, String instanceId) {
+    return getBigtableClusters(projectId, instanceId, null);
+  }
+
   List<BigtableCluster> getBigtableClusters(String projectId, String instanceId, String clusterId);
 
   Optional<BigtableCluster> getBigtableCluster(

@@ -22,6 +22,8 @@ package com.spotify.autoscaler.api.type;
 
 import com.google.gson.JsonElement;
 import com.google.gson.annotations.SerializedName;
+import com.spotify.autoscaler.db.BigtableCluster;
+import java.util.List;
 import java.util.Map;
 
 // ReconcileResponse is the local definitions of the response that kubebuilder bridge understands.
@@ -107,4 +109,13 @@ public class ReconcileResponse {
       }
     }
   }
+
+  public static class Status {
+    private int clusterCount;
+
+    public Status(final List<BigtableCluster> clusters) {
+      this.clusterCount = clusters.size();
+    }
+  }
+
 }
