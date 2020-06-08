@@ -46,7 +46,7 @@ public class KCCAutoscalerController implements Endpoint {
 
   // Use the GSON provided by the k8s java client to deal with k8s objects, since
   // it implements several typeadapter to decode k8s object correctly.
-  private final Gson gson = new JSON().getGson();
+  private static final Gson gson = new JSON().getGson();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(KCCAutoscalerController.class);
 
