@@ -64,23 +64,33 @@ public class KCCAutoscalerController implements Endpoint {
     final ReconcileRequest reconcileRequest = gson.fromJson(request, ReconcileRequest.class);
     final BigtableAutoscaler autoscalerConfig = reconcileRequest.getForObject();
     final ReconcileResponse.EnsureResources.ForObject forObj =
-        new ReconcileResponse.EnsureResources.ForObject(autoscalerConfig.getApiVersion(), autoscalerConfig.getKind(),
-            autoscalerConfig.getMetadata().getNamespace(), autoscalerConfig.getMetadata().getName());
+        new ReconcileResponse.EnsureResources.ForObject(
+            autoscalerConfig.getApiVersion(),
+            autoscalerConfig.getKind(),
+            autoscalerConfig.getMetadata().getNamespace(),
+            autoscalerConfig.getMetadata().getName());
 
     final String projectId = autoscalerConfig.getMetadata().getNamespace();
     final String instanceId = autoscalerConfig.getSpec().getInstanceId();
 
     if (reconcileRequest.getDeletionInProgress()) {
       int deletedClustersCount = database.deleteBigtableClusters(projectId, instanceId);
-      LOGGER.info("Project {}, instance {}: {} clusters deleted", projectId, instanceId, deletedClustersCount);
+      LOGGER.info(
+          "Project {}, instance {}: {} clusters deleted",
+          projectId,
+          instanceId,
+          deletedClustersCount);
       forObj.deleted(true);
-      return gson.toJson(new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
+      return gson.toJson(
+          new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
           ReconcileResponse.class);
     }
 
     final Map<String, BigtableAutoscaler.Spec.Cluster> targetClusters =
-        Arrays.stream(autoscalerConfig.getSpec().getCluster()).collect(Collectors.toMap(
-            BigtableAutoscaler.Spec.Cluster::getClusterId, Function.identity()));
+        Arrays.stream(autoscalerConfig.getSpec().getCluster())
+            .collect(
+                Collectors.toMap(
+                    BigtableAutoscaler.Spec.Cluster::getClusterId, Function.identity()));
 
     targetClusters.forEach(
         (clusterId, clusterSpec) ->
@@ -95,16 +105,22 @@ public class KCCAutoscalerController implements Endpoint {
                     .enabled(true)
                     .build()));
 
-    int deletedClustersCount = database.deleteBigtableClustersExcept(projectId, instanceId, targetClusters.keySet());
+    int deletedClustersCount =
+        database.deleteBigtableClustersExcept(projectId, instanceId, targetClusters.keySet());
     if (deletedClustersCount > 0) {
-      LOGGER.info("Project {}, instance {}: {} clusters deleted", projectId, instanceId, deletedClustersCount);
+      LOGGER.info(
+          "Project {}, instance {}: {} clusters deleted",
+          projectId,
+          instanceId,
+          deletedClustersCount);
     }
 
     final List<BigtableCluster> clusters = database.getBigtableClusters(projectId, instanceId);
-    forObj.status(gson.toJsonTree(new ReconcileResponse.Status(clusters), ReconcileResponse.Status.class));
+    forObj.status(
+        gson.toJsonTree(new ReconcileResponse.Status(clusters), ReconcileResponse.Status.class));
 
-    return gson.toJson(new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
+    return gson.toJson(
+        new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
         ReconcileResponse.class);
   }
-
 }

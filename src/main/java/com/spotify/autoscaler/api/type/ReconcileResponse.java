@@ -117,5 +117,4 @@ public class ReconcileResponse {
       this.clusterCount = clusters.size();
     }
   }
-
 }

@@ -287,7 +287,7 @@ public class PostgresDatabaseIT {
     db.reconcileBigtableCluster(testClusterForReconcile());
     final BigtableCluster retrievedCluster =
         db.getBigtableCluster(
-            testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(0.7, retrievedCluster.storageTarget(), 0.0001);
@@ -299,17 +299,18 @@ public class PostgresDatabaseIT {
 
   @Test
   public void testReconcileExistingCluster() {
-    db.insertBigtableCluster(BigtableClusterBuilder.from(testCluster())
-        .minNodes(15)
-        .maxNodes(50)
-        .storageTarget(0.6)
-        .overloadStep(5)
-        .extraEnabledAlgorithms("any")
-        .build());
+    db.insertBigtableCluster(
+        BigtableClusterBuilder.from(testCluster())
+            .minNodes(15)
+            .maxNodes(50)
+            .storageTarget(0.6)
+            .overloadStep(5)
+            .extraEnabledAlgorithms("any")
+            .build());
     db.reconcileBigtableCluster(testCluster());
     final BigtableCluster retrievedCluster =
         db.getBigtableCluster(
-            testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(0.6, retrievedCluster.storageTarget(), 0.0001);
@@ -318,5 +319,4 @@ public class PostgresDatabaseIT {
     assertEquals(10, retrievedCluster.minNodes());
     assertEquals(100, retrievedCluster.maxNodes());
   }
-
 }

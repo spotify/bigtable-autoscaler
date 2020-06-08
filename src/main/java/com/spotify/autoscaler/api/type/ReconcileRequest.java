@@ -33,9 +33,11 @@ public class ReconcileRequest {
   @SerializedName("for")
   private BigtableAutoscaler forObject;
 
-  public ReconcileRequest(final String version,
-                          final Map<String, Map<String, JsonElement>> owns, final Boolean deletionInProgress,
-                          final BigtableAutoscaler forObject) {
+  public ReconcileRequest(
+      final String version,
+      final Map<String, Map<String, JsonElement>> owns,
+      final Boolean deletionInProgress,
+      final BigtableAutoscaler forObject) {
     this.version = version;
     this.owns = owns;
     this.deletionInProgress = deletionInProgress;

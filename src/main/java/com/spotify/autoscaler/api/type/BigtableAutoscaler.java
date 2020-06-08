@@ -29,15 +29,13 @@ public class BigtableAutoscaler {
   private final V1ObjectMeta metadata;
   private final Spec spec;
 
-  public BigtableAutoscaler(final String apiVersion, final String kind,
-                            final V1ObjectMeta metadata,
-                            final Spec spec) {
+  public BigtableAutoscaler(
+      final String apiVersion, final String kind, final V1ObjectMeta metadata, final Spec spec) {
     this.apiVersion = apiVersion;
     this.kind = kind;
     this.metadata = metadata;
     this.spec = spec;
   }
-
 
   public String getApiVersion() {
     return apiVersion;
@@ -59,12 +57,10 @@ public class BigtableAutoscaler {
     private final String instanceId;
     private final Cluster[] cluster;
 
-    public Spec(final String instanceId,
-                final Cluster[] cluster) {
+    public Spec(final String instanceId, final Cluster[] cluster) {
       this.instanceId = instanceId;
       this.cluster = cluster;
     }
-
 
     public String getInstanceId() {
       return instanceId;
@@ -80,7 +76,8 @@ public class BigtableAutoscaler {
       private final int maxNodes;
       private final double cpuTarget;
 
-      Cluster(final String clusterId, final int minNodes, final int maxNodes, final double cpuTarget) {
+      Cluster(
+          final String clusterId, final int minNodes, final int maxNodes, final double cpuTarget) {
         this.clusterId = clusterId;
         this.minNodes = minNodes;
         this.maxNodes = maxNodes;

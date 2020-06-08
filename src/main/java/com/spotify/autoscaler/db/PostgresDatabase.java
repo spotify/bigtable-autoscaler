@@ -191,11 +191,11 @@ public class PostgresDatabase implements Database {
   public boolean reconcileBigtableCluster(final BigtableCluster cluster) {
     final String sql =
         "INSERT INTO "
-        + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, enabled) "
-        + "VALUES(:project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, :enabled) "
-        + "ON CONFLICT(project_id, instance_id, cluster_id) "
-        + "DO UPDATE SET "
-        + "min_nodes = :min_nodes, max_nodes = :max_nodes, cpu_target = :cpu_target, enabled = :enabled";
+            + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, enabled) "
+            + "VALUES(:project_id, :instance_id, :cluster_id, :min_nodes, :max_nodes, :cpu_target, :enabled) "
+            + "ON CONFLICT(project_id, instance_id, cluster_id) "
+            + "DO UPDATE SET "
+            + "min_nodes = :min_nodes, max_nodes = :max_nodes, cpu_target = :cpu_target, enabled = :enabled";
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put("project_id", cluster.projectId());
     params.put("instance_id", cluster.instanceId());
@@ -468,15 +468,15 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public int deleteBigtableClustersExcept(final String projectId, final String instanceId,
-                                          final Set<String> clusterIds) {
-    final String sql = "DELETE FROM autoscale WHERE project_id=:project_id AND instance_id=:instance_id AND "
-                       + "cluster_id NOT IN (:cluster_ids)";
+  public int deleteBigtableClustersExcept(
+      final String projectId, final String instanceId, final Set<String> clusterIds) {
+    final String sql =
+        "DELETE FROM autoscale WHERE project_id=:project_id AND instance_id=:instance_id AND "
+            + "cluster_id NOT IN (:cluster_ids)";
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put("project_id", projectId);
     params.put("instance_id", instanceId);
     params.put("cluster_ids", clusterIds);
     return jdbc.update(sql, params);
   }
-
 }
