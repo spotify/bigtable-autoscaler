@@ -33,6 +33,10 @@ public interface Database extends AutoCloseable {
     return getBigtableClusters(null, null, null);
   }
 
+  default List<BigtableCluster> getBigtableClusters(String projectId, String instanceId) {
+    return getBigtableClusters(projectId, instanceId, null);
+  }
+
   List<BigtableCluster> getBigtableClusters(String projectId, String instanceId, String clusterId);
 
   Optional<BigtableCluster> getBigtableCluster(
@@ -77,4 +81,11 @@ public interface Database extends AutoCloseable {
       String projectId, String instanceId, String clusterId, Integer minNodesOverride);
 
   int getTotalConnections();
+
+  int deleteBigtableClusters(String projectId, String instanceId);
+
+  int deleteBigtableClustersExcept(
+      String projectId, String instanceId, Set<String> excludedClusterIds);
+
+  boolean reconcileBigtableCluster(final BigtableCluster cluster);
 }

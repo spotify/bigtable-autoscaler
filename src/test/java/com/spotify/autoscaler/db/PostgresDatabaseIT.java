@@ -57,6 +57,18 @@ public class PostgresDatabaseIT {
         .build();
   }
 
+  private BigtableCluster testClusterForReconcile() {
+    return new BigtableClusterBuilder()
+        .projectId(projectId)
+        .instanceId(instanceId)
+        .clusterId(clusterId)
+        .minNodes(10)
+        .maxNodes(100)
+        .cpuTarget(0.8)
+        .enabled(true)
+        .build();
+  }
+
   private BigtableCluster anotherTestCluster() {
     return new BigtableClusterBuilder()
         .projectId("another-project")
@@ -268,5 +280,43 @@ public class PostgresDatabaseIT {
             .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
 
     assertEquals(42, retrievedCluster.minNodesOverride());
+  }
+
+  @Test
+  public void testReconcileNewCluster() {
+    db.reconcileBigtableCluster(testClusterForReconcile());
+    final BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(0.7, retrievedCluster.storageTarget(), 0.0001);
+    assertFalse(retrievedCluster.overloadStep().isPresent());
+    assertFalse(retrievedCluster.extraEnabledAlgorithms().isPresent());
+    assertEquals(10, retrievedCluster.minNodes());
+    assertEquals(100, retrievedCluster.maxNodes());
+  }
+
+  @Test
+  public void testReconcileExistingCluster() {
+    db.insertBigtableCluster(
+        BigtableClusterBuilder.from(testCluster())
+            .minNodes(15)
+            .maxNodes(50)
+            .storageTarget(0.6)
+            .overloadStep(5)
+            .extraEnabledAlgorithms("any")
+            .build());
+    db.reconcileBigtableCluster(testCluster());
+    final BigtableCluster retrievedCluster =
+        db.getBigtableCluster(
+                testCluster().projectId(), testCluster().instanceId(), testCluster().clusterId())
+            .orElseThrow(() -> new RuntimeException("Inserted cluster not present!!"));
+
+    assertEquals(0.6, retrievedCluster.storageTarget(), 0.0001);
+    assertEquals(5, retrievedCluster.overloadStep().get().intValue());
+    assertEquals("any", retrievedCluster.extraEnabledAlgorithms().get());
+    assertEquals(10, retrievedCluster.minNodes());
+    assertEquals(100, retrievedCluster.maxNodes());
   }
 }
