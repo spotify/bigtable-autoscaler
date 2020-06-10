@@ -116,10 +116,6 @@ public class ReconcileResponse {
         return this;
       }
 
-      public boolean isDeleted() {
-        return this.deleted;
-      }
-
       public Status getStatus() {
         return status;
       }

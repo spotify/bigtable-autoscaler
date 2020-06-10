@@ -41,12 +41,12 @@ import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/")
+@Path("/reconcile")
 public class DeclarativeAutoscalerController implements Endpoint {
 
   // Use the GSON provided by the k8s java client to deal with k8s objects, since
   // it implements several typeadapter to decode k8s object correctly.
-  private final Gson gson = new JSON().getGson();
+  private static final Gson gson = new JSON().getGson();
 
   private static final Logger LOGGER =
       LoggerFactory.getLogger(DeclarativeAutoscalerController.class);
@@ -59,7 +59,6 @@ public class DeclarativeAutoscalerController implements Endpoint {
   }
 
   @POST
-  @Path("/reconcile")
   public String reconcile(String body) {
     // parse request
     final ReconcileRequest request = gson.fromJson(body, ReconcileRequest.class);
@@ -70,13 +69,13 @@ public class DeclarativeAutoscalerController implements Endpoint {
             config.getKind(),
             config.getMetadata().getNamespace(),
             config.getMetadata().getName());
-    forObj.deleted(request.getDeletionInProgress());
+
     final String projectId = config.getMetadata().getNamespace();
     final String instanceId = config.getSpec().getInstanceId();
-
-    // reconciliation
     final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState =
-        forObj.isDeleted() ? Collections.emptyList() : Arrays.asList(config.getSpec().getCluster());
+        request.getDeletionInProgress()
+            ? Collections.emptyList()
+            : Arrays.asList(config.getSpec().getCluster());
 
     reconcileClustersDesiredState(projectId, instanceId, clustersDesiredState);
 
@@ -140,6 +139,7 @@ public class DeclarativeAutoscalerController implements Endpoint {
               clustersDesiredState.size(), clustersFromDB.size()));
     }
     forObj.status(new ReconcileResponse.Status(clustersFromDB));
+    forObj.deleted(clustersDesiredState.isEmpty());
     return gson.toJson(
         new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
         ReconcileResponse.class);
