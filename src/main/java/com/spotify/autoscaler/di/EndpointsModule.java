@@ -21,9 +21,9 @@
 package com.spotify.autoscaler.di;
 
 import com.spotify.autoscaler.api.ClusterResources;
+import com.spotify.autoscaler.api.DeclarativeAutoscalerController;
 import com.spotify.autoscaler.api.Endpoint;
 import com.spotify.autoscaler.api.HealthCheck;
-import com.spotify.autoscaler.api.KCCAutoscalerController;
 import dagger.Binds;
 import dagger.Module;
 import dagger.multibindings.IntoSet;
@@ -41,5 +41,6 @@ public abstract class EndpointsModule {
 
   @Binds
   @IntoSet
-  public abstract Endpoint kccAutoscalerController(KCCAutoscalerController kccAutoscalerController);
+  public abstract Endpoint declarativeAutoscalerController(
+      DeclarativeAutoscalerController declarativeAutoscalerController);
 }

@@ -188,7 +188,7 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public boolean reconcileBigtableCluster(final BigtableCluster cluster) {
+  public void reconcileBigtableCluster(final BigtableCluster cluster) {
     final String sql =
         "INSERT INTO "
             + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, enabled) "
@@ -204,7 +204,7 @@ public class PostgresDatabase implements Database {
     params.put("max_nodes", cluster.maxNodes());
     params.put("cpu_target", cluster.cpuTarget());
     params.put("enabled", cluster.enabled());
-    return jdbc.update(sql, Collections.unmodifiableMap(params)) == 1;
+    jdbc.update(sql, Collections.unmodifiableMap(params));
   }
 
   @Override
@@ -462,21 +462,18 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public int deleteBigtableClusters(final String projectId, final String instanceId) {
-    final String sql = "DELETE FROM autoscale WHERE project_id = ? AND instance_id = ?";
-    return jdbc.getJdbcOperations().update(sql, projectId, instanceId);
-  }
-
-  @Override
   public int deleteBigtableClustersExcept(
       final String projectId, final String instanceId, final Set<String> clusterIds) {
-    final String sql =
-        "DELETE FROM autoscale WHERE project_id=:project_id AND instance_id=:instance_id AND "
-            + "cluster_id NOT IN (:cluster_ids)";
+    final StringBuilder sql =
+        new StringBuilder(
+            "DELETE FROM autoscale WHERE project_id=:project_id AND instance_id=:instance_id");
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put("project_id", projectId);
     params.put("instance_id", instanceId);
-    params.put("cluster_ids", clusterIds);
-    return jdbc.update(sql, params);
+    if (!clusterIds.isEmpty()) {
+      sql.append(" AND cluster_id NOT IN (:cluster_ids)");
+      params.put("cluster_ids", clusterIds);
+    }
+    return jdbc.update(sql.toString(), params);
   }
 }
