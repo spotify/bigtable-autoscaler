@@ -69,7 +69,7 @@ public class ClusterMetricsDataGenerator {
   }
 
   // for now we don't have reliable data, so we manually set data job start, duration, etc
-  private static final List<DataJobInformation> jobs = Collections.EMPTY_LIST;
+  private static final List<DataJobInformation> jobs = Collections.emptyList();
 
   public static void main(final String[] args) throws IOException {
     final BigtableCluster cluster =
