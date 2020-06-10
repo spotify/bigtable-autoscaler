@@ -41,6 +41,6 @@ public abstract class EndpointsModule {
 
   @Binds
   @IntoSet
-  public abstract Endpoint kccAutoscalerController(
+  public abstract Endpoint declarativeAutoscalerController(
       DeclarativeAutoscalerController declarativeAutoscalerController);
 }
