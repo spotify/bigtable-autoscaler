@@ -188,7 +188,7 @@ public class PostgresDatabase implements Database {
   }
 
   @Override
-  public boolean reconcileBigtableCluster(final BigtableCluster cluster) {
+  public void reconcileBigtableCluster(final BigtableCluster cluster) {
     final String sql =
         "INSERT INTO "
             + "autoscale(project_id, instance_id, cluster_id, min_nodes, max_nodes, cpu_target, enabled) "
@@ -204,7 +204,7 @@ public class PostgresDatabase implements Database {
     params.put("max_nodes", cluster.maxNodes());
     params.put("cpu_target", cluster.cpuTarget());
     params.put("enabled", cluster.enabled());
-    return jdbc.update(sql, Collections.unmodifiableMap(params)) == 1;
+    jdbc.update(sql, Collections.unmodifiableMap(params));
   }
 
   @Override
@@ -459,12 +459,6 @@ public class PostgresDatabase implements Database {
   @Override
   public int getTotalConnections() {
     return dataSource.getHikariPoolMXBean().getTotalConnections();
-  }
-
-  @Override
-  public int deleteBigtableClusters(final String projectId, final String instanceId) {
-    final String sql = "DELETE FROM autoscale WHERE project_id = ? AND instance_id = ?";
-    return jdbc.getJdbcOperations().update(sql, projectId, instanceId);
   }
 
   @Override

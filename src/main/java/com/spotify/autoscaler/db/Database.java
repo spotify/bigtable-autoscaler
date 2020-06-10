@@ -22,6 +22,7 @@ package com.spotify.autoscaler.db;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -82,10 +83,12 @@ public interface Database extends AutoCloseable {
 
   int getTotalConnections();
 
-  int deleteBigtableClusters(String projectId, String instanceId);
+  default int deleteBigtableClusters(String projectId, String instanceId) {
+    return deleteBigtableClustersExcept(projectId, instanceId, Collections.emptySet());
+  }
 
   int deleteBigtableClustersExcept(
       String projectId, String instanceId, Set<String> excludedClusterIds);
 
-  boolean reconcileBigtableCluster(final BigtableCluster cluster);
+  void reconcileBigtableCluster(final BigtableCluster cluster);
 }
