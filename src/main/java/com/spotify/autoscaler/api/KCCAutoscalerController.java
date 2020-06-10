@@ -31,9 +31,9 @@ import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import io.kubernetes.client.openapi.JSON;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.POST;
@@ -59,54 +59,55 @@ public class KCCAutoscalerController implements Endpoint {
 
   @POST
   @Path("/reconcile")
-  public String reconcile(String request) {
-
-    final ReconcileRequest reconcileRequest = gson.fromJson(request, ReconcileRequest.class);
-    final BigtableAutoscaler autoscalerConfig = reconcileRequest.getForObject();
+  public String reconcile(String body) {
+    // parse request
+    final ReconcileRequest request = gson.fromJson(body, ReconcileRequest.class);
+    final BigtableAutoscaler config = request.getForObject();
     final ReconcileResponse.EnsureResources.ForObject forObj =
         new ReconcileResponse.EnsureResources.ForObject(
-            autoscalerConfig.getApiVersion(),
-            autoscalerConfig.getKind(),
-            autoscalerConfig.getMetadata().getNamespace(),
-            autoscalerConfig.getMetadata().getName());
+            config.getApiVersion(),
+            config.getKind(),
+            config.getMetadata().getNamespace(),
+            config.getMetadata().getName());
+    forObj.deleted(request.getDeletionInProgress());
+    final String projectId = config.getMetadata().getNamespace();
+    final String instanceId = config.getSpec().getInstanceId();
 
-    final String projectId = autoscalerConfig.getMetadata().getNamespace();
-    final String instanceId = autoscalerConfig.getSpec().getInstanceId();
+    // reconciliation
+    final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState =
+        forObj.isDeleted() ? Collections.emptyList() : Arrays.asList(config.getSpec().getCluster());
 
-    if (reconcileRequest.getDeletionInProgress()) {
-      int deletedClustersCount = database.deleteBigtableClusters(projectId, instanceId);
-      LOGGER.info(
-          "Project {}, instance {}: {} clusters deleted",
-          projectId,
-          instanceId,
-          deletedClustersCount);
-      forObj.deleted(true);
-      return gson.toJson(
-          new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
-          ReconcileResponse.class);
-    }
+    reconcileClustersDesiredState(projectId, instanceId, clustersDesiredState);
 
-    final Map<String, BigtableAutoscaler.Spec.Cluster> targetClusters =
-        Arrays.stream(autoscalerConfig.getSpec().getCluster())
-            .collect(
-                Collectors.toMap(
-                    BigtableAutoscaler.Spec.Cluster::getClusterId, Function.identity()));
+    return reconcileResponse(projectId, instanceId, clustersDesiredState, forObj);
+  }
 
-    targetClusters.forEach(
-        (clusterId, clusterSpec) ->
+  private void reconcileClustersDesiredState(
+      final String projectId,
+      final String instanceId,
+      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState) {
+    clustersDesiredState.forEach(
+        cluster ->
             database.reconcileBigtableCluster(
                 new BigtableClusterBuilder()
                     .projectId(projectId)
                     .instanceId(instanceId)
-                    .clusterId(clusterId)
-                    .minNodes(clusterSpec.getMinNodes())
-                    .maxNodes(clusterSpec.getMaxNodes())
-                    .cpuTarget(clusterSpec.getCpuTarget())
+                    .clusterId(cluster.getClusterId())
+                    .minNodes(cluster.getMinNodes())
+                    .maxNodes(cluster.getMaxNodes())
+                    .cpuTarget(cluster.getCpuTarget())
                     .enabled(true)
                     .build()));
+    deleteAbsentClusters(projectId, instanceId, clustersDesiredState);
+  }
 
-    int deletedClustersCount =
-        database.deleteBigtableClustersExcept(projectId, instanceId, targetClusters.keySet());
+  private void deleteAbsentClusters(
+      final String projectId,
+      final String instanceId,
+      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState) {
+    final int deletedClustersCount =
+        database.deleteBigtableClustersExcept(
+            projectId, instanceId, getClusterIds(clustersDesiredState));
     if (deletedClustersCount > 0) {
       LOGGER.info(
           "Project {}, instance {}: {} clusters deleted",
@@ -114,11 +115,30 @@ public class KCCAutoscalerController implements Endpoint {
           instanceId,
           deletedClustersCount);
     }
+  }
 
-    final List<BigtableCluster> clusters = database.getBigtableClusters(projectId, instanceId);
-    forObj.status(
-        gson.toJsonTree(new ReconcileResponse.Status(clusters), ReconcileResponse.Status.class));
+  private Set<String> getClusterIds(
+      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState) {
+    return clustersDesiredState
+        .stream()
+        .map(BigtableAutoscaler.Spec.Cluster::getClusterId)
+        .collect(Collectors.toSet());
+  }
 
+  private String reconcileResponse(
+      final String projectId,
+      final String instanceId,
+      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState,
+      final ReconcileResponse.EnsureResources.ForObject forObj) {
+    final List<BigtableCluster> clustersFromDB =
+        database.getBigtableClusters(projectId, instanceId);
+    if (clustersDesiredState.size() != clustersFromDB.size()) {
+      throw new IllegalStateException(
+          String.format(
+              "Desired state had %d clusters but DB has %d clusters after reconciliation!",
+              clustersDesiredState.size(), clustersFromDB.size()));
+    }
+    forObj.status(new ReconcileResponse.Status(clustersFromDB));
     return gson.toJson(
         new ReconcileResponse().ensure(new ReconcileResponse.EnsureResources().forObject(forObj)),
         ReconcileResponse.class);
