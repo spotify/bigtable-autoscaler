@@ -46,7 +46,7 @@ import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Test;
 import org.mockito.Mock;
 
-public class KCCAutoscalerControllerTest extends JerseyTest {
+public class DeclarativeAutoscalerControllerTest extends JerseyTest {
 
   @Mock private Database db;
   private final Gson gson = new JSON().getGson();
@@ -57,7 +57,7 @@ public class KCCAutoscalerControllerTest extends JerseyTest {
   protected Application configure() {
     initMocks(this);
     ResourceConfig resourceConfig = new ResourceConfig();
-    resourceConfig.register(new KCCAutoscalerController(db));
+    resourceConfig.register(new DeclarativeAutoscalerController(db));
     return resourceConfig;
   }
 
@@ -91,7 +91,7 @@ public class KCCAutoscalerControllerTest extends JerseyTest {
 
   private void reconcile(final String name, final int desiredClusterCount) {
     final Response response =
-        target("/kcc/reconcile")
+        target("/reconcile")
             .request()
             .post(Entity.text(readFile(String.format("kcc/%s.json", name))));
     assertThat(response.getStatusInfo(), equalTo(Response.Status.OK));

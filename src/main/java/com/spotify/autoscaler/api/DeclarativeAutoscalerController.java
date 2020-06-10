@@ -41,19 +41,20 @@ import javax.ws.rs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Path("/kcc")
-public class KCCAutoscalerController implements Endpoint {
+@Path("/")
+public class DeclarativeAutoscalerController implements Endpoint {
 
   // Use the GSON provided by the k8s java client to deal with k8s objects, since
   // it implements several typeadapter to decode k8s object correctly.
   private final Gson gson = new JSON().getGson();
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(KCCAutoscalerController.class);
+  private static final Logger LOGGER =
+      LoggerFactory.getLogger(DeclarativeAutoscalerController.class);
 
   private final Database database;
 
   @Inject
-  public KCCAutoscalerController(final Database database) {
+  public DeclarativeAutoscalerController(final Database database) {
     this.database = checkNotNull(database);
   }
 
