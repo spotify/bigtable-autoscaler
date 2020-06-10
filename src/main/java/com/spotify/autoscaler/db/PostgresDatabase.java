@@ -470,13 +470,16 @@ public class PostgresDatabase implements Database {
   @Override
   public int deleteBigtableClustersExcept(
       final String projectId, final String instanceId, final Set<String> clusterIds) {
-    final String sql =
-        "DELETE FROM autoscale WHERE project_id=:project_id AND instance_id=:instance_id AND "
-            + "cluster_id NOT IN (:cluster_ids)";
+    final StringBuilder sql =
+        new StringBuilder(
+            "DELETE FROM autoscale WHERE project_id=:project_id AND instance_id=:instance_id");
     final Map<String, Object> params = new HashMap<String, Object>();
     params.put("project_id", projectId);
     params.put("instance_id", instanceId);
-    params.put("cluster_ids", clusterIds);
-    return jdbc.update(sql, params);
+    if (!clusterIds.isEmpty()) {
+      sql.append(" AND cluster_id NOT IN (:cluster_ids)");
+      params.put("cluster_ids", clusterIds);
+    }
+    return jdbc.update(sql.toString(), params);
   }
 }
