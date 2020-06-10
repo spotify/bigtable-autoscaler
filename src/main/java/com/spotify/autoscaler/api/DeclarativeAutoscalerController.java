@@ -30,7 +30,9 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import io.kubernetes.client.openapi.JSON;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -89,7 +91,9 @@ public class DeclarativeAutoscalerController implements Endpoint {
       final BigtableAutoscaler.Spec.Cluster[] arraySpecClusters,
       final Boolean isDeletionInProgress) {
     final Set<BigtableAutoscaler.Spec.Cluster> setSpecClusters =
-        isDeletionInProgress ? Collections.emptySet() : Set.of(arraySpecClusters);
+        isDeletionInProgress
+            ? Collections.emptySet()
+            : new HashSet<>(Arrays.asList(arraySpecClusters));
     return setSpecClusters
         .stream()
         .map(cluster -> getBigtableCluster(projectId, instanceId, cluster))
