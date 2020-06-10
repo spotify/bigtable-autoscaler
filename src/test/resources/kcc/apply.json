@@ -1,0 +1,40 @@
+{
+  "version": "",
+  "for": {
+    "apiVersion": "storage.spotify.com/v1alpha1",
+    "kind": "BigtableAutoscaler",
+    "metadata": {
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"storage.spotify.com/v1alpha1\",\"kind\":\"BigtableAutoscaler\",\"metadata\":{\"annotations\":{},\"name\":\"this-is-my-bigtable-instance\",\"namespace\":\"bigtable-playground\"},\"spec\":{\"cluster\":[{\"clusterId\":\"gew-cluster\",\"cpuTarget\":0.7,\"maxNodes\":30,\"minNodes\":1},{\"clusterId\":\"guc-cluster\",\"cpuTarget\":0.7,\"maxNodes\":30,\"minNodes\":1},{\"clusterId\":\"gae-cluster\",\"cpuTarget\":0.7,\"maxNodes\":30,\"minNodes\":2}],\"instanceId\":\"this-is-my-bigtable-instance\"}}\n"
+      },
+      "creationTimestamp": "2020-06-09T13:25:20Z",
+      "finalizers": ["bigtable-autoscaler-controller.kubebuilderbridge.dev"],
+      "generation": 1,
+      "name": "this-is-my-bigtable-instance",
+      "namespace": "bigtable-playground",
+      "resourceVersion": "271270",
+      "selfLink": "/apis/storage.spotify.com/v1alpha1/namespaces/bigtable-playground/bigtableautoscalers/this-is-my-bigtable-instance",
+      "uid": "11082d6c-d9db-4762-a254-1f10f6a94604"
+    },
+    "spec": {
+      "cluster": [{
+        "clusterId": "gew-cluster",
+        "cpuTarget": 0.7,
+        "maxNodes": 30,
+        "minNodes": 1
+      }, {
+        "clusterId": "guc-cluster",
+        "cpuTarget": 0.7,
+        "maxNodes": 30,
+        "minNodes": 1
+      }, {
+        "clusterId": "gae-cluster",
+        "cpuTarget": 0.7,
+        "maxNodes": 30,
+        "minNodes": 2
+      }],
+      "instanceId": "this-is-my-bigtable-instance"
+    }
+  },
+  "deletionInProgress": false
+}
