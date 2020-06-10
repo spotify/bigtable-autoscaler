@@ -39,6 +39,10 @@ public class ReconcileResponse {
     return this;
   }
 
+  public EnsureResources getEnsure() {
+    return ensure;
+  }
+
   public static class EnsureResources {
     @SerializedName("for")
     private ForObject forObject;
@@ -54,6 +58,10 @@ public class ReconcileResponse {
     public EnsureResources owns(Map<String, Map<String, JsonElement>> owns) {
       this.owns = owns;
       return this;
+    }
+
+    public ForObject getForObject() {
+      return forObject;
     }
 
     public static class ForObject {
@@ -76,7 +84,7 @@ public class ReconcileResponse {
       private Map<String, String> annotations;
 
       @SerializedName("status")
-      private JsonElement status;
+      private Status status;
 
       @SerializedName("deleted")
       private Boolean deleted;
@@ -98,7 +106,7 @@ public class ReconcileResponse {
         return this;
       }
 
-      public ForObject status(JsonElement status) {
+      public ForObject status(Status status) {
         this.status = status;
         return this;
       }
@@ -107,14 +115,26 @@ public class ReconcileResponse {
         this.deleted = deleted;
         return this;
       }
+
+      public boolean isDeleted() {
+        return this.deleted;
+      }
+
+      public Status getStatus() {
+        return status;
+      }
     }
   }
 
   public static class Status {
-    private int clusterCount;
+    private final int clusterCount;
 
     public Status(final List<BigtableCluster> clusters) {
       this.clusterCount = clusters.size();
+    }
+
+    public int getClusterCount() {
+      return clusterCount;
     }
   }
 }
