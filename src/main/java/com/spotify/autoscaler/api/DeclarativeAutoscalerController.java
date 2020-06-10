@@ -30,7 +30,6 @@ import com.spotify.autoscaler.db.BigtableCluster;
 import com.spotify.autoscaler.db.BigtableClusterBuilder;
 import com.spotify.autoscaler.db.Database;
 import io.kubernetes.client.openapi.JSON;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -72,39 +71,50 @@ public class DeclarativeAutoscalerController implements Endpoint {
 
     final String projectId = config.getMetadata().getNamespace();
     final String instanceId = config.getSpec().getInstanceId();
-    final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState =
-        request.getDeletionInProgress()
-            ? Collections.emptyList()
-            : Arrays.asList(config.getSpec().getCluster());
 
-    reconcileClustersDesiredState(projectId, instanceId, clustersDesiredState);
+    final Set<BigtableCluster> clustersDesiredState =
+        getClustersDesiredState(
+            projectId, instanceId, config.getSpec().getCluster(), request.getDeletionInProgress());
+
+    // reconcile
+    clustersDesiredState.forEach(database::reconcileBigtableCluster);
+    deleteAbsentClusters(projectId, instanceId, clustersDesiredState);
 
     return reconcileResponse(projectId, instanceId, clustersDesiredState, forObj);
   }
 
-  private void reconcileClustersDesiredState(
+  private Set<BigtableCluster> getClustersDesiredState(
       final String projectId,
       final String instanceId,
-      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState) {
-    clustersDesiredState.forEach(
-        cluster ->
-            database.reconcileBigtableCluster(
-                new BigtableClusterBuilder()
-                    .projectId(projectId)
-                    .instanceId(instanceId)
-                    .clusterId(cluster.getClusterId())
-                    .minNodes(cluster.getMinNodes())
-                    .maxNodes(cluster.getMaxNodes())
-                    .cpuTarget(cluster.getCpuTarget())
-                    .enabled(true)
-                    .build()));
-    deleteAbsentClusters(projectId, instanceId, clustersDesiredState);
+      final BigtableAutoscaler.Spec.Cluster[] arraySpecClusters,
+      final Boolean isDeletionInProgress) {
+    final Set<BigtableAutoscaler.Spec.Cluster> setSpecClusters =
+        isDeletionInProgress ? Collections.emptySet() : Set.of(arraySpecClusters);
+    return setSpecClusters
+        .stream()
+        .map(cluster -> getBigtableCluster(projectId, instanceId, cluster))
+        .collect(Collectors.toSet());
+  }
+
+  private BigtableCluster getBigtableCluster(
+      final String projectId,
+      final String instanceId,
+      final BigtableAutoscaler.Spec.Cluster cluster) {
+    return new BigtableClusterBuilder()
+        .projectId(projectId)
+        .instanceId(instanceId)
+        .clusterId(cluster.getClusterId())
+        .minNodes(cluster.getMinNodes())
+        .maxNodes(cluster.getMaxNodes())
+        .cpuTarget(cluster.getCpuTarget())
+        .enabled(true)
+        .build();
   }
 
   private void deleteAbsentClusters(
       final String projectId,
       final String instanceId,
-      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState) {
+      final Set<BigtableCluster> clustersDesiredState) {
     final int deletedClustersCount =
         database.deleteBigtableClustersExcept(
             projectId, instanceId, getClusterIds(clustersDesiredState));
@@ -117,18 +127,17 @@ public class DeclarativeAutoscalerController implements Endpoint {
     }
   }
 
-  private Set<String> getClusterIds(
-      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState) {
+  private Set<String> getClusterIds(final Set<BigtableCluster> clustersDesiredState) {
     return clustersDesiredState
         .stream()
-        .map(BigtableAutoscaler.Spec.Cluster::getClusterId)
+        .map(BigtableCluster::clusterId)
         .collect(Collectors.toSet());
   }
 
   private String reconcileResponse(
       final String projectId,
       final String instanceId,
-      final List<BigtableAutoscaler.Spec.Cluster> clustersDesiredState,
+      final Set<BigtableCluster> clustersDesiredState,
       final ReconcileResponse.EnsureResources.ForObject forObj) {
     final List<BigtableCluster> clustersFromDB =
         database.getBigtableClusters(projectId, instanceId);
