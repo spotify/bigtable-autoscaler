@@ -114,7 +114,9 @@ clusters from being autoscaled.
 
 ### Does it handle sudden load spikes, for instance Dataflow jobs reading/writing batch data?
 
-Not on its own. In order to not overwhelm Bigtable, you can PUT to the `/clusers/override-min-nodes/` endpoint, passing it a number that basically overrides the min nodes count that the autoscaler must immediately respect. The [official Google documentation](https://cloud.google.com/bigtable/docs/scaling) states that if you are doing big batch jobs, you should rescale in advance and wait up to 20 minutes before starting the actual job. Then, of course, reset it back to 0 once the job has completed.
+Not on its own. In order to not overwhelm Bigtable, you can PUT to the `/clusers/override-min-nodes/` endpoint, passing it a number that basically overrides the min nodes count that the autoscaler must immediately respect. The [official Google documentation](https://cloud.google.com/bigtable/docs/scaling) states that if you are doing big batch jobs, you should rescale in advance and wait up to 20 minutes before starting the actual job.
+
+Additionally, when you decrease the number of nodes in a cluster to scale down after the job is complete, try not to reduce the cluster size by more than 10% in a 10-minute period. Scaling down too quickly can cause performance problems, such as increased latency, if the remaining nodes in the cluster become temporarily overwhelmed.
 
 We realize that this can be inconvenient and welcome any ideas on how to approach this problem better.
 
