@@ -4,7 +4,7 @@
 
 If you have a Bigtable cluster and you would like to optimize its cost-efficiency by using the
 right number of nodes at any given time you should consider using this Bigtable
-autoscaler service! The Bigtable autoscaler lets you do that 
+autoscaler service! The Bigtable autoscaler lets you do that
 with no manual intervention.
 
 ## Getting started
@@ -23,7 +23,7 @@ with no manual intervention.
 * Docker
 * Java 11 and maven
 * (Optional) **PostgreSQL database** for production use. In this quickstart session we're using a postgres docker image
-* (Optional) We have a [make-file](https://www.gnu.org/software/make) with local development helper methods. 
+* (Optional) We have a [make-file](https://www.gnu.org/software/make) with local development helper methods.
 
 ### Building
 
@@ -40,7 +40,7 @@ Start the service with docker-compose using a dockerized local postgres:
     . ./.env
     # start the service with docker compose
     make up
-    
+
     # see service logs
     make logs
 
@@ -96,14 +96,14 @@ keeping its state, like for example:
 * target CPU utilization
 * last resize event
 
-The autoscaler checks the database every 30 seconds and decides if it should 
-do something or not (there are time thresholds to not resize clusters too often). 
-In case it's time to check a cluster, it fetches the current CPU utilization 
-from the Bigtable API. If that is different from the target CPU utilization 
-(also here there are thresholds) it calculates the adequate number of nodes 
+The autoscaler checks the database every 30 seconds and decides if it should
+do something or not (there are time thresholds to not resize clusters too often).
+In case it's time to check a cluster, it fetches the current CPU utilization
+from the Bigtable API. If that is different from the target CPU utilization
+(also here there are thresholds) it calculates the adequate number of nodes
 and then it sends a resize request.
 
-The autoscaler also provides an HTTP API to insert, update and delete Bigtable 
+The autoscaler also provides an HTTP API to insert, update and delete Bigtable
 clusters from being autoscaled.
 
 ## Development Status
@@ -128,8 +128,20 @@ Since July 1st 2018 Google enforces storage limits on Bigtable nodes. In particu
 
 No!
 
-A resize command may fail if you don't have enough quota in the GCP project. This will be logged 
+A resize command may fail if you don't have enough quota in the GCP project. This will be logged
 as an error.
+
+### Can I add an additional logic to resize the number of nodes?
+
+Yes!
+
+We increased the project's modularity, so you can create your custom strategy in your project,
+which uses the Bigtable Autoscaler as a dependency, and implement the class "Algorithm".
+If you add the class path of your new custom strategy in the column `extra_enabled_algorithms`, it
+will be considered for upscaling the cluster.
+
+Note that the recommended number of nodes will be the higher between the strategies in this
+project (CPU + Storage constraints), and your custom strategies.
 
 ## API
 
