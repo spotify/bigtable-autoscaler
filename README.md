@@ -11,7 +11,7 @@ with no manual intervention.
 
 ### Prerequisites
 
-* A production Bigtable cluster (or several) to autoscale (development clusters can't be scaled)
+* A production Bigtable cluster (or several) to autoscale
 * Service account JSON key that has relevant access to the Bigtable clusters to autoscale. See [Google's documentation](https://cloud.google.com/iam/docs/creating-managing-service-account-keys) on how to create a key.
     * If the autoscaler is running in the same GCP project as all the Bigtable clusters, the Compute Engine Default Service Account is sufficient.
     * The minimum permissions are:
