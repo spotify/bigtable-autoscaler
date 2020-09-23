@@ -37,7 +37,11 @@ import com.spotify.autoscaler.metric.AutoscalerMetrics;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -98,7 +102,7 @@ public class Autoscaler implements Runnable {
 
   private void runUnsafe() {
     autoscalerMetrics.markHeartBeat();
-    final CompletableFuture[] futures =
+    final BigtableCluster[] clusters =
         database
             .getCandidateClusters()
             .stream()
@@ -106,9 +110,20 @@ public class Autoscaler implements Runnable {
             // That could lead to cluster starvation
             .filter(filter::match)
             .filter(database::updateLastChecked)
+            .toArray(BigtableCluster[]::new);
+
+    Map<String, List<BigtableCluster>> instanceMap = new HashMap<>();
+    for (BigtableCluster cluster : clusters) {
+        String instanceId = String.format("%s:%s", cluster.projectId(), cluster.instanceId());
+        if (!instanceMap.containsKey(instanceId)) {
+            instanceMap.put(instanceId, new ArrayList<>());
+        }
+        instanceMap.get(instanceId).add(cluster);
+    }
+    final CompletableFuture[] futures = instanceMap.values().stream()
             .map(
-                cluster ->
-                    CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
+                clusterList ->
+                    CompletableFuture.runAsync(() -> runForInstance(clusterList), executorService))
             .toArray(CompletableFuture[]::new);
 
     CompletableFuture.allOf(futures).join();
@@ -123,6 +138,21 @@ public class Autoscaler implements Runnable {
     } catch (final Exception e) {
       final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
       LOGGER.error("Failed to autoscale cluster!", e);
+      database.increaseFailureCount(cluster, Instant.now(), e.toString(), errorCode);
+    }
+    LoggerContext.clearContext();
+  }
+
+  private void runForInstance(final List<BigtableCluster> clusters) {
+    BigtableCluster cluster = clusters.get(0);
+    LoggerContext.pushContext(cluster);
+    LOGGER.info("Autoscaling cluster!");
+    try (final BigtableSession session = createSession(cluster.instanceId(), cluster.projectId())) {
+      makeAutoscaleJob(stackDriverClient, database, autoscalerMetrics, algorithms)
+          .runInstance(clusters, session, Instant::now);
+    } catch (final Exception e) {
+      final ErrorCode errorCode = ErrorCode.fromException(Optional.of(e));
+      LOGGER.error("Failed to autoscale instance!", e);
       database.increaseFailureCount(cluster, Instant.now(), e.toString(), errorCode);
     }
     LoggerContext.clearContext();

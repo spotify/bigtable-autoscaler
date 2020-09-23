@@ -319,6 +319,92 @@ public class AutoscaleJob {
         session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);
   }
 
+  void runInstance(
+      final List<BigtableCluster> clusters,
+      final BigtableSession session,
+      final Supplier<Instant> timeSupplier)
+      throws IOException {
+
+    int maxDesiredNodes = 0;
+
+    for (BigtableCluster cluster : clusters) {
+      if (shouldExponentialBackoff(cluster, timeSupplier)) {
+        LOGGER.info("Exponential backoff");
+        return;
+      }
+
+      final BigtableInstanceClient instanceAdminClient = session.getInstanceAdminClient();
+      final Cluster clusterInfo =
+          instanceAdminClient.getCluster(
+              GetClusterRequest.newBuilder().setName(cluster.clusterName()).build());
+      final int currentNodes = getSize(clusterInfo);
+      final ClusterResizeLogBuilder clusterResizeLogBuilder = ClusterResizeLog.builder(cluster);
+      clusterResizeLogBuilder.currentNodes(currentNodes);
+      autoscalerMetrics.registerClusterDataMetrics(cluster, currentNodes, database);
+      autoscalerMetrics.markClusterCheck();
+
+      if (isTooEarlyToAutoscale(cluster, timeSupplier)) {
+        LOGGER.info("Too early to autoscale");
+        final int newNodeCount =
+            nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, currentNodes)
+                .getDesiredNodeCount();
+        if (newNodeCount == currentNodes) {
+          return;
+        } else {
+          // Allow per cluster node count constraints to be enforced separately
+          LOGGER.info("Ensuring node count within boundaries.");
+          updateNodeCount(
+              session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);
+          return;
+        }
+      }
+      final Duration samplingDuration = getSamplingDuration(cluster, timeSupplier);
+
+      List<Algorithm> allAlgorithmList = new ArrayList<>(algorithms);
+      if (cluster.extraEnabledAlgorithms().isPresent()) {
+        final String[] extraAlgorithmStr = cluster.extraEnabledAlgorithms().get().split(",");
+        for (String algorithm : extraAlgorithmStr) {
+          try {
+            final Class algorithmClass = Class.forName(algorithm);
+            final Constructor algorithmConstructor = algorithmClass.getConstructor();
+            allAlgorithmList.add((Algorithm) algorithmConstructor.newInstance());
+          } catch (ClassNotFoundException
+              | NoSuchMethodException
+              | IllegalAccessException
+              | InstantiationException
+              | InvocationTargetException e) {
+            LOGGER.warn(
+                "Algorithm found in the database failed to be added to be executed. - "
+                    + e.getMessage());
+          }
+        }
+      }
+
+      ScalingEvent newScalingEvent =
+          allAlgorithmList
+              .stream()
+              .map(
+                  algorithm ->
+                      algorithm.calculateWantedNodes(
+                          cluster, clusterResizeLogBuilder, samplingDuration, currentNodes))
+              .max(ScalingEvent::compareTo)
+              .get();
+
+      int newNodeCount = newScalingEvent.getDesiredNodeCount();
+      autoscalerMetrics.markScalingEventConstraint(cluster, currentNodes, newScalingEvent);
+
+      newNodeCount = frequencyConstraints(cluster, timeSupplier, newNodeCount, currentNodes);
+      final ScalingEvent nodeCountSettingsConstraints =
+          nodeCountSettingsConstraints(cluster, clusterResizeLogBuilder, newNodeCount);
+      newNodeCount = nodeCountSettingsConstraints.getDesiredNodeCount();
+      maxDesiredNodes = Math.max(newNodeCount, maxDesiredNodes);
+    }
+    for (BigtableCluster cluster : clusters) {
+      updateNodeCount(
+          session, cluster, timeSupplier, clusterResizeLogBuilder, newNodeCount, currentNodes);
+    }
+  }
+
   private void updateNodeCount(
       final BigtableSession bigtableSession,
       final BigtableCluster cluster,
