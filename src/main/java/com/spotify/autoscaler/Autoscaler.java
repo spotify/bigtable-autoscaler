@@ -91,8 +91,9 @@ public class Autoscaler implements Runnable {
      */
     try {
       runUnsafe();
-    } catch (final Exception t) {
-      LOGGER.error("Unexpected Exception!", t);
+    } catch (final Throwable t) {
+      LOGGER.error("Exception happened. Shutting down the whole application.", t);
+      System.exit(1);
     }
   }
 
