@@ -41,6 +41,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +53,7 @@ public class Autoscaler implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(Autoscaler.class);
   private static final int SHORT_TIMEOUT = (int) Duration.ofSeconds(10).toMillis();
   private static final int LONG_TIMEOUT = (int) Duration.ofSeconds(60).toMillis();
-  private static final boolean USE_TIMEOUT = true;
+  private static final int THREADS_TIMEOUT = (int) Duration.ofSeconds(5).toMillis();
 
   private final StackdriverClient stackDriverClient;
   private final Database database;
@@ -85,23 +88,27 @@ public class Autoscaler implements Runnable {
 
   @Override
   public void run() {
-    /*
-     * Without this horrible bit of horribleness,
-     * any uncaught Exception would kill the whole autoscaler.
-     */
+    Future<?> runResult = executorService.submit(this::check);
     try {
-      runUnsafe();
+      runResult.get(THREADS_TIMEOUT, TimeUnit.MILLISECONDS);
+    } catch (TimeoutException e) {
+      LOGGER.warn("Autoscaler is taking too long to run, stopping this check.");
+      runResult.cancel(true);
     } catch (final Throwable t) {
       LOGGER.error("Exception happened. Shutting down the whole application.", t);
+      executorService.shutdownNow();
       System.exit(1);
     }
   }
 
-  private void runUnsafe() {
+  private void check() {
+    LOGGER.info("Starting Autoscaler check.");
     autoscalerMetrics.markHeartBeat();
+    List<BigtableCluster> candidateClusters = database.getCandidateClusters();
+    LOGGER.info("Got {} candidate clusters from the database.", candidateClusters.size());
+
     final CompletableFuture[] futures =
-        database
-            .getCandidateClusters()
+        candidateClusters
             .stream()
             // Order here is important - don't call updateLastChecked if a cluster is filtered.
             // That could lead to cluster starvation
@@ -109,10 +116,12 @@ public class Autoscaler implements Runnable {
             .filter(database::updateLastChecked)
             .map(
                 cluster ->
-                    CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
+                    CompletableFuture.runAsync(() -> runForCluster(cluster), executorService)
+                        .orTimeout(THREADS_TIMEOUT, TimeUnit.MILLISECONDS))
             .toArray(CompletableFuture[]::new);
 
     CompletableFuture.allOf(futures).join();
+    LOGGER.info("Successfully completed Autoscaler check.");
   }
 
   private void runForCluster(final BigtableCluster cluster) {
