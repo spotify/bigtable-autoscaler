@@ -88,12 +88,15 @@ public class Autoscaler implements Runnable {
 
   @Override
   public void run() {
-    Future<?> runResult = executorService.submit(this::check);
+    Future<?> runResult = null;
     try {
+      runResult = executorService.submit(this::check);
       runResult.get(THREADS_TIMEOUT, TimeUnit.MILLISECONDS);
     } catch (TimeoutException e) {
-      LOGGER.warn("Autoscaler is taking too long to run, stopping this check.");
+      LOGGER.warn("Autoscaler is taking too long to run, stopping this check.", e);
       runResult.cancel(true);
+    } catch (final Exception e) {
+      LOGGER.error("Unexpected Exception.", e);
     } catch (final Throwable t) {
       LOGGER.error("Exception happened. Shutting down the whole application.", t);
       executorService.shutdownNow();
@@ -116,8 +119,7 @@ public class Autoscaler implements Runnable {
             .filter(database::updateLastChecked)
             .map(
                 cluster ->
-                    CompletableFuture.runAsync(() -> runForCluster(cluster), executorService)
-                        .orTimeout(THREADS_TIMEOUT, TimeUnit.MILLISECONDS))
+                    CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
             .toArray(CompletableFuture[]::new);
 
     CompletableFuture.allOf(futures).join();
