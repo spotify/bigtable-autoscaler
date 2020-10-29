@@ -40,7 +40,7 @@ public class Application {
   private final Autoscaler autoscaler;
   private final HttpServer server;
   private final Optional<FastForwardReporter> reporter;
-  private static final Duration RUN_INTERVAL = Duration.ofSeconds(5);
+  private static final Duration RUN_INTERVAL = Duration.ofSeconds(15);
 
   @Inject
   public Application(

@@ -53,7 +53,7 @@ public class Autoscaler implements Runnable {
   private static final Logger LOGGER = LoggerFactory.getLogger(Autoscaler.class);
   private static final int SHORT_TIMEOUT = (int) Duration.ofSeconds(10).toMillis();
   private static final int LONG_TIMEOUT = (int) Duration.ofSeconds(60).toMillis();
-  private static final int THREADS_TIMEOUT = (int) Duration.ofSeconds(5).toMillis();
+  private static final int THREADS_TIMEOUT = (int) Duration.ofSeconds(15).toMillis();
 
   private final StackdriverClient stackDriverClient;
   private final Database database;
@@ -105,6 +105,7 @@ public class Autoscaler implements Runnable {
   }
 
   private void check() {
+    Instant start = Instant.now();
     LOGGER.info("Starting Autoscaler check.");
     autoscalerMetrics.markHeartBeat();
     List<BigtableCluster> candidateClusters = database.getCandidateClusters();
@@ -123,7 +124,9 @@ public class Autoscaler implements Runnable {
             .toArray(CompletableFuture[]::new);
 
     CompletableFuture.allOf(futures).join();
-    LOGGER.info("Successfully completed Autoscaler check.");
+    Duration elapsed = Duration.between(start, Instant.now());
+    LOGGER.info(
+        "Successfully completed Autoscaler check in {} seconds.", elapsed.toMillis() / 1000.0f);
   }
 
   private void runForCluster(final BigtableCluster cluster) {
