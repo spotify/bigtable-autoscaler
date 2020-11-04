@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 
 @Module
 public class AutoscalerExecutorModule {
-  private static final int CONCURRENCY_LIMIT = 5;
+  private static final int CONCURRENCY_LIMIT = 16;
 
   @Provides
   public ExecutorService autoscalerExecutorService() {
