@@ -20,11 +20,11 @@ spec:
         image: "us.gcr.io/<PROJECT_ID>/bigtable-autoscaler:latest"
         resources:
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 600m
+            memory: 512Mi
           limits:
-            memory: 256Mi
-            cpu: 256m
+            cpu: 800m
+            memory: 1024Mi
         ports:
         - containerPort: 8080
         env:
@@ -47,8 +47,8 @@ spec:
             cpu: 100m
             memory: 100Mi
           limits:
-            memory: 256Mi
             cpu: 256m
+            memory: 256Mi
         command:
           - "/cloud_sql_proxy"
           - "-instances=<DB_CONNECTION_NAME>=tcp:5432"
