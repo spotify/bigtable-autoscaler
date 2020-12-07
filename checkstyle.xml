@@ -37,6 +37,21 @@ page at http://checkstyle.sourceforge.net/config.html -->
         <property name="message" value='All TODOs should be named.  e.g. "TODO(johndoe): Refactor when v2 is released."' />
     </module>
 
+    <module name="LineLength">
+        <!-- Checks if a line is too long. -->
+        <property name="max" value="140"/>
+        <property name="severity" value="error"/>
+
+        <!--
+            The default ignore pattern exempts the following elements:
+            - import statements
+            - long URLs inside comments
+        -->
+
+        <property name="ignorePattern"
+                    value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.ignorePattern}"
+                    default="^(package .*;\s*)|(import .*;\s*)|( *\* *https?://.*)$"/>
+    </module>
     <!--<module name="JavadocPackage">-->
     <!--&lt;!&ndash; Checks that each Java package has a Javadoc file used for commenting.-->
     <!--Only allows a package-info.java, not package.html. &ndash;&gt;-->
@@ -90,12 +105,8 @@ page at http://checkstyle.sourceforge.net/config.html -->
             <property name="scope" value="nothing"/>
             <property name="excludeScope" value="anoninner"/>
             <property name="severity" value="ignore"/>
-            <property name="allowMissingJavadoc" value="true"/>
             <property name="allowMissingParamTags" value="true"/>
             <property name="allowMissingReturnTag" value="true"/>
-            <property name="allowMissingThrowsTags" value="true"/>
-            <property name="allowThrowsTagsForSubclasses" value="true"/>
-            <property name="allowUndeclaredRTE" value="true"/>
         </module>
 
         <module name="JavadocType">
@@ -205,21 +216,7 @@ page at http://checkstyle.sourceforge.net/config.html -->
 
         -->
 
-        <module name="LineLength">
-            <!-- Checks if a line is too long. -->
-            <property name="max" value="140"/>
-            <property name="severity" value="error"/>
 
-            <!--
-              The default ignore pattern exempts the following elements:
-                - import statements
-                - long URLs inside comments
-            -->
-
-            <property name="ignorePattern"
-                      value="${com.puppycrawl.tools.checkstyle.checks.sizes.LineLength.ignorePattern}"
-                      default="^(package .*;\s*)|(import .*;\s*)|( *\* *https?://.*)$"/>
-        </module>
 
         <module name="LeftCurly">
             <!-- Checks for placement of the left curly brace ('{'). -->
