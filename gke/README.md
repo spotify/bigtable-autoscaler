@@ -1,4 +1,4 @@
-# Bigtable auto-scaler Deployment
+# Bigtable autoscaler Deployment
 
 ## General
 
