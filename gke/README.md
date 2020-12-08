@@ -2,7 +2,7 @@
 
 ## General
 
-In this guide we will deploy Bigtable auto-scaler into GKE.
+In this guide we will deploy Bigtable autoscaler into GKE.
 
 ![Bigtable autoscaler on GKE](./img/bigtable-autoscaler.svg)
 
