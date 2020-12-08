@@ -73,7 +73,7 @@ gcloud sql users set-password postgres \
 
 ### Set GKE environment
 
-* We will use [Cloud SQL Proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) to connect the auto-scaler container to the Postgres DB. Cloud SQL Proxy provides secure access to your instances without the need for Authorized networks or for configuring SSL. The next steps follows the instructions in [this article](https://cloud.google.com/sql/docs/postgres/connect-kubernetes-engine#providing_the_service_account_to_the_proxy)
+* We will use [Cloud SQL Proxy](https://cloud.google.com/sql/docs/mysql/sql-proxy) to connect the autoscaler container to the Postgres DB. Cloud SQL Proxy provides secure access to your instances without the need for authorized networks or for configuring SSL. The next steps follows the instructions in [this article](https://cloud.google.com/sql/docs/postgres/connect-kubernetes-engine#providing_the_service_account_to_the_proxy)
   * Create a GCP service account "bigtable-autoscaler"
     * Add "Bigtable Administrator" role
     * Add "Cloud SQL Client" role
