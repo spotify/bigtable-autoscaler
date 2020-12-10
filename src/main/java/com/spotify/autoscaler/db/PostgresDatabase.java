@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import org.flywaydb.core.Flyway;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
 public class PostgresDatabase implements Database {
@@ -475,5 +476,10 @@ public class PostgresDatabase implements Database {
       params.put("cluster_ids", clusterIds);
     }
     return jdbc.update(sql.toString(), params);
+  }
+
+  @Override
+  public void migrate() {
+    Flyway.configure().dataSource(dataSource).envVars().load().migrate();
   }
 }
