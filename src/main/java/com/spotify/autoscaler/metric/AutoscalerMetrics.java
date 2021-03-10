@@ -282,7 +282,9 @@ public class AutoscalerMetrics {
           APP_PREFIX.tagged("what", "failing-cluster-count").tagged("error-code", code.name()),
           (Gauge<Long>)
               () ->
-                  database.getBigtableClusters().stream()
+                  database
+                      .getBigtableClusters()
+                      .stream()
                       .filter(BigtableCluster::enabled)
                       .filter(p -> p.errorCode().orElse(ErrorCode.OK) == code)
                       .filter(p -> p.consecutiveFailureCount() > 0)

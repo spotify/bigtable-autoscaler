@@ -80,7 +80,9 @@ public class FakeBTCluster {
     // first metrics that will serve as the beginning instant for the test to have a valid node
     // count.
     final Map.Entry<Instant, ClusterMetricsData> firstMetrics =
-        metrics.entrySet().stream()
+        metrics
+            .entrySet()
+            .stream()
             .sorted(Comparator.comparing(Map.Entry::getKey))
             .filter(e -> e.getValue().nodeCount() > 0)
             .findFirst()

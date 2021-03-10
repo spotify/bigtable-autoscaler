@@ -299,7 +299,8 @@ public class AutoscaleJob {
     }
 
     ScalingEvent newScalingEvent =
-        allAlgorithmList.stream()
+        allAlgorithmList
+            .stream()
             .map(
                 algorithm ->
                     algorithm.calculateWantedNodes(

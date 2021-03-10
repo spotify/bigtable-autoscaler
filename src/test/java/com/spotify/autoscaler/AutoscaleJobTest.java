@@ -253,7 +253,10 @@ public class AutoscaleJobTest {
     AutoscaleJobTestMocks.setCurrentLoad(stackdriverClient, 0.1);
     job.run(cluster, bigtableSession, Instant::now);
     final List<MetricId> metric =
-        registry.getMeters().keySet().stream()
+        registry
+            .getMeters()
+            .keySet()
+            .stream()
             .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
             .collect(Collectors.toList());
 
@@ -292,7 +295,10 @@ public class AutoscaleJobTest {
     job = new AutoscaleJob(stackdriverClient, db, new AutoscalerMetrics(registry), algorithms);
     job.run(cluster1, bigtableSession, Instant::now);
     final List<MetricId> metric =
-        registry.getMeters().keySet().stream()
+        registry
+            .getMeters()
+            .keySet()
+            .stream()
             .filter(meter -> meter.getTags().containsValue("overridden-desired-node-count"))
             .collect(Collectors.toList());
     assertEquals(1, metric.size());
