@@ -61,8 +61,7 @@ public interface Database extends AutoCloseable {
       BigtableCluster cluster, Instant lastFailure, String lastFailureMessage, ErrorCode errorCode);
 
   default Set<String> getActiveClusterKeys() {
-    return getBigtableClusters()
-        .stream()
+    return getBigtableClusters().stream()
         .filter(BigtableCluster::enabled)
         .filter(BigtableCluster::exists)
         .map(BigtableCluster::clusterName)

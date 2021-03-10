@@ -112,8 +112,7 @@ public class Autoscaler implements Runnable {
     LOGGER.info("Got {} candidate clusters from the database.", candidateClusters.size());
 
     final CompletableFuture[] futures =
-        candidateClusters
-            .stream()
+        candidateClusters.stream()
             // Order here is important - don't call updateLastChecked if a cluster is filtered.
             // That could lead to cluster starvation
             .filter(filter::match)

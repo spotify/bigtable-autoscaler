@@ -154,10 +154,7 @@ public class AutoscalerMetricsTest {
   private <T> void assertMetric(
       final SemanticMetricRegistry registry, final String what, final T expected) {
     final MetricId metricId =
-        registry
-            .getMetrics()
-            .keySet()
-            .stream()
+        registry.getMetrics().keySet().stream()
             .filter(m -> m.getTags().containsValue(what))
             .findAny()
             .get();

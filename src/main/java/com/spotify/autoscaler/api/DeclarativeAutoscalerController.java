@@ -94,8 +94,7 @@ public class DeclarativeAutoscalerController implements Endpoint {
         isDeletionInProgress
             ? Collections.emptySet()
             : new HashSet<>(Arrays.asList(arraySpecClusters));
-    return setSpecClusters
-        .stream()
+    return setSpecClusters.stream()
         .map(cluster -> getBigtableCluster(projectId, instanceId, cluster))
         .collect(Collectors.toSet());
   }
@@ -132,8 +131,7 @@ public class DeclarativeAutoscalerController implements Endpoint {
   }
 
   private Set<String> getClusterIds(final Set<BigtableCluster> clustersDesiredState) {
-    return clustersDesiredState
-        .stream()
+    return clustersDesiredState.stream()
         .map(BigtableCluster::clusterId)
         .collect(Collectors.toSet());
   }
