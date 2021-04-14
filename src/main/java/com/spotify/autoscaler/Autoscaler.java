@@ -40,8 +40,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
@@ -88,13 +88,8 @@ public class Autoscaler implements Runnable {
 
   @Override
   public void run() {
-    Future<?> runResult = null;
     try {
-      runResult = executorService.submit(this::check);
-      runResult.get(THREADS_TIMEOUT, TimeUnit.MILLISECONDS);
-    } catch (TimeoutException e) {
-      LOGGER.warn("Autoscaler is taking too long to run, stopping this check.", e);
-      runResult.cancel(true);
+      executorService.submit(this::check);
     } catch (final Exception e) {
       LOGGER.error("Unexpected Exception.", e);
     } catch (final Throwable t) {
@@ -111,7 +106,7 @@ public class Autoscaler implements Runnable {
     List<BigtableCluster> candidateClusters = database.getCandidateClusters();
     LOGGER.info("Got {} candidate clusters from the database.", candidateClusters.size());
 
-    final CompletableFuture[] futures =
+    final CompletableFuture<Void> futures =
         candidateClusters
             .stream()
             // Order here is important - don't call updateLastChecked if a cluster is filtered.
@@ -121,12 +116,24 @@ public class Autoscaler implements Runnable {
             .map(
                 cluster ->
                     CompletableFuture.runAsync(() -> runForCluster(cluster), executorService))
-            .toArray(CompletableFuture[]::new);
+            .reduce(CompletableFuture::allOf)
+            .orElse(CompletableFuture.completedFuture(null));
 
-    CompletableFuture.allOf(futures).join();
-    Duration elapsed = Duration.between(start, Instant.now());
-    LOGGER.info(
-        "Successfully completed Autoscaler check in {} seconds.", elapsed.toMillis() / 1000.0f);
+    try {
+      futures.get(THREADS_TIMEOUT, TimeUnit.MILLISECONDS);
+      LOGGER.info(
+          "Successfully completed Autoscaler check in {} seconds.", getElapsedSeconds(start));
+    } catch (TimeoutException e) {
+      LOGGER.error("Autoscaler check timed out after " + getElapsedSeconds(start) + " seconds", e);
+    } catch (ExecutionException e) {
+      LOGGER.error("Autoscaler check failed.", e);
+    } catch (InterruptedException e) {
+      LOGGER.error("Autoscaler check was interrupted.", e);
+    }
+  }
+
+  private float getElapsedSeconds(final Instant start) {
+    return Duration.between(start, Instant.now()).toMillis() / 1000.0f;
   }
 
   private void runForCluster(final BigtableCluster cluster) {
