@@ -1,3 +1,7 @@
+# DEPRECATION NOTICE
+
+**This repo is no longer actively maintained. While it should continue to work and there are no major known bugs, we will not be improving bigtable autoscaler or releasing new versions.**
+
 # bigtable-autoscaler
 
 [![CircleCI](https://circleci.com/gh/spotify/bigtable-autoscaler.svg?style=svg)](https://circleci.com/gh/spotify/bigtable-autoscaler)
