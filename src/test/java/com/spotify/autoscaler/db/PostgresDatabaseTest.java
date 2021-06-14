@@ -35,7 +35,7 @@ public class PostgresDatabaseTest {
   */
 
   public static PostgresDatabase getPostgresDatabase() {
-    JdbcDatabaseContainer container = new PostgreSQLContainer().withInitScript("schema.sql");
+    JdbcDatabaseContainer container = new PostgreSQLContainer();
     container.start();
     Config config =
         ConfigFactory.empty()
@@ -44,6 +44,8 @@ public class PostgresDatabaseTest {
             .withValue("password", ConfigValueFactory.fromAnyRef(container.getPassword()))
             .withValue("maxConnectionPool", ConfigValueFactory.fromAnyRef(1));
 
-    return new PostgresDatabase(config);
+    PostgresDatabase postgresDatabase = new PostgresDatabase(config);
+    postgresDatabase.migrate();
+    return postgresDatabase;
   }
 }

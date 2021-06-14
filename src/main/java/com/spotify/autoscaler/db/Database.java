@@ -91,4 +91,6 @@ public interface Database extends AutoCloseable {
       String projectId, String instanceId, Set<String> excludedClusterIds);
 
   void reconcileBigtableCluster(final BigtableCluster cluster);
+
+  void migrate();
 }

@@ -20,6 +20,7 @@
 
 package com.spotify.autoscaler;
 
+import com.spotify.autoscaler.db.Database;
 import com.spotify.metrics.ffwd.FastForwardReporter;
 import java.io.IOException;
 import java.time.Duration;
@@ -40,19 +41,23 @@ public class Application {
   private final Autoscaler autoscaler;
   private final HttpServer server;
   private final Optional<FastForwardReporter> reporter;
+  private final Database database;
   private static final Duration RUN_INTERVAL = Duration.ofSeconds(15);
 
   @Inject
   public Application(
       final Autoscaler autoscaler,
       final HttpServer server,
-      final Optional<FastForwardReporter> reporter) {
+      final Optional<FastForwardReporter> reporter,
+      final Database database) {
     this.autoscaler = autoscaler;
     this.server = server;
     this.reporter = reporter;
+    this.database = database;
   }
 
   public void start() throws IOException {
+    database.migrate();
     reporter.ifPresent(FastForwardReporter::start);
     scheduledExecutorService.scheduleWithFixedDelay(
         autoscaler, RUN_INTERVAL.toMillis(), RUN_INTERVAL.toMillis(), TimeUnit.MILLISECONDS);
