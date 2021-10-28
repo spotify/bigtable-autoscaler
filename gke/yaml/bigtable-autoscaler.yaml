@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bigtable-autoscaler
+  labels:
+    app: bigtable-autoscaler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bigtable-autoscaler
+  template:
+    metadata:
+      labels:
+        app: bigtable-autoscaler
+    spec:
+      serviceAccountName: bigtable-autoscaler
+      containers:
+      - name: bigtable-autoscaler 
+        image: "us.gcr.io/<PROJECT_ID>/bigtable-autoscaler:latest"
+        resources:
+          requests:
+            cpu: 600m
+            memory: 512Mi
+          limits:
+            cpu: 800m
+            memory: 1024Mi
+        ports:
+        - containerPort: 8080
+        env:
+          - name: JDBC_URL
+            value: jdbc:postgresql://127.0.0.1:5432/autoscale
+          - name: DB_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-info
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-info
+                key: password
+      - name: cloud-sql-proxy
+        image: gcr.io/cloudsql-docker/gce-proxy:1.17
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 256m
+            memory: 256Mi
+        command:
+          - "/cloud_sql_proxy"
+          - "-instances=<DB_CONNECTION_NAME>=tcp:5432"
+        securityContext:
+          runAsNonRoot: true
